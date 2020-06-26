@@ -18,7 +18,32 @@ const (
 	Z
 )
 
+// Cylindrical coordinate indices, use Z from Cartesians
+const (
+	R = iota
+	T
+)
+
+// Float comparison threshold
+const (
+	eps = 1e-15
+)
+
 type axis int
+
+// return the plane perpendicular to the axis
+func (a axis) not() plane {
+	switch a {
+	case X:
+		return plane{Y, Z}
+	case Y:
+		return plane{X, Z}
+	case Z:
+		return plane{X, Y}
+	default:
+		panic("axis.not: invalid axis")
+	}
+}
 
 func (a axis) String() string {
 	return []string{"X", "Y", "Z"}[int(a)]
@@ -28,6 +53,7 @@ type plane struct {
 	a, b axis
 }
 
+// return the axis perpindicular to the plane
 func (p plane) not() axis {
 	switch {
 	case p.a == Y && p.b == Z || p.a == Z && p.b == Y:
@@ -44,17 +70,6 @@ func (p plane) not() axis {
 func (p plane) String() string {
 	return fmt.Sprintf("{%s, %s}", p.a, p.b)
 }
-
-// Cylindrical coordinate indices, use Z from Cartesians
-const (
-	R = iota
-	T
-)
-
-// Float comparison threshold
-const (
-	eps = 1e-15
-)
 
 // Atom represents an atom, with atomic symbol and Cartesian coordinate
 type Atom struct {
@@ -117,9 +132,9 @@ func Rotate(atoms []Atom, deg float64, axis axis) []Atom {
 	return new
 }
 
-// Mirror returns a copy of atoms, with its coordinates mirrored
+// Reflect returns a copy of atoms, with its coordinates mirrored
 // across plane
-func Mirror(atoms []Atom, plane plane) []Atom {
+func Reflect(atoms []Atom, plane plane) []Atom {
 	ax := plane.not()
 	new := make([]Atom, len(atoms))
 	for i, atom := range atoms {
@@ -129,6 +144,24 @@ func Mirror(atoms []Atom, plane plane) []Atom {
 		new[i].Coord[ax] = -new[i].Coord[ax]
 	}
 	return new
+}
+
+// RotaryReflect returns a copy of atoms, with its coordinates rotated
+// about axis and then mirrored through the plane perpendicular to
+// axis
+// TODO: untested
+func RotaryReflect(atoms []Atom, deg float64, axis axis) []Atom {
+	rot := Rotate(atoms, deg, axis)
+	pl := axis.not()
+	return Reflect(rot, pl)
+}
+
+// Invert uses the fact that S_2 = i to return a copy of atoms, with
+// its coordinates inverted or equivalently rotated 180 degrees about
+// ax and then mirrored through the plane perpendicular to ax
+// TODO: untested
+func Invert(atoms []Atom, ax axis) []Atom {
+	return RotaryReflect(atoms, 180.0, ax)
 }
 
 // approxEqual checks approximate equality between float slices

@@ -1,0 +1,6 @@
+* TODO compare []Atoms to see if symmetry operation affects them
+* TODO What if the molecule is not aligned on an axis to start?
+  - need to translate coordinates to put it in a plane
+  - principal axis needs to be on one of the cartesian axes
+    - how to identify the principal rotation axis?
+

@@ -97,7 +97,7 @@ H 0.0000000000 -0.7574590974 0.5217905143
 	}
 }
 
-func TestMirror(t *testing.T) {
+func TestReflect(t *testing.T) {
 	xyz := `3
 water
 H 0.0000000000 0.7574590974 0.5217905143
@@ -133,11 +133,11 @@ H 0.0000000000 -0.7574590974 0.5217905143
 	}
 
 	for i := range tests {
-		got := Mirror(atoms, tests[i].plane)
+		got := Reflect(atoms, tests[i].plane)
 		for j := range got {
 			if got[j].Label != tests[i].want[j].Label ||
 				!approxEqual(got[j].Coord, tests[i].want[j].Coord) {
-				t.Errorf("Mirror(%s): got\n%v, wanted\n%v\n",
+				t.Errorf("Reflect(%s): got\n%v, wanted\n%v\n",
 					tests[i].plane, got, tests[i].want)
 				break
 			}
