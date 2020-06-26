@@ -1,3 +1,0 @@
-// Package atom provides the Atom type and associated functions for working
-// with atoms in Cartesian coordinates
-package atom
