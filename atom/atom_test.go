@@ -34,7 +34,7 @@ func TestToCylinder(t *testing.T) {
 }
 
 func TestToCartesian(t *testing.T) {
-	got := ToCartesian([]float64{0.7574590974, math.Pi / 2, 0.5217905143})
+	got := ToCartesian([]float64{0.7574590974, math.Pi / 2, 0.5217905143}, Z)
 	want := []float64{0.0000000000, 0.7574590974, 0.5217905143}
 	if !approxEqual(got, want) {
 		t.Errorf("got %v, wanted %v\n", got, want)
@@ -51,7 +51,7 @@ H 0.0000000000 -0.7574590974 0.5217905143
 	atoms := ReadXYZ(strings.NewReader(xyz), true)
 	tests := []struct {
 		deg  float64
-		axis int
+		axis axis
 		want []Atom
 	}{
 		{180, Z,
@@ -59,6 +59,20 @@ H 0.0000000000 -0.7574590974 0.5217905143
 				{"H", []float64{0.0000000000, -0.7574590974, 0.5217905143}},
 				{"O", []float64{0.0000000000, 0.0000000000, -0.0657441568}},
 				{"H", []float64{0.0000000000, 0.7574590974, 0.5217905143}},
+			},
+		},
+		{180, Y,
+			[]Atom{
+				{"H", []float64{0.0000000000, 0.7574590974, -0.5217905143}},
+				{"O", []float64{0.0000000000, 0.0000000000, 0.0657441568}},
+				{"H", []float64{0.0000000000, -0.7574590974, -0.5217905143}},
+			},
+		},
+		{180, X,
+			[]Atom{
+				{"H", []float64{0.0000000000, -0.7574590974, -0.5217905143}},
+				{"O", []float64{0.0000000000, 0.0000000000, 0.0657441568}},
+				{"H", []float64{0.0000000000, 0.7574590974, -0.5217905143}},
 			},
 		},
 		{90, Z,
@@ -72,8 +86,61 @@ H 0.0000000000 -0.7574590974 0.5217905143
 
 	for i := range tests {
 		got := Rotate(atoms, tests[i].deg, tests[i].axis)
-		if !reflect.DeepEqual(got, tests[i].want) {
-			t.Errorf("got %v, wanted %v\n", got, tests[i].want)
+		for j := range got {
+			if got[j].Label != tests[i].want[j].Label ||
+				!approxEqual(got[j].Coord, tests[i].want[j].Coord) {
+				t.Errorf("Rotate(%f, %s): got %v, wanted %v\n",
+					tests[i].deg, tests[i].axis, got, tests[i].want)
+				break
+			}
+		}
+	}
+}
+
+func TestMirror(t *testing.T) {
+	xyz := `3
+water
+H 0.0000000000 0.7574590974 0.5217905143
+O 0.0000000000 0.0000000000 -0.0657441568
+H 0.0000000000 -0.7574590974 0.5217905143
+`
+	atoms := ReadXYZ(strings.NewReader(xyz), true)
+	tests := []struct {
+		plane plane
+		want  []Atom
+	}{
+		{plane{Y, Z},
+			[]Atom{
+				{"H", []float64{0.0000000000, 0.7574590974, 0.5217905143}},
+				{"O", []float64{0.0000000000, 0.0000000000, -0.0657441568}},
+				{"H", []float64{0.0000000000, -0.7574590974, 0.5217905143}},
+			},
+		},
+		{plane{Y, X},
+			[]Atom{
+				{"H", []float64{0.0000000000, 0.7574590974, -0.5217905143}},
+				{"O", []float64{0.0000000000, 0.0000000000, 0.0657441568}},
+				{"H", []float64{0.0000000000, -0.7574590974, -0.5217905143}},
+			},
+		},
+		{plane{X, Z},
+			[]Atom{
+				{"H", []float64{0.0000000000, -0.7574590974, 0.5217905143}},
+				{"O", []float64{0.0000000000, 0.0000000000, -0.0657441568}},
+				{"H", []float64{0.0000000000, 0.7574590974, 0.5217905143}},
+			},
+		},
+	}
+
+	for i := range tests {
+		got := Mirror(atoms, tests[i].plane)
+		for j := range got {
+			if got[j].Label != tests[i].want[j].Label ||
+				!approxEqual(got[j].Coord, tests[i].want[j].Coord) {
+				t.Errorf("Mirror(%s): got\n%v, wanted\n%v\n",
+					tests[i].plane, got, tests[i].want)
+				break
+			}
 		}
 	}
 }
