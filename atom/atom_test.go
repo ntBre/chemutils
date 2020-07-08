@@ -144,3 +144,17 @@ H 0.0000000000 -0.7574590974 0.5217905143
 		}
 	}
 }
+
+// func TestRotaryReflect(t *testing.T) {
+	
+// 	if got != want {
+// 		t.Errorf("got %v, wanted %v\n", got, want)
+// 	}
+// }
+
+// func TestInvert(t *testing.T) {
+	
+// 	if got != want {
+// 		t.Errorf("got %v, wanted %v\n", got, want)
+// 	}
+// }
