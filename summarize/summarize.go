@@ -4,6 +4,8 @@ package summarize
 
 import (
 	"bufio"
+	"bytes"
+	"fmt"
 	"math"
 	"os"
 	"regexp"
@@ -44,7 +46,9 @@ var (
 func Spectro(filename string, nfreqs int) (zpt float64,
 	harm, fund, corr []float64,
 	rotABC [][]float64,
-	deltas, phis []float64) {
+	deltas, phis []float64,
+	rEquil, rAlpha []float64,
+	rHeaders []string) {
 
 	corr = make([]float64, nfreqs, nfreqs)
 	f, err := os.Open(filename)
@@ -60,10 +64,16 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 		nrot     int
 		harmFund bool
 		rot      bool
+		geom     bool
+		buf      bytes.Buffer
+		// this is cute
+		gparams = []string{"", "", "r", "<"}
 	)
 	freq := regexp.MustCompile(`[0-9]+`)
 	delta := regexp.MustCompile(`(?i)delta (J|(JK)|K)`)
 	phi := regexp.MustCompile(`(?i)phi (J|(JK)|(KJ)|K)`)
+	icn := regexp.MustCompile(`\([ 0-9]+\)\s+(BOND|ANGLE)`)
+	atom := regexp.MustCompile(`([0-9]+)\(([A-Za-z ]+)\)`)
 	for scanner.Scan() {
 		line = scanner.Text()
 		switch {
@@ -104,7 +114,7 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 			}
 		case strings.Contains(line, "NON-DEG(Vt)"):
 			if nrot < nfreqs+1 { /* include 0th */
-				if nfreqs > 10 {
+				if nfreqs > 10 { /* two lines of NON-DEG(Vt) if > 10 */
 					skip += 7
 				} else {
 					skip += 3
@@ -115,9 +125,6 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 		case rot:
 			// order is A0 -> An
 			// in cm-1
-			// TODO option for BZA/S
-			// BZS for linear molecules
-			// could skip 3 more here to get BZS too
 			rot = false
 			fields := strings.Fields(line)
 			tmp := make([]float64, 0, 3)
@@ -143,10 +150,39 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 			fields := strings.Fields(line)
 			f, _ := strconv.ParseFloat(fields[len(fields)-1], 64)
 			phis = append(phis, f)
+		case strings.Contains(line, "INT COORD TYPE") &&
+			!geom && rEquil == nil:
+			geom = true
+			skip++
+		case geom:
+			if line == "" {
+				geom = false
+				continue
+			}
+			fields := strings.Fields(line)
+			e, _ := strconv.ParseFloat(fields[2], 64)
+			a, _ := strconv.ParseFloat(fields[4], 64)
+			rEquil = append(rEquil, e)
+			rAlpha = append(rAlpha, a)
+		case icn.MatchString(line):
+			// Torsions do not appear in r(equil|alpha) part so
+			// neglect here as well
+			match := atom.FindAllStringSubmatch(line, -1)
+			fmt.Fprintf(&buf, "%s(", gparams[len(match)])
+			for l, p := range match {
+				fmt.Fprintf(&buf, "%s%s",
+					strings.TrimSpace(p[2]),
+					strings.TrimSpace(p[1]))
+				if l < len(match)-1 {
+					fmt.Fprint(&buf, "-")
+				}
+			}
+			fmt.Fprint(&buf, ")")
+			rHeaders = append(rHeaders, buf.String())
+			buf.Reset()
 		}
-		// TODO geometry parameters
-		// presumably vibrationally averaged coordinates
-		// - pretty sure R(EQUIL), but what are R(G) and R(ALPHA)?
+		// TODO option for BZA and/or BZS
+		// TODO option for D in addition to DELTA
 	}
 	return
 }

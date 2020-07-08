@@ -61,7 +61,8 @@ func main() {
 		os.Exit(1)
 	}
 	zpt, harm, fund, corr,
-		rotABC, deltas, phis := summarize.Spectro(filename, nfreqs)
+		rotABC, deltas, phis,
+		requil, ralpha, rhead := summarize.Spectro(filename, nfreqs)
 	fmt.Printf("ZPT (cm-1): %.1f\n", zpt)
 	// TODO flag for specifying width and probably precision too
 	// TODO flag for org, tex format
@@ -72,12 +73,15 @@ func main() {
 	// TODO check dimension mismatch before calling this
 	fmt.Print(colPrint("%"+width+".1f", harm, fund, corr))
 	// TODO flag for units/format here
+	// TODO convert these to MHz
 	fmt.Println("ABC (cm-1):")
 	for a := range rotABC {
 		fmt.Printf("A_%d%10.6f\n", a, rotABC[a][2])
 		fmt.Printf("B_%d%10.6f\n", a, rotABC[a][0])
 		fmt.Printf("C_%d%10.6f\n", a, rotABC[a][1])
 	}
+	// TODO deduce correct units
+	// - three decimal places, no more than 5 sig figs if possible
 	fmt.Println("Deltas (MHz):")
 	// TODO flag to disable unicode output?
 	for d := range deltas {
@@ -88,5 +92,10 @@ func main() {
 	for p := range phis {
 		fmt.Printf("%s%20.10e\n", summarize.PhiOrder[p],
 			phis[p])
+	}
+	fmt.Println("Geom (A or Deg):")
+	fmt.Printf("%15s%15s%15s\n", "COORD", "R(EQUIL)", "R(ALPHA)")
+	for g := range requil {
+		fmt.Printf("%15s%15.7f%15.7f\n", rhead[g], requil[g], ralpha[g])
 	}
 }

@@ -18,6 +18,9 @@ func TestSpectro(t *testing.T) {
 		rotABC [][]float64
 		deltas []float64
 		phis   []float64
+		requil []float64
+		ralpha []float64
+		rhead  []string
 	}{
 		{
 			file:  "testfiles/spectro.out",
@@ -39,20 +42,27 @@ func TestSpectro(t *testing.T) {
 				{0.3547570, 0.3480413, -8.6483579},
 			},
 			deltas: []float64{
-				0.0041596072,
-				276.2016104107,
-				0.6722227103,
-				0.0000596455,
+				0.0041596072, 276.2016104107,
+				0.6722227103, 0.0000596455,
 				0.3035637199,
 			},
 			phis: []float64{
-				-0.4946484183E-03,
-				0.2374310264E+06,
-				0.3252182153E+01,
-				-0.2896689993E+04,
-				0.4401912504E-04,
-				0.1940400502E+01,
+				-0.4946484183E-03, 0.2374310264E+06,
+				0.3252182153E+01, -0.2896689993E+04,
+				0.4401912504E-04, 0.1940400502E+01,
 				0.6140585605E+04,
+			},
+			requil: []float64{
+				1.1573804, 1.2990232, 0.9626153,
+				109.6544076, 41.1568277,
+			},
+			ralpha: []float64{
+				1.1586186, 1.3025842, 0.9724295,
+				109.7346599, 40.9623102,
+			},
+			rhead: []string{
+				"r(N1-C2)", "r(C2-O3)", "r(O3-H4)",
+				"<(O3-C2-H4)", "<(H4-O3-C2)",
 			},
 		},
 		{
@@ -105,26 +115,43 @@ func TestSpectro(t *testing.T) {
 				{0.5775190, 0.5774985, 2.4322943},
 			},
 			deltas: []float64{
-				0.0469588942,
-				0.2228671420,
-				0.0594222941,
-				0.0000002512,
+				0.0469588942, 0.2228671420,
+				0.0594222941, 0.0000002512,
 				0.2123725433,
 			},
 			phis: []float64{
-				-0.1633979197E+00,
-				-0.1188042331E+04,
-				-0.5090171025E+03,
-				0.1700920469E+04,
-				-0.3176907240E-04,
-				0.4680895674E+00,
+				-0.1633979197E+00, -0.1188042331E+04,
+				-0.5090171025E+03, 0.1700920469E+04,
+				-0.3176907240E-04, 0.4680895674E+00,
 				-0.4161588292E+09,
+			},
+			requil: []float64{
+				1.0135437, 1.0135427, 1.0135427,
+				1.6495880, 1.2092633, 1.2092631,
+				1.2092631, 110.9864784, 110.9777107,
+				110.9777107, 104.8600368, 104.8602644,
+				104.8602644,
+			},
+			ralpha: []float64{
+				1.0139841, 1.0139881, 1.0139932,
+				1.6730848, 1.2168612, 1.2168475,
+				1.2168590, 110.9798368, 110.9703946,
+				110.9730406, 104.7957009, 104.7957520,
+				104.7942464,
+			},
+			rhead: []string{
+				"r(N1-H2)", "r(N1-H3)", "r(N1-H4)",
+				"r(N1-B5)", "r(B5-H6)", "r(B5-H7)",
+				"r(B5-H8)",
+				"<(N1-H2-B5)", "<(N1-H3-B5)", "<(N1-H4-B5)",
+				"<(B5-H6-N1)", "<(B5-H7-N1)", "<(B5-H8-N1)",
 			},
 		},
 	}
 	for _, test := range tests {
 		gzpt, gharm, gfund, gcorr,
-			rotABC, deltas, phis := Spectro(test.file, test.nfreq)
+			rotABC, deltas, phis,
+			requil, ralpha, rhead := Spectro(test.file, test.nfreq)
 		if gzpt != test.zpt {
 			t.Errorf("Spectro(%s, %d): got %f, wanted %f\n",
 				test.file, test.nfreq, gzpt, test.zpt)
@@ -169,6 +196,18 @@ func TestSpectro(t *testing.T) {
 		if !reflect.DeepEqual(phis, test.phis) {
 			t.Errorf("Spectro(%s, %d): got %v, wanted %v\n",
 				test.file, test.nfreq, phis, test.phis)
+		}
+		if !reflect.DeepEqual(requil, test.requil) {
+			t.Errorf("Spectro(%s, %d): got %v, wanted %v\n",
+				test.file, test.nfreq, requil, test.requil)
+		}
+		if !reflect.DeepEqual(ralpha, test.ralpha) {
+			t.Errorf("Spectro(%s, %d): got %v, wanted %v\n",
+				test.file, test.nfreq, ralpha, test.ralpha)
+		}
+		if !reflect.DeepEqual(rhead, test.rhead) {
+			t.Errorf("Spectro(%s, %d): got %v, wanted %v\n",
+				test.file, test.nfreq, rhead, test.rhead)
 		}
 	}
 }
