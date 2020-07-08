@@ -4,9 +4,9 @@ package summarize
 
 import (
 	"bufio"
+	"math"
 	"os"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -18,6 +18,7 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 	rotABC [][]float64,
 	deltas, phis []float64) {
 
+	corr = make([]float64, nfreqs, nfreqs)
 	f, err := os.Open(filename)
 	if err != nil {
 		panic(err)
@@ -28,6 +29,7 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 		line     string
 		skip     int
 		freqs    int
+		nrot     int
 		harmFund bool
 		rot      bool
 	)
@@ -60,20 +62,28 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 			freqs = nfreqs + 1 // add ZPT
 		case !harmFund && freqs > 0 && len(line) > 1:
 			fields := strings.Fields(line)
-			if freq.MatchString(fields[0]) {
+			if strings.Contains(line, "NON-DEG") &&
+				freq.MatchString(fields[0]) {
 				state, _ := strconv.Atoi(fields[0])
 				if state == 1 {
 					zpt, _ = strconv.ParseFloat(fields[1], 64)
 					freqs--
 				} else if state <= nfreqs+1 {
 					f, _ := strconv.ParseFloat(fields[2], 64)
-					corr = append(corr, f)
+					corr[state-2] = f
 					freqs--
 				}
 			}
 		case strings.Contains(line, "NON-DEG(Vt)"):
-			skip += 3
-			rot = true
+			if nrot < nfreqs+1 { /* include 0th */
+				if nfreqs > 10 {
+					skip += 7
+				} else {
+					skip += 3
+				}
+				rot = true
+				nrot++
+			}
 		case rot:
 			// order is A0 -> An
 			// in cm-1
@@ -82,7 +92,10 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 			fields := strings.Fields(line)
 			tmp := make([]float64, 0, 3)
 			for f := range fields {
-				v, _ := strconv.ParseFloat(fields[f], 64)
+				v, err := strconv.ParseFloat(fields[f], 64)
+				if err != nil {
+					v = math.NaN()
+				}
 				tmp = append(tmp, v)
 			}
 			rotABC = append(rotABC, tmp)
@@ -105,9 +118,5 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 		// presumably vibrationally averaged coordinates
 		// - pretty sure R(EQUIL), but what are R(G) and R(ALPHA)?
 	}
-	// put freqs in decreasing order
-	sort.Sort(sort.Reverse(sort.Float64Slice(harm)))
-	sort.Sort(sort.Reverse(sort.Float64Slice(fund)))
-	sort.Sort(sort.Reverse(sort.Float64Slice(corr)))
 	return
 }
