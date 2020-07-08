@@ -11,6 +11,34 @@ import (
 	"strings"
 )
 
+// unicode characters
+const (
+	upperDelta = "\u0394"
+	lowerDelta = "\u03B4"
+	upperPhi   = "\u03A6"
+	lowerPhi   = "\u03C6"
+)
+
+// Exported variables
+var (
+	DeltaOrder = []string{
+		upperDelta + "_J ",
+		upperDelta + "_K ",
+		upperDelta + "_JK",
+		lowerDelta + "_J ",
+		lowerDelta + "_K ",
+	}
+	PhiOrder = []string{
+		upperPhi + "_J ",
+		upperPhi + "_K ",
+		upperPhi + "_JK",
+		upperPhi + "_KJ",
+		lowerPhi + "_j ",
+		lowerPhi + "_jk",
+		lowerPhi + "_k ",
+	}
+)
+
 // FreqReport gathers harmonic, anharmonic, and resonance-corrected
 // frequencies from a spectro  output file for reporting
 func Spectro(filename string, nfreqs int) (zpt float64,
@@ -87,6 +115,8 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 		case rot:
 			// order is A0 -> An
 			// in cm-1
+			// TODO option for BZA/S
+			// BZS for linear molecules
 			// could skip 3 more here to get BZS too
 			rot = false
 			fields := strings.Fields(line)
