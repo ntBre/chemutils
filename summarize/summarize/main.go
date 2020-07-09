@@ -80,18 +80,18 @@ func main() {
 		fmt.Printf("B_%d%10.6f\n", a, rotABC[a][0])
 		fmt.Printf("C_%d%10.6f\n", a, rotABC[a][1])
 	}
-	// TODO deduce correct units
-	// - three decimal places, no more than 5 sig figs if possible
-	fmt.Println("Deltas (MHz):")
+	fmt.Println("Deltas (GHz MHz kHz Hz mHz):")
 	// TODO flag to disable unicode output?
 	for d := range deltas {
-		fmt.Printf("%s%15.10f\n", summarize.DeltaOrder[d],
-			deltas[d])
+		fmt.Printf("%s%15.3f%15.3f%15.3f%15.3f%15.3f\n",
+			summarize.DeltaOrder[d], deltas[d]/1e3, deltas[d],
+			deltas[d]*1e3, deltas[d]*1e6, deltas[d]*1e9)
 	}
-	fmt.Println("Phis (Hz):")
+	fmt.Println("Phis (kHz Hz mHz uHz nHz):")
 	for p := range phis {
-		fmt.Printf("%s%20.10e\n", summarize.PhiOrder[p],
-			phis[p])
+		fmt.Printf("%s%15.3f%15.3f%15.3f%15.3f%15.3f\n",
+			summarize.PhiOrder[p], phis[p]/1e3, phis[p],
+			phis[p]*1e3, phis[p]*1e6, phis[p]*1e9)
 	}
 	fmt.Println("Geom (A or Deg):")
 	fmt.Printf("%15s%15s%15s\n", "COORD", "R(EQUIL)", "R(ALPHA)")
