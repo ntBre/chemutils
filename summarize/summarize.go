@@ -9,6 +9,7 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -48,9 +49,10 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 	rotABC [][]float64,
 	deltas, phis []float64,
 	rEquil, rAlpha []float64,
-	rHeaders []string) {
+	rHeaders, fermi []string) {
 
 	corr = make([]float64, nfreqs, nfreqs)
+	fermiMap := make(map[string][]string)
 	f, err := os.Open(filename)
 	if err != nil {
 		panic(err)
@@ -65,6 +67,8 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 		harmFund bool
 		rot      bool
 		geom     bool
+		fermi1   bool
+		fermi2   bool
 		buf      bytes.Buffer
 		// this is cute
 		gparams = []string{"", "", "r", "<"}
@@ -140,7 +144,8 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 			// order is DELTA J, K, JK, delta J, K
 			// in MHz
 			fields := strings.Fields(line)
-			f, _ := strconv.ParseFloat(fields[len(fields)-1], 64)
+			f, _ := strconv.ParseFloat(fields[len(fields)-1],
+				64)
 			deltas = append(deltas, f)
 		case phi.MatchString(line):
 			// order is PHI J, K, JK, KJ, phi j, jk, k
@@ -148,13 +153,14 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 			// may need this in delta too
 			line := strings.ReplaceAll(line, "D", "E")
 			fields := strings.Fields(line)
-			f, _ := strconv.ParseFloat(fields[len(fields)-1], 64)
+			f, _ := strconv.ParseFloat(fields[len(fields)-1],
+				64)
 			phis = append(phis, f)
 		case strings.Contains(line, "INT COORD TYPE") &&
 			!geom && rEquil == nil:
 			geom = true
 			skip++
-		case geom:
+		case geom && !strings.Contains(line, "LINEAR"):
 			if line == "" {
 				geom = false
 				continue
@@ -180,9 +186,44 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 			fmt.Fprint(&buf, ")")
 			rHeaders = append(rHeaders, buf.String())
 			buf.Reset()
+		case strings.Contains(line, "FERMI RESONANCE   "):
+			skip += 3
+			if strings.Contains(line, "TYPE 1") {
+				fermi1 = true
+			} else {
+				fermi2 = true
+			}
+		case (fermi1 || fermi2) && line == "":
+			// just set them both instead of checking
+			fermi1 = false
+			fermi2 = false
+		case fermi1:
+			fields := strings.Fields(line)
+			key := fields[3]
+			fermiMap[key] = append(fermiMap[key],
+				fmt.Sprintf("2v_%s", fields[1]))
+		case fermi2:
+			fields := strings.Fields(line)
+			key := fields[3]
+			fermiMap[key] = append(fermiMap[key],
+				fmt.Sprintf("v_%s+v_%s", fields[1],
+					fields[2]))
 		}
 		// TODO option for BZA and/or BZS
 		// TODO option for D in addition to DELTA
+	}
+	sorter := make([]string, 0, len(fermiMap))
+	for k := range fermiMap {
+		sorter = append(sorter, k)
+	}
+	sort.Strings(sorter)
+	for _, k := range sorter {
+		for _, r := range fermiMap[k] {
+			fmt.Fprintf(&buf, "%s = ", r)
+		}
+		fmt.Fprintf(&buf, "v_%s", k)
+		fermi = append(fermi, buf.String())
+		buf.Reset()
 	}
 	return
 }

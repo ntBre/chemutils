@@ -62,7 +62,7 @@ func main() {
 	}
 	zpt, harm, fund, corr,
 		rotABC, deltas, phis,
-		requil, ralpha, rhead := summarize.Spectro(filename, nfreqs)
+		requil, ralpha, rhead, fermi := summarize.Spectro(filename, nfreqs)
 	fmt.Printf("ZPT (cm-1): %.1f\n", zpt)
 	// TODO flag for specifying width and probably precision too
 	// TODO flag for org, tex format
@@ -97,5 +97,9 @@ func main() {
 	fmt.Printf("%15s%15s%15s\n", "COORD", "R(EQUIL)", "R(ALPHA)")
 	for g := range requil {
 		fmt.Printf("%15s%15.7f%15.7f\n", rhead[g], requil[g], ralpha[g])
+	}
+	fmt.Println("Fermi Resonances:")
+	for r := range fermi {
+		fmt.Println(fermi[r])
 	}
 }

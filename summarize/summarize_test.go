@@ -21,6 +21,7 @@ func TestSpectro(t *testing.T) {
 		requil []float64
 		ralpha []float64
 		rhead  []string
+		fermi  []string
 	}{
 		{
 			file:  "testfiles/spectro.out",
@@ -63,6 +64,10 @@ func TestSpectro(t *testing.T) {
 			rhead: []string{
 				"r(N1-C2)", "r(C2-O3)", "r(O3-H4)",
 				"<(O3-C2-H4)", "<(H4-O3-C2)",
+			},
+			fermi: []string{
+				"2v_4 = v_4+v_3 = v_2",
+				"2v_5 = v_4",
 			},
 		},
 		{
@@ -146,12 +151,88 @@ func TestSpectro(t *testing.T) {
 				"<(N1-H2-B5)", "<(N1-H3-B5)", "<(N1-H4-B5)",
 				"<(B5-H6-N1)", "<(B5-H7-N1)", "<(B5-H8-N1)",
 			},
+			fermi: []string{
+				"v_16+v_15 = v_17+v_16 = v_10",
+				"2v_16 = 2v_17 = v_17+v_15 = v_11",
+				"2v_15 = v_12",
+				"v_18+v_17 = v_13",
+				"v_18+v_16 = v_14",
+				"2v_18 = v_15",
+				"2v_7 = 2v_8 = v_3",
+				"2v_10 = 2v_11 = v_12+v_11 = v_4",
+				"v_11+v_10 = v_12+v_10 = v_5",
+				"2v_10 = 2v_11 = 2v_12 = v_13+v_10 = v_14+v_11 = v_6",
+				"v_15+v_13 = v_16+v_14 = v_17+v_13 = v_7",
+				"v_15+v_14 = v_16+v_13 = v_17+v_14 = v_8",
+				"2v_15 = 2v_16 = 2v_17 = v_9",
+			},
+		},
+		{
+			file:  "testfiles/jax.prob.out",
+			nfreq: 9,
+			zpt:   6847.4520,
+			harm: []float64{
+				3819.706, 3478.907, 2243.281,
+				1272.576, 1069.500, 622.746,
+				537.802, 401.606, 368.267,
+			},
+			fund: []float64{
+				3628.429, 3345.921, 2193.109,
+				1235.865, 1057.343, 629.176,
+				548.446, 417.098, 386.093,
+			},
+			corr: []float64{
+				3628.4295, 3347.8029, 2203.3286,
+				1235.8645, 1052.7773, 629.1764,
+				548.4458, 417.0980, 386.0932,
+			},
+			rotABC: [][]float64{
+				{0.3228534, 0.3178922, 22.4479576},
+				{0.3227327, 0.3176009, 21.4728179},
+				{0.3220040, 0.3170685, 22.4445304},
+				{0.3209536, 0.3160462, 22.4205485},
+				{0.3230913, 0.3177488, 23.7354379},
+				{0.3215155, 0.3164633, 22.4077827},
+				{0.3233114, 0.3179611, 23.3635186},
+				{0.3230655, 0.3185377, 22.3819206},
+				{0.3233493, 0.3189513, 21.3237610},
+				{0.3241649, 0.3184727, 22.6271116},
+			},
+			deltas: []float64{
+				0.0032166547, 253.0816116693,
+				0.6221602357, 0.0000416412,
+				0.2759818046,
+			},
+			phis: []float64{
+				-0.3148755392E-03, 0.1450201513E+06,
+				0.3478976071E+01, -0.5278691516E+04,
+				0.2327941810E-04, 0.1937446213E+01,
+				0.6871318174E+04,
+			},
+			requil: []float64{
+				1.0609763, 1.2034593, 1.3145119,
+				0.9620542, 41.6792532,
+			},
+			ralpha: []float64{
+				1.0492227, 1.2063767, 1.3169088,
+				0.9718421, 41.4652508,
+			},
+			rhead: []string{
+				"r(H1-C2)", "r(C2-C3)", "r(C3-O4)",
+				"r(O4-H5)", "<(H5-O4-C3)",
+			},
+			fermi: []string{
+				"v_5+v_3 = v_2",
+				"2v_5 = v_5+v_4 = v_3",
+				"2v_6 = 2v_7 = v_5",
+			},
 		},
 	}
 	for _, test := range tests {
 		gzpt, gharm, gfund, gcorr,
 			rotABC, deltas, phis,
-			requil, ralpha, rhead := Spectro(test.file, test.nfreq)
+			requil, ralpha, rhead,
+			fermi := Spectro(test.file, test.nfreq)
 		if gzpt != test.zpt {
 			t.Errorf("Spectro(%s, %d): got %f, wanted %f\n",
 				test.file, test.nfreq, gzpt, test.zpt)
@@ -208,6 +289,10 @@ func TestSpectro(t *testing.T) {
 		if !reflect.DeepEqual(rhead, test.rhead) {
 			t.Errorf("Spectro(%s, %d): got %v, wanted %v\n",
 				test.file, test.nfreq, rhead, test.rhead)
+		}
+		if !reflect.DeepEqual(fermi, test.fermi) {
+			t.Errorf("Spectro(%s, %d): got %q, wanted %q\n",
+				test.file, test.nfreq, fermi, test.fermi)
 		}
 	}
 }
