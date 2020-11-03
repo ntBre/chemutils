@@ -1,5 +1,6 @@
 // Package summarize is for summarizing output from quantum chemistry
 // programs
+// (let ((compile-command "go test .")) (my-recompile))
 package summarize
 
 import (
