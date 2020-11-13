@@ -20,7 +20,6 @@
 (define (dot? str)
   (string-contains? str "."))
 
-;; TODO should probably map this to color instead of name
 (define ptable
   (hash
    "1.0078250" "H"
@@ -28,6 +27,13 @@
    "14.0030740" "N"
    "15.9949146" "O"
    ))
+
+(define pcolor
+  (hash
+   "H" (make-color 221 228 240)
+   "C" (make-color 39 45 54)
+   "N" (make-color 10 100 245)
+   "O" (make-color 255 0 0)))
 
 
 (define (read-output in)
@@ -110,6 +116,7 @@
 
 (define dash-pen (new pen% (style 'long-dash)))
 (define def-pen (new pen%))
+(define def-brush (new brush%))
 
 (define (x-help-lines dc w h)
   (let ((wend (- w (* *axis-scale* w)))
@@ -165,16 +172,22 @@
                  (+ (square a) b)) 0.0 (list x y z))))
 
 (define (cart->2d x y z)
-  (displayln (list x y z)))
+  "Return width and height"
+  (values
+   (+ y (* x *xangle*))
+   (+ z (* x *yangle*))))
 
-(define (draw-atom dc canvas maxw maxh atom x y z)
-  (let* ((len (vec-len x y z))
-         (vec (map (lambda (a)
-                     (/ a len)) (list x y z))))
-    ;; (define-values 
-    ;; TODO convert the vectors to 2d coordinates and draw the atoms
-    (display atom)
-    (apply cart->2d vec)))
+(define (atom-color atom)
+  (hash-ref pcolor atom))
+
+(define (draw-atom canvas dc maxw maxh atom x y z)
+    (define-values (cw ch) (center canvas))
+    (define-values (w h) (cart->2d x y z))
+    (let ((pw (+ cw (* w (- maxw cw) 0.5)))
+          (ph (+ ch (* h (- maxh ch) 0.5))))
+      (send dc set-brush (atom-color atom) 'solid)
+      (send dc draw-ellipse pw ph 20 20))
+  (send dc set-brush def-brush))
 
 (define (draw-axes canvas dc)
   ;; TODO update these functions when I introduce rotation
@@ -182,7 +195,6 @@
   (draw-x dc w h)
   (values (draw-y dc w h) (draw-z dc w h)))
 
-;; (displayln (car coords))
 (define (draw-geom canvas dc maxw maxh)
   ;; need to scale the whole geometry
   (for ((atom atoms) (coord coords))
@@ -223,6 +235,7 @@
 
 (define list-box (new list-box%
                       (parent right-panel)
+                      (min-width 100)
                       (label #f)
                       (choices (map number->string (vib-choices)))
                       (columns '("Frequencies"))
