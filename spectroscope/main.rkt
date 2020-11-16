@@ -1,3 +1,4 @@
+;; could use parameter to return pen to default
 #lang racket/gui
 
 (require racket/gui/base)
@@ -6,6 +7,8 @@
 (define *xangle* (cos (/ (* 5 pi) 4.)))
 (define *yangle* (sin (/ (* 5 pi) 4.)))
 (define *axis-scale* 0.75)
+(define *atom-scale* 0.25)
+(define *refresh-rate* 0.5)
 
 (struct vib (freq contribs)
   #:transparent
@@ -35,15 +38,14 @@
    "N" (make-color 10 100 245)
    "O" (make-color 255 0 0)))
 
-
 (define (read-output in)
-  (define in-lxm? #f)
-  (define head? #f)
-  (define geom? #f)
-  (define freqs null)
-  (define geom null)
-  (define skip 0)
-  (define ht (make-hash))
+  (let ((in-lxm? #f)
+        (head? #f)
+        (geom? #f)
+        (freqs null)
+        (geom null)
+        (skip 0)
+        (ht (make-hash)))
   (for ((l (in-lines in)))
     (cond
       ((string-contains? l "LXM MATRIX") (set! in-lxm? #t) (set! head? #t))
@@ -61,7 +63,7 @@
           (let* ((slc (string-split l))
                  (fst (car slc)))
             (hash-set! ht fst (append (hash-ref ht fst null) (cdr slc)))))))))
-  (values freqs ht (reverse geom)))
+  (values freqs ht (reverse geom))))
 
 (define-values (freqs contribs geom) (call-with-input-file "spectro.out" read-output))
 
@@ -70,15 +72,13 @@
         (for/list ((k keys))
           (hash-ref contribs k))))
 
-;; need to look up how to do a recursive accumulator
-(define vibs null)
 (define (make-vibs freqs contribs)
-  (set! vibs (append vibs (list (vib (car freqs) (map car contribs)))))
   (cond
-    ((null? (cdr freqs)) (void))
-    (else (make-vibs (cdr freqs) (map cdr contribs)))))
+    ((null? freqs) null)
+    (else (cons (vib (car freqs) (map car contribs))
+                (make-vibs (cdr freqs) (map cdr contribs))))))
 
-(make-vibs freqs contribs)
+(define vibs (make-vibs freqs contribs))
 
 (define (print-vibs)
   (for ((line vibs))
@@ -90,13 +90,42 @@
 
 (define atoms
   (map (lambda (a)
-         (hash-ref ptable a)) (flatten (map (lambda (l)
-                                              (take-right l 1)) geom))))
+         (hash-ref ptable a))
+       (flatten (map (lambda (l)
+                       (take-right l 1)) geom))))
 
 (define coords
   (map (lambda (l) (map string->number (take l 3))) geom))
 
-(define frame (new frame%
+(define my-frame%
+  (class frame%
+    (define/override (on-subwindow-char rec event)
+      (let* ((sel (send list-box get-selections2))
+             (sel-max (- (send list-box number-of-visible-items) 1)) 
+             (sli (send slider get-value)))
+        (cond
+          ((equal? (send event get-key-code) #\q)
+           (exit))
+          ((equal? (send event get-key-code) 'escape)
+           (send list-box clear-select))
+          ((equal? (send event get-key-code) #\j)
+           (cond
+             ((null? sel) (send list-box select 0))
+             ((< sel sel-max)
+              (send list-box select (+ 1 sel)))))
+          ((equal? (send event get-key-code) #\k)
+           (cond
+             ((null? sel) (send list-box select sel-max))
+             ((> sel 0) (send list-box select (- sel 1)))))
+          ((equal? (send event get-key-code) #\l)
+           (when (< sli slide-max)
+             (send slider set-value (+ (send slider get-value) 5))))
+          ((equal? (send event get-key-code) #\h)
+           (when (> sli slide-min)
+             (send slider set-value (- (send slider get-value) 5)))))))
+    (super-new)))
+
+(define frame (new my-frame%
                    (label "spectroscope")
                    (width 500)
                    (height 500)))
@@ -159,7 +188,7 @@
         (maxh (+ h (* h *axis-scale*))))
     (send dc draw-line
           w h
-          wend hend )
+          wend hend)
     (define-values (woff hoff d a) (send dc get-text-extent "z"))
     (send dc draw-text "z" (- wend (/ woff 2)) (- hend hoff))
     maxh))
@@ -168,11 +197,9 @@
   (* x x))
 
 (define (vec-len x y z)
-  (sqrt (foldl (lambda (a b)
-                 (+ (square a) b)) 0.0 (list x y z))))
+  (sqrt (apply + (map square (list x y z)))))
 
 (define (cart->2d x y z)
-  "Return width and height"
   (values
    (+ y (* x *xangle*))
    (+ z (* x *yangle*))))
@@ -183,8 +210,8 @@
 (define (draw-atom canvas dc maxw maxh atom x y z)
     (define-values (cw ch) (center canvas))
     (define-values (w h) (cart->2d x y z))
-    (let ((pw (+ cw (* w (- maxw cw) 0.5)))
-          (ph (+ ch (* h (- maxh ch) 0.5))))
+    (let ((pw (+ cw (* w (- maxw cw) *atom-scale*)))
+          (ph (+ ch (* h (- maxh ch) *atom-scale*))))
       (send dc set-brush (atom-color atom) 'solid)
       (send dc draw-ellipse pw ph 20 20))
   (send dc set-brush def-brush))
@@ -200,18 +227,17 @@
   (for ((atom atoms) (coord coords))
     (apply draw-atom canvas dc maxw maxh atom coord)))
 
-(define my-canvas%
-  (class canvas%
-    (define/override (on-char event)
-      (cond
-        ((equal? (send event get-key-code) #\q) (exit))))
+(define my-list-box%
+  (class list-box%
+    (define/public (clear-select)
+      (let ((test (send this get-selections2)))
+      (unless (null? test) (send this select test #f))))
+    (define/public (get-selections2)
+      (let* ((sel (send this get-selections)))
+        (if (not (null? sel)) (car sel) null)))
     (super-new)))
 
-(define (draw-canvas canvas dc)
-  (define-values (maxw maxh) (draw-axes canvas dc))
-  (draw-geom canvas dc maxw maxh))
-
-(define canvas (new my-canvas%
+(define canvas (new canvas%
                     (parent left-panel)
                     (min-width 500)
                     (min-height 500)
@@ -220,20 +246,23 @@
                        (draw-canvas canvas dc)))))
 
 (send canvas focus)
-
+(define dc (send canvas get-dc))
 (send canvas set-canvas-background *bg-color*)
+
+(define slide-min 0)
+(define slide-max 100)
 
 (define slider (new slider%
                     (label "Magnitude")
                     (parent left-panel)
-                    (min-value 0)
-                    (max-value 100)
+                    (min-value slide-min)
+                    (max-value slide-max)
                     (init-value 50)))
 
 (define right-panel (new vertical-panel%
                          (parent panel)))
 
-(define list-box (new list-box%
+(define list-box (new my-list-box%
                       (parent right-panel)
                       (min-width 100)
                       (label #f)
@@ -242,6 +271,22 @@
                       (style '(single column-headers))))
 
 (send frame show #t)
+
+(define (draw-canvas canvas dc)
+  (define-values (maxw maxh) (draw-axes canvas dc))
+  (let ((cs (send list-box get-selections2)))
+  (unless (null? cs) (displayln (vib-contribs (list-ref vibs cs)))))
+  (draw-geom canvas dc maxw maxh))
+
+;; might need this for animation
+;; (define (loop)
+;;   (send canvas on-paint)
+;;   (sleep/yield *refresh-rate*)
+;;   (loop))
+;; (loop)
+
+;; maintain an internal counter in draw-geom, cycle through (+contrib,
+;; 0, -contrib) on repeated calls; take intensity from slider
 
 ;; extract information from spectro output - CHECK
 ;; - need original geometry - split into coords and atoms
