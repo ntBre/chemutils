@@ -38,6 +38,9 @@
    "N" (make-color 10 100 245)
    "O" (make-color 255 0 0)))
 
+(define (atom-color atom)
+  (hash-ref pcolor atom))
+
 (define (read-output in)
   (let ((in-lxm? #f)
         (head? #f)
@@ -70,7 +73,7 @@
 (set! contribs
       (let ((keys (map number->string (sort (map string->number (hash-keys contribs)) <))))
         (for/list ((k keys))
-          (hash-ref contribs k))))
+          (map string->number (hash-ref contribs k)))))
 
 (define (make-vibs freqs contribs)
   (cond
@@ -143,6 +146,11 @@
         (height (send canvas get-height)))
     (values (/ width 2.) (/ height 2.))))
 
+(define (extent canvas)
+  (values
+   (send canvas get-width)
+   (send canvas get-height)))
+
 (define dash-pen (new pen% (style 'long-dash)))
 (define def-pen (new pen%))
 (define def-brush (new brush%))
@@ -193,27 +201,20 @@
     (send dc draw-text "z" (- wend (/ woff 2)) (- hend hoff))
     maxh))
 
-(define (square x)
-  (* x x))
-
-(define (vec-len x y z)
-  (sqrt (apply + (map square (list x y z)))))
-
-(define (cart->2d x y z)
+;; TODO should do all the normalization here and use this for both
+;; axes and atoms to make rotation easier
+;; want to say draw-z from 0,0,0 to 0,0,1 and get the same thing I have now
+(define (cart->2d canvas x y z scale)
+  (let-values (((cw ch) (center canvas))
+               ((mw mh) (extent canvas)))
   (values
-   (+ y (* x *xangle*))
-   (+ z (* x *yangle*))))
+   (+ cw (* (+ y (* x *xangle*)) (- mw cw) scale))
+   (+ ch (* (+ z (* x *yangle*)) (- mh ch) scale)))))
 
-(define (atom-color atom)
-  (hash-ref pcolor atom))
-
-(define (draw-atom canvas dc maxw maxh atom x y z)
-    (define-values (cw ch) (center canvas))
-    (define-values (w h) (cart->2d x y z))
-    (let ((pw (+ cw (* w (- maxw cw) *atom-scale*)))
-          (ph (+ ch (* h (- maxh ch) *atom-scale*))))
+(define (draw-atom canvas dc atom x y z)
+    (let-values (((w h) (cart->2d canvas x y z *atom-scale*)))
       (send dc set-brush (atom-color atom) 'solid)
-      (send dc draw-ellipse pw ph 20 20))
+      (send dc draw-ellipse w h 20 20))
   (send dc set-brush def-brush))
 
 (define (draw-axes canvas dc)
@@ -222,10 +223,9 @@
   (draw-x dc w h)
   (values (draw-y dc w h) (draw-z dc w h)))
 
-(define (draw-geom canvas dc maxw maxh)
-  ;; need to scale the whole geometry
+(define (draw-geom canvas dc atoms coords)
   (for ((atom atoms) (coord coords))
-    (apply draw-atom canvas dc maxw maxh atom coord)))
+    (apply draw-atom canvas dc atom coord)))
 
 (define my-list-box%
   (class list-box%
@@ -251,6 +251,10 @@
 
 (define slide-min 0)
 (define slide-max 100)
+(define slide-init 50)
+
+(define (magnitude)
+  (/ (send slider get-value) slide-init))
 
 (define slider (new slider%
                     (label "Magnitude")
@@ -273,17 +277,51 @@
 (send frame show #t)
 
 (define (draw-canvas canvas dc)
-  (define-values (maxw maxh) (draw-axes canvas dc))
-  (let ((cs (send list-box get-selections2)))
-  (unless (null? cs) (displayln (vib-contribs (list-ref vibs cs)))))
-  (draw-geom canvas dc maxw maxh))
+  (draw-axes canvas dc)
+  (draw-geom canvas dc atoms coords))
 
-;; might need this for animation
-;; (define (loop)
-;;   (send canvas on-paint)
-;;   (sleep/yield *refresh-rate*)
-;;   (loop))
-;; (loop)
+(define (resplit lst)
+  (cond
+    ((null? lst) null)
+    (else (cons (take lst 3) (resplit (drop lst 3))))))
+
+(define vibrate
+  (let ((n 0)
+        (steps (list + - - +)))
+    (lambda (contribs (reset? #f))
+      (when reset? (set! n 0))
+      (let ((op (list-ref steps (remainder n 4)))
+            (mag (magnitude)))
+        (set! coords (resplit (map op
+                                   (flatten coords)
+                                   (map (lambda (c)
+                                          (* mag c)) contribs)))))
+      (set! n (add1 n)))))
+
+(define ref-coords coords)
+
+(define prev
+  (let ((hold null))
+    (lambda (next)
+      (begin0
+          (equal? hold next)
+        (set! hold next)))))
+
+(define (loop)
+  (let* ((sel (send list-box get-selections2))
+         (diff? (prev sel)))
+    (unless diff? ;; if new selection made, reset coords
+      (set! coords ref-coords))
+    (unless (null? sel) ;; only vibrate when there is a selection
+      (if diff? 
+          (vibrate (vib-contribs (list-ref vibs sel)) #f)
+          (vibrate (vib-contribs (list-ref vibs sel)) #t))))
+  (send canvas refresh)
+  (send canvas on-paint)
+  (sleep/yield *refresh-rate*)
+  (loop))
+
+(loop)
 
 ;; maintain an internal counter in draw-geom, cycle through (+contrib,
 ;; 0, -contrib) on repeated calls; take intensity from slider
