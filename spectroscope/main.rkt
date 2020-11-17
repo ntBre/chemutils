@@ -1,3 +1,6 @@
+;; TODO reset geometry when slider changes, otherwise can trap on wrong side
+;; TODO offsets for labels aren't going to work when rotated
+;; TODO coule probably DRY out draw-x,y,z but not sure how exactly. macro?
 ;; could use parameter to return pen to default
 #lang racket/gui
 
@@ -171,45 +174,38 @@
 
 (define (draw-x dc w h)
   ;; (x-help-lines dc w h)
-  (let ((wend (+ w (* w *axis-scale* *xangle*)))
-        (hend (- h (* h *axis-scale* *yangle*))))
+  (let-values (((wbeg hbeg) (cart->2d canvas 0 0 0 *axis-scale*))
+               ((wend hend) (cart->2d canvas 1 0 0 *axis-scale*)))
     (send dc draw-line
-          w h
+          wbeg hbeg
           wend hend)
     (define-values (woff hoff d a) (send dc get-text-extent "x"))
     (send dc draw-text "x" (- wend woff) hend)))
 
 (define (draw-y dc w h)
-  (let ((wend (+ w (* w *axis-scale*)))
-        (hend h))
+  (let-values (((wbeg hbeg) (cart->2d canvas 0 0 0 *axis-scale*))
+               ((wend hend) (cart->2d canvas 0 1 0 *axis-scale*)))
     (send dc draw-line
-          w h
+          wbeg hbeg
           wend hend)
     (define-values (woff hoff d a) (send dc get-text-extent "y"))
-    ;; add full offset in width and subtract half in height
-    (send dc draw-text "y" (+ wend woff) (- hend (/ hoff 2)))
-    wend))
+    (send dc draw-text "y" (+ wend woff) (- hend (/ hoff 2)))))
 
 (define (draw-z dc w h)
-  (let ((wend w)
-        (hend (- h (* h *axis-scale*)))
-        (maxh (+ h (* h *axis-scale*))))
+  (let-values (((wbeg hbeg) (cart->2d canvas 0 0 0 *axis-scale*))
+               ((wend hend) (cart->2d canvas 0 0 1 *axis-scale*)))
     (send dc draw-line
-          w h
+          wbeg hbeg
           wend hend)
     (define-values (woff hoff d a) (send dc get-text-extent "z"))
-    (send dc draw-text "z" (- wend (/ woff 2)) (- hend hoff))
-    maxh))
+    (send dc draw-text "z" (- wend (/ woff 2)) (- hend hoff))))
 
-;; TODO should do all the normalization here and use this for both
-;; axes and atoms to make rotation easier
-;; want to say draw-z from 0,0,0 to 0,0,1 and get the same thing I have now
 (define (cart->2d canvas x y z scale)
   (let-values (((cw ch) (center canvas))
                ((mw mh) (extent canvas)))
   (values
    (+ cw (* (+ y (* x *xangle*)) (- mw cw) scale))
-   (+ ch (* (+ z (* x *yangle*)) (- mh ch) scale)))))
+   (- ch (* (+ z (* x *yangle*)) (- mh ch) scale)))))
 
 (define (draw-atom canvas dc atom x y z)
     (let-values (((w h) (cart->2d canvas x y z *atom-scale*)))
