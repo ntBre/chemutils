@@ -91,16 +91,11 @@ func CcCR(tz, qz, fz, mt, mtc, dk, dkr float64) float64 {
 		mtc - mt + dkr - dk
 }
 
-func main() {
-	flag.Parse()
-	toread := strings.Fields(*dirs)
-	e := make([][]Job, NBASIS)
+func LoadDirs(toread []string) *[][]Job {
 	var wg sync.WaitGroup
-	fmt.Println("READING OUTPUT FILES")
-	fmt.Println("--------------------")
+	e := make([][]Job, NBASIS)
 	for b, r := range toread {
 		read := filepath.Join(*base, r, *inp)
-		fmt.Printf("Reading %s/*.%s as %s input\n", read, *suff, BASIS[b])
 		wg.Add(1)
 		go func(b int, read string) {
 			defer wg.Done()
@@ -108,6 +103,21 @@ func main() {
 		}(b, read)
 	}
 	wg.Wait()
+	return &e
+}
+
+func main() {
+	flag.Parse()
+	toread := strings.Fields(*dirs)
+
+	fmt.Println("READING OUTPUT FILES")
+	fmt.Println("--------------------")
+	for b, r := range toread {
+		read := filepath.Join(*base, r, *inp)
+		fmt.Printf("Reading %s/*.%s as %s input\n", read, *suff, BASIS[b])
+	}
+	e := LoadDirs(toread)
+
 	fmt.Println("\nRAW ENERGIES")
 	fmt.Println("------------")
 	fmt.Printf("%15s", "Basis")
@@ -120,26 +130,27 @@ func main() {
 		fmt.Printf("%20s", r)
 	}
 	fmt.Print("\n")
-	for i := range e[VTZ] {
-		compare := e[VTZ][i].filename
+
+	for i := range (*e)[VTZ] {
+		compare := (*e)[VTZ][i].filename
 		fmt.Printf("%15s", compare)
 		for b := range BASIS {
-			if e[b][i].filename != compare {
+			if (*e)[b][i].filename != compare {
 				panic("filename order mismatch")
 			}
-			fmt.Printf("%20.12f", e[b][i].energy)
+			fmt.Printf("%20.12f", (*e)[b][i].energy)
 		}
 		fmt.Print("\n")
 	}
 
 	fmt.Println("\nRELATIVE ENERGIES")
 	fmt.Println("-----------------")
-	energies := make([]float64, len(e[VTZ]))
+	energies := make([]float64, len((*e)[VTZ]))
 	min := 0.0
-	for i := range e[VTZ] {
-		energy := CcCR(e[VTZ][i].energy, e[VQZ][i].energy,
-			e[V5Z][i].energy, e[MT][i].energy, e[MTC][i].energy,
-			e[DK][i].energy, e[DKR][i].energy)
+	for i := range (*e)[VTZ] {
+		energy := CcCR((*e)[VTZ][i].energy, (*e)[VQZ][i].energy,
+			(*e)[V5Z][i].energy, (*e)[MT][i].energy, (*e)[MTC][i].energy,
+			(*e)[DK][i].energy, (*e)[DKR][i].energy)
 		if energy < min {
 			min = energy
 		}

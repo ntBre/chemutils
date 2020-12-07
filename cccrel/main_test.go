@@ -1,8 +1,14 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"math"
+	"os"
+	"path/filepath"
 	"reflect"
+	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -93,5 +99,52 @@ func TestCcCR(t *testing.T) {
 	eps := 1e-10
 	if math.Abs(got-want) >= eps {
 		t.Errorf("got %v, wanted %v\n", got, want)
+	}
+}
+
+func loadEDat(filename string) []float64 {
+	fmt.Println(filename)
+	f, _ := os.Open(filename)
+	scanner := bufio.NewScanner(f)
+	energies := make([]float64, 0)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line != "" {
+			fl, _ := strconv.ParseFloat(strings.TrimSpace(line), 64)
+			energies = append(energies, fl)
+		}
+	}
+	return energies
+}
+
+func jobEnergies(jobs []Job) []float64 {
+	energies := make([]float64, 0, len(jobs))
+	for _, j := range jobs {
+		energies = append(energies, j.energy)
+	}
+	return energies
+}
+
+// test LoadDirs against the contents of the energy.dat files in each
+// directory
+func TestLoadDirs(t *testing.T) {
+	toread := []string{
+		"testfiles/hno/pts/avtz/",
+		"testfiles/hno/pts/avqz/",
+		"testfiles/hno/pts/av5z/",
+		"testfiles/hno/pts/mt/",
+		"testfiles/hno/pts/mtc/",
+		"testfiles/hno/pts/dk/",
+		"testfiles/hno/pts/dkr/",
+	}
+	*base = ""
+	got := LoadDirs(toread)
+	for i, line := range *got {
+		efile := filepath.Join(toread[i], "inp", "energy.dat")
+		want := loadEDat(efile)
+		nrg := jobEnergies(line)
+		if !reflect.DeepEqual(nrg, want) {
+			t.Errorf("got %v, wanted %v\n", nrg, want)
+		}
 	}
 }
