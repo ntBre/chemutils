@@ -1,6 +1,14 @@
 package main
 
-import "testing"
+import (
+	"io/ioutil"
+	"reflect"
+	"testing"
+
+	"bytes"
+
+	"github.com/ntBre/chemutils/summarize"
+)
 
 func TestColPrint(t *testing.T) {
 	datum0 := []float64{1, 2, 3}
@@ -12,8 +20,14 @@ func TestColPrint(t *testing.T) {
 	}
 }
 
-func TestOutput(t *testing.T) {
-	if got != want {
-		t.Errorf("got %v, wanted %v\n", got, want)
+func TestPrintResult(t *testing.T) {
+	initConst()
+	res := summarize.Spectro("testfiles/spectro.out", 6)
+	truefile := "testfiles/summary.txt"
+	var got bytes.Buffer
+	printResult(&got, res)
+	want, _ := ioutil.ReadFile(truefile)
+	if !reflect.DeepEqual(got.Bytes(), want) {
+		t.Errorf("got %v, wanted %v\n", got.String(), string(want))
 	}
 }
