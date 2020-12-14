@@ -7,6 +7,8 @@ import (
 
 	"bytes"
 
+	"os"
+
 	"github.com/ntBre/chemutils/summarize"
 )
 
@@ -28,6 +30,10 @@ func TestPrintResult(t *testing.T) {
 	printAll(&got, res)
 	want, _ := ioutil.ReadFile(truefile)
 	if !reflect.DeepEqual(got.Bytes(), want) {
-		t.Errorf("got %v, wanted %v\n", got.String(), string(want))
+		t.Errorf("got:\n%v, wanted:\n%v\n", got.String(), string(want))
+		out, _ := os.Create("testfiles/problem.out")
+		defer out.Close()
+		got.WriteTo(out)
 	}
+	// (diff "testfiles/problem.out" "testfiles/summary.txt")
 }

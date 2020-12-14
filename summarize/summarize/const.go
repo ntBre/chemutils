@@ -31,6 +31,7 @@ func initConst() {
 			"phi_k ",
 		}
 	} else if *tex {
+		t = template.Must(template.New("p").Parse(texTemplate))
 		DeltaOrder = []string{
 			"$\\Delta_{J }$",
 			"$\\Delta_{K }$",

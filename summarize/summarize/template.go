@@ -19,5 +19,6 @@ const (
 \end{table}
 `
 	plainTemplate = `{{.Caption}}:
+{{if .Header -}} {{.Header}} {{- end -}}
 {{.Body}}`
 )

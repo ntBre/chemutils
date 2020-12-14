@@ -32,50 +32,82 @@ func colPrint(format string, cols ...[]float64) string {
 	return buf.String()
 }
 
-func printDeltas(out io.Writer, res *summarize.Result) {
-	fmt.Fprintln(out, "Deltas (GHz MHz kHz Hz mHz):")
-	for d := range res.Deltas {
-		fmt.Fprintf(out, "%s%15.3f%15.3f%15.3f%15.3f%15.3f\n",
-			DeltaOrder[d], res.Deltas[d]/1e3, res.Deltas[d],
-			res.Deltas[d]*1e3, res.Deltas[d]*1e6, res.Deltas[d]*1e9)
-	}
-}
-
-func printABC(out io.Writer, res *summarize.Result) {
-	fmt.Fprintln(out, "ABC (cm-1):")
-	for a := range res.Rots {
-		fmt.Fprintf(out, "A_%d%10.6f\n", a, res.Rots[a][2])
-		fmt.Fprintf(out, "B_%d%10.6f\n", a, res.Rots[a][0])
-		fmt.Fprintf(out, "C_%d%10.6f\n", a, res.Rots[a][1])
-	}
-}
-
-func printFreqs(out io.Writer, res *summarize.Result) {
-	fmt.Fprintf(out, "ZPT (cm-1): %.1f\n", res.ZPT)
-	width := "8"
-	fmt.Fprintln(out, "Freqs (cm-1):")
-	fmt.Fprintf(out, "%"+width+"s"+"%"+width+"s"+"%"+width+"s"+"\n",
-		"HARM", "FUND", "CORR")
+func makeFreqs(res *summarize.Result) *Table {
+	var str strings.Builder
 	if lh := len(res.Harm); !(lh == len(res.Fund) && lh == len(res.Corr)) {
 		panic("dimension mismatch")
 	}
-	fmt.Fprint(out, colPrint("%"+width+".1f", res.Harm, res.Fund, res.Corr))
-}
-
-func printPhis(out io.Writer, res *summarize.Result) {
-	fmt.Fprintln(out, "Phis (kHz Hz mHz uHz nHz):")
-	for p := range res.Phis {
-		fmt.Fprintf(out, "%s%15.3f%15.3f%15.3f%15.3f%15.3f\n",
-			PhiOrder[p], res.Phis[p]/1e3, res.Phis[p],
-			res.Phis[p]*1e3, res.Phis[p]*1e6, res.Phis[p]*1e9)
+	fmt.Fprint(&str, colPrint("%8.1f", res.Harm, res.Fund, res.Corr))
+	return &Table{
+		Caption:   fmt.Sprintf("Freqs, ZPT=%.1f (cm-1)", res.ZPT),
+		Alignment: "ccc",
+		Header:    fmt.Sprintf("%8s%8s%8s\n", "HARM", "FUND", "CORR"),
+		Body:      str.String(),
 	}
 }
 
-func printGeom(out io.Writer, res *summarize.Result) {
-	fmt.Fprintln(out, "Geom (A or Deg):")
-	fmt.Fprintf(out, "%15s%15s%15s\n", "COORD", "R(EQUIL)", "R(ALPHA)")
+func makeABC(res *summarize.Result) *Table {
+	var str strings.Builder
+	for a := range res.Rots {
+		fmt.Fprintf(&str, "%8s%10.6f\n",
+			fmt.Sprintf("A_%d", a), res.Rots[a][2])
+		fmt.Fprintf(&str, "%8s%10.6f\n",
+			fmt.Sprintf("B_%d", a), res.Rots[a][0])
+		fmt.Fprintf(&str, "%8s%10.6f\n",
+			fmt.Sprintf("C_%d", a), res.Rots[a][1])
+	}
+	return &Table{
+		Caption:   "ABC (cm-1)",
+		Alignment: "cc",
+		Header:    fmt.Sprintf("%8s%10s\n", "Constant", "Value"),
+		Body:      str.String(),
+	}
+}
+
+func makeDeltas(res *summarize.Result) *Table {
+	var str strings.Builder
+	for d := range res.Deltas {
+		fmt.Fprintf(&str, "%8s%15.3f%15.3f%15.3f%15.3f%18.3f\n",
+			DeltaOrder[d], res.Deltas[d]/1e3, res.Deltas[d],
+			res.Deltas[d]*1e3, res.Deltas[d]*1e6, res.Deltas[d]*1e9)
+	}
+	return &Table{
+		Caption:   "Deltas",
+		Alignment: "cccccc",
+		Header: fmt.Sprintf("%8s%15s%15s%15s%15s%18s\n",
+			"", "GHz", "MHz", "kHz", "Hz", "mHz"),
+		Body: str.String(),
+	}
+}
+
+func makePhis(res *summarize.Result) *Table {
+	var str strings.Builder
+	for p := range res.Phis {
+		fmt.Fprintf(&str, "%8s%15.3f%15.3f%15.3f%15.3f%18.3f\n",
+			PhiOrder[p], res.Phis[p]/1e3, res.Phis[p],
+			res.Phis[p]*1e3, res.Phis[p]*1e6, res.Phis[p]*1e9)
+	}
+	return &Table{
+		Caption:   "Phis",
+		Alignment: "cccccc",
+		Header: fmt.Sprintf("%8s%15s%15s%15s%15s%18s\n",
+			"", "kHz", "Hz", "mHz", "uHz", "nHz"),
+		Body: str.String(),
+	}
+}
+
+func makeGeom(res *summarize.Result) *Table {
+	var str strings.Builder
 	for g := range res.Requil {
-		fmt.Fprintf(out, "%15s%15.7f%15.7f\n", res.Rhead[g], res.Requil[g], res.Ralpha[g])
+		fmt.Fprintf(&str, "%15s%15.7f%15.7f\n", res.Rhead[g],
+			res.Requil[g], res.Ralpha[g])
+	}
+	return &Table{
+		Caption:   "Geom (A or Deg)",
+		Alignment: "ccc",
+		Header: fmt.Sprintf("%15s%15s%15s\n",
+			"COORD", "R(EQUIL)", "R(ALPHA)"),
+		Body: str.String(),
 	}
 }
 
@@ -92,11 +124,11 @@ func makeFermi(res *summarize.Result) *Table {
 }
 
 func printAll(out io.Writer, res *summarize.Result) {
-	printFreqs(out, res)
-	printABC(out, res)
-	printDeltas(out, res)
-	printPhis(out, res)
-	printGeom(out, res)
+	t.Execute(out, makeFreqs(res))
+	t.Execute(out, makeABC(res))
+	t.Execute(out, makeDeltas(res))
+	t.Execute(out, makePhis(res))
+	t.Execute(out, makeGeom(res))
 	t.Execute(out, makeFermi(res))
 }
 

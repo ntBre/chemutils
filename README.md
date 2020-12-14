@@ -28,3 +28,4 @@ SPECTRO is supported.
 * Implement -org flag
 * Support ANPASS
 * Support INTDER
+* Make tables from multiple input files
