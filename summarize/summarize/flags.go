@@ -27,12 +27,6 @@ func parseFlags() []string {
 		flag.PrintDefaults()
 	}
 	flag.Parse()
-	if *plain {
-		upperDelta = "Delta"
-		lowerDelta = "delta"
-		upperPhi = "Phi"
-		lowerPhi = "phi"
-	}
 	initConst()
 	return flag.Args()
 }
