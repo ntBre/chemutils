@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"strconv"
 
 	"bytes"
+
+	"text/template"
 
 	"github.com/ntBre/chemutils/summarize"
 )
@@ -15,6 +18,7 @@ import (
 var (
 	DeltaOrder []string
 	PhiOrder   []string
+	t          *template.Template
 )
 
 func colPrint(format string, cols ...[]float64) string {
@@ -75,10 +79,15 @@ func printGeom(out io.Writer, res *summarize.Result) {
 	}
 }
 
-func printFermi(out io.Writer, res *summarize.Result) {
-	fmt.Fprintln(out, "Fermi Resonances:")
+func makeFermi(res *summarize.Result) *Table {
+	var str strings.Builder
 	for r := range res.Fermi {
-		fmt.Fprintln(out, res.Fermi[r])
+		fmt.Fprintln(&str, res.Fermi[r])
+	}
+	return &Table{
+		Caption:   "Fermi Resonances",
+		Alignment: "c",
+		Body:      str.String(),
 	}
 }
 
@@ -88,7 +97,7 @@ func printAll(out io.Writer, res *summarize.Result) {
 	printDeltas(out, res)
 	printPhis(out, res)
 	printGeom(out, res)
-	printFermi(out, res)
+	t.Execute(out, makeFermi(res))
 }
 
 func main() {

@@ -7,12 +7,8 @@ type Table struct {
 	Body      string
 }
 
-func NewTable(caption string) *Table {
-	return &Table{Caption: caption}
-}
-
 const (
-	tabTemplate = `\begin{table}[ht]
+	texTemplate = `\begin{table}[ht]
 \centering
 \caption{{{.Caption}}}
 \begin{tabular}{{{.Alignment}}}
@@ -22,4 +18,6 @@ const (
 \end{tabular}
 \end{table}
 `
+	plainTemplate = `{{.Caption}}:
+{{.Body}}`
 )

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"text/template"
 )
 
 func initConst() {
@@ -12,6 +13,7 @@ func initConst() {
 			"plain", "tex")
 		os.Exit(1)
 	} else if *plain {
+		t = template.Must(template.New("p").Parse(plainTemplate))
 		DeltaOrder = []string{
 			"Delta_J ",
 			"Delta_K ",
@@ -46,6 +48,7 @@ func initConst() {
 			"$\\phi{_k }$",
 		}
 	} else {
+		t = template.Must(template.New("p").Parse(plainTemplate))
 		var (
 			upperDelta = "\u0394"
 			lowerDelta = "\u03B4"
