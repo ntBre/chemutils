@@ -16,7 +16,8 @@ Flags:
 )
 
 var (
-	tex = flag.Bool("tex", false, "output summary in TeX table format")
+	tex   = flag.Bool("tex", false, "output summary in TeX table format")
+	plain = flag.Bool("plain", false, "disable Unicode characters in txt output")
 )
 
 func parseFlags() []string {
@@ -26,5 +27,12 @@ func parseFlags() []string {
 		flag.PrintDefaults()
 	}
 	flag.Parse()
+	if *plain {
+		upperDelta = "Delta"
+		lowerDelta = "delta"
+		upperPhi = "Phi"
+		lowerPhi = "phi"
+	}
+	initConst()
 	return flag.Args()
 }

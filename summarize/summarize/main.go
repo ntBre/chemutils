@@ -12,15 +12,19 @@ import (
 )
 
 // unicode characters
-const (
+var (
 	upperDelta = "\u0394"
 	lowerDelta = "\u03B4"
 	upperPhi   = "\u03A6"
 	lowerPhi   = "\u03C6"
 )
 
-// Exported variables
 var (
+	DeltaOrder []string
+	PhiOrder []string
+)
+
+func initConst() {
 	DeltaOrder = []string{
 		upperDelta + "_J ",
 		upperDelta + "_K ",
@@ -37,7 +41,7 @@ var (
 		lowerPhi + "_jk",
 		lowerPhi + "_k ",
 	}
-)
+}
 
 func colPrint(format string, cols ...[]float64) string {
 	var buf bytes.Buffer
