@@ -15,6 +15,29 @@ import (
 	"strings"
 )
 
+var (
+	upperDelta = "\u0394"
+	lowerDelta = "\u03B4"
+	upperPhi   = "\u03A6"
+	lowerPhi   = "\u03C6"
+	DeltaOrder = []string{
+		upperDelta + "_J ",
+		upperDelta + "_K ",
+		upperDelta + "_JK",
+		lowerDelta + "_J ",
+		lowerDelta + "_K ",
+	}
+	PhiOrder = []string{
+		upperPhi + "_J ",
+		upperPhi + "_K ",
+		upperPhi + "_JK",
+		upperPhi + "_KJ",
+		lowerPhi + "_j ",
+		lowerPhi + "_jk",
+		lowerPhi + "_k ",
+	}
+)
+
 type Result struct {
 	ZPT    float64
 	Harm   []float64
