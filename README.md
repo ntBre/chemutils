@@ -25,6 +25,9 @@ SPECTRO is supported.
 
 ### TODO
 * Implement -tex flag
+  * Still need document header and footer
+    * Flag to disable?
+  * Still need delimiters
 * Implement -org flag
 * Support ANPASS
 * Support INTDER

@@ -31,7 +31,7 @@ func initConst() {
 			"phi_k ",
 		}
 	} else if *tex {
-		t = template.Must(template.New("p").Parse(texTemplate))
+		t = template.Must(template.New("p").Delims("<", ">").Parse(texTemplate))
 		DeltaOrder = []string{
 			"$\\Delta_{J }$",
 			"$\\Delta_{K }$",
@@ -40,13 +40,13 @@ func initConst() {
 			"$\\delta_{K }$",
 		}
 		PhiOrder = []string{
-			"$\\Phi{_J }$",
-			"$\\Phi{_K }$",
-			"$\\Phi{_JK}$",
-			"$\\Phi{_KJ}$",
-			"$\\phi{_j }$",
-			"$\\phi{_jk}$",
-			"$\\phi{_k }$",
+			"$\\Phi_{J }$",
+			"$\\Phi_{K }$",
+			"$\\Phi_{JK}$",
+			"$\\Phi_{KJ}$",
+			"$\\phi_{j }$",
+			"$\\phi_{jk}$",
+			"$\\phi_{k }$",
 		}
 	} else {
 		t = template.Must(template.New("p").Parse(plainTemplate))

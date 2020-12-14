@@ -10,15 +10,21 @@ type Table struct {
 const (
 	texTemplate = `\begin{table}[ht]
 \centering
-\caption{{{.Caption}}}
-\begin{tabular}{{{.Alignment}}}
-{{.Header}}
+\caption{<.Caption>}
+\begin{tabular}{<.Alignment>}
+<if .Header ->
+<.Header>
 \hline
-{{.Body}}
+<end ->
+<.Body>
 \end{tabular}
 \end{table}
+
 `
+
 	plainTemplate = `{{.Caption}}:
-{{if .Header -}} {{.Header}} {{- end -}}
+{{if .Header -}}
+{{.Header}}
+{{end -}}
 {{.Body}}`
 )
