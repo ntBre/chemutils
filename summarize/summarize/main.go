@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
@@ -12,25 +11,33 @@ import (
 	"github.com/ntBre/chemutils/summarize"
 )
 
+// unicode characters
 const (
-	help = `summarize is a tool for summarizing output from quantum chemistry
-programs. Currently supported programs are
-- spectro
-Usage:
-$ summarize <filename> <nfreqs>
-Flags:
-`
+	upperDelta = "\u0394"
+	lowerDelta = "\u03B4"
+	upperPhi   = "\u03A6"
+	lowerPhi   = "\u03C6"
 )
 
-func parseFlags() []string {
-	flag.Usage = func() {
-		fmt.Fprintf(flag.CommandLine.Output(),
-			"%s", help)
-		flag.PrintDefaults()
+// Exported variables
+var (
+	DeltaOrder = []string{
+		upperDelta + "_J ",
+		upperDelta + "_K ",
+		upperDelta + "_JK",
+		lowerDelta + "_J ",
+		lowerDelta + "_K ",
 	}
-	flag.Parse()
-	return flag.Args()
-}
+	PhiOrder = []string{
+		upperPhi + "_J ",
+		upperPhi + "_K ",
+		upperPhi + "_JK",
+		upperPhi + "_KJ",
+		lowerPhi + "_j ",
+		lowerPhi + "_jk",
+		lowerPhi + "_k ",
+	}
+)
 
 func colPrint(format string, cols ...[]float64) string {
 	var buf bytes.Buffer
@@ -84,13 +91,13 @@ func main() {
 	// TODO flag to disable unicode output?
 	for d := range deltas {
 		fmt.Printf("%s%15.3f%15.3f%15.3f%15.3f%15.3f\n",
-			summarize.DeltaOrder[d], deltas[d]/1e3, deltas[d],
+			DeltaOrder[d], deltas[d]/1e3, deltas[d],
 			deltas[d]*1e3, deltas[d]*1e6, deltas[d]*1e9)
 	}
 	fmt.Println("Phis (kHz Hz mHz uHz nHz):")
 	for p := range phis {
 		fmt.Printf("%s%15.3f%15.3f%15.3f%15.3f%15.3f\n",
-			summarize.PhiOrder[p], phis[p]/1e3, phis[p],
+			PhiOrder[p], phis[p]/1e3, phis[p],
 			phis[p]*1e3, phis[p]*1e6, phis[p]*1e9)
 	}
 	fmt.Println("Geom (A or Deg):")
