@@ -11,3 +11,9 @@ func TestColPrint(t *testing.T) {
 		t.Errorf("got %v, wanted %v\n", got, want)
 	}
 }
+
+func TestOutput(t *testing.T) {
+	if got != want {
+		t.Errorf("got %v, wanted %v\n", got, want)
+	}
+}

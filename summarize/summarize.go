@@ -15,16 +15,25 @@ import (
 	"strings"
 )
 
+type Result struct {
+	ZPT    float64
+	Harm   []float64
+	Fund   []float64
+	Corr   []float64
+	Rots   [][]float64
+	Deltas []float64
+	Phis   []float64
+	Rhead  []string
+	Ralpha []float64
+	Requil []float64
+	Fermi  []string
+}
+
 // FreqReport gathers harmonic, anharmonic, and resonance-corrected
 // frequencies from a spectro  output file for reporting
-func Spectro(filename string, nfreqs int) (zpt float64,
-	harm, fund, corr []float64,
-	rotABC [][]float64,
-	deltas, phis []float64,
-	rEquil, rAlpha []float64,
-	rHeaders, fermi []string) {
-
-	corr = make([]float64, nfreqs, nfreqs)
+func Spectro(filename string, nfreqs int) *Result {
+	res := new(Result)
+	res.Corr = make([]float64, nfreqs, nfreqs)
 	fermiMap := make(map[string][]string)
 	f, err := os.Open(filename)
 	if err != nil {
@@ -65,8 +74,8 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 			if freq.MatchString(fields[0]) {
 				h, _ := strconv.ParseFloat(fields[1], 64)
 				f, _ := strconv.ParseFloat(fields[2], 64)
-				harm = append(harm, h)
-				fund = append(fund, f)
+				res.Harm = append(res.Harm, h)
+				res.Fund = append(res.Fund, f)
 				freqs--
 			}
 			if freqs == 0 {
@@ -81,11 +90,11 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 				freq.MatchString(fields[0]) {
 				state, _ := strconv.Atoi(fields[0])
 				if state == 1 {
-					zpt, _ = strconv.ParseFloat(fields[1], 64)
+					res.ZPT, _ = strconv.ParseFloat(fields[1], 64)
 					freqs--
 				} else if state <= nfreqs+1 {
 					f, _ := strconv.ParseFloat(fields[2], 64)
-					corr[state-2] = f
+					res.Corr[state-2] = f
 					freqs--
 				}
 			}
@@ -112,14 +121,14 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 				}
 				tmp = append(tmp, v)
 			}
-			rotABC = append(rotABC, tmp)
+			res.Rots = append(res.Rots, tmp)
 		case delta.MatchString(line):
 			// order is DELTA J, K, JK, delta J, K
 			// in MHz
 			fields := strings.Fields(line)
 			f, _ := strconv.ParseFloat(fields[len(fields)-1],
 				64)
-			deltas = append(deltas, f)
+			res.Deltas = append(res.Deltas, f)
 		case phi.MatchString(line):
 			// order is PHI J, K, JK, KJ, phi j, jk, k
 			// in Hz
@@ -128,9 +137,9 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 			fields := strings.Fields(line)
 			f, _ := strconv.ParseFloat(fields[len(fields)-1],
 				64)
-			phis = append(phis, f)
+			res.Phis = append(res.Phis, f)
 		case strings.Contains(line, "INT COORD TYPE") &&
-			!geom && rEquil == nil:
+			!geom && res.Requil == nil:
 			geom = true
 			skip++
 		case geom && !strings.Contains(line, "LINEAR"):
@@ -141,8 +150,8 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 			fields := strings.Fields(line)
 			e, _ := strconv.ParseFloat(fields[2], 64)
 			a, _ := strconv.ParseFloat(fields[4], 64)
-			rEquil = append(rEquil, e)
-			rAlpha = append(rAlpha, a)
+			res.Requil = append(res.Requil, e)
+			res.Ralpha = append(res.Ralpha, a)
 		case icn.MatchString(line):
 			// Torsions do not appear in r(equil|alpha) part so
 			// neglect here as well
@@ -157,7 +166,7 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 				}
 			}
 			fmt.Fprint(&buf, ")")
-			rHeaders = append(rHeaders, buf.String())
+			res.Rhead = append(res.Rhead, buf.String())
 			buf.Reset()
 		case strings.Contains(line, "FERMI RESONANCE   "):
 			skip += 3
@@ -195,8 +204,8 @@ func Spectro(filename string, nfreqs int) (zpt float64,
 			fmt.Fprintf(&buf, "%s = ", r)
 		}
 		fmt.Fprintf(&buf, "v_%s", k)
-		fermi = append(fermi, buf.String())
+		res.Fermi = append(res.Fermi, buf.String())
 		buf.Reset()
 	}
-	return
+	return res
 }
