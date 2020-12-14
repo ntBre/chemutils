@@ -25,7 +25,7 @@ func TestPrintResult(t *testing.T) {
 	res := summarize.Spectro("testfiles/spectro.out", 6)
 	truefile := "testfiles/summary.txt"
 	var got bytes.Buffer
-	printResult(&got, res)
+	printAll(&got, res)
 	want, _ := ioutil.ReadFile(truefile)
 	if !reflect.DeepEqual(got.Bytes(), want) {
 		t.Errorf("got %v, wanted %v\n", got.String(), string(want))

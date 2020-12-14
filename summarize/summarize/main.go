@@ -28,7 +28,7 @@ func colPrint(format string, cols ...[]float64) string {
 	return buf.String()
 }
 
-func printResult(out io.Writer, res *summarize.Result) {
+func printAll(out io.Writer, res *summarize.Result) {
 	fmt.Fprintf(out, "ZPT (cm-1): %.1f\n", res.ZPT)
 	// TODO flag for specifying width and probably precision too
 	// TODO flag for org, tex format
@@ -87,5 +87,5 @@ func main() {
 		os.Exit(1)
 	}
 	res := summarize.Spectro(filename, nfreqs)
-	printResult(os.Stdout, res)
+	printAll(os.Stdout, res)
 }
