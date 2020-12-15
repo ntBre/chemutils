@@ -201,7 +201,7 @@ func Spectro(filename string, nfreqs int) *Result {
 	sort.Strings(sorter)
 	for _, k := range sorter {
 		for _, r := range fermiMap[k] {
-			fmt.Fprintf(&buf, "%s = ", r)
+			fmt.Fprintf(&buf, "%s=", r)
 		}
 		fmt.Fprintf(&buf, "v_%s", k)
 		res.Fermi = append(res.Fermi, buf.String())

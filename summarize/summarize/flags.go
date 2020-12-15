@@ -16,8 +16,9 @@ Flags:
 )
 
 var (
-	tex   = flag.Bool("tex", false, "output summary in TeX table format")
-	plain = flag.Bool("plain", false, "disable Unicode characters in txt output")
+	tex    = flag.Bool("tex", false, "output summary in TeX table format")
+	plain  = flag.Bool("plain", false, "disable Unicode characters in txt output")
+	nohead = flag.Bool("nohead", false, "disable printing of header info for TeX output")
 )
 
 func parseFlags() []string {

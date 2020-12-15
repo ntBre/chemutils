@@ -18,12 +18,14 @@ import (
 var (
 	DeltaOrder []string
 	PhiOrder   []string
+	ABC        = []string{"A_%d", "B_%d", "C_%d"}
 	t          *template.Template
 )
 
 func colPrint(format string, cols ...[]float64) string {
 	var buf bytes.Buffer
 	for i := range cols[0] {
+		fmt.Fprintf(&buf, "%5d", i+1)
 		for j := range cols {
 			fmt.Fprintf(&buf, format, cols[j][i])
 		}
@@ -42,8 +44,8 @@ func makeFreqs(res *summarize.Result) *Table {
 	fmt.Fprint(&str, colPrint("%8.1f", res.Harm, res.Fund, res.Corr))
 	return &Table{
 		Caption:   fmt.Sprintf("Freqs, ZPT=%.1f (cm-1)", res.ZPT),
-		Alignment: "ccc",
-		Header:    fmt.Sprintf("%8s%8s%8s", "HARM", "FUND", "CORR"),
+		Alignment: "crrr",
+		Header:    fmt.Sprintf("%5s%8s%8s%8s", "Mode", "HARM", "FUND", "CORR"),
 		Body:      str.String(),
 	}
 }
@@ -52,11 +54,11 @@ func makeABC(res *summarize.Result) *Table {
 	var str strings.Builder
 	for a := range res.Rots {
 		fmt.Fprintf(&str, "%8s%10.6f\n",
-			fmt.Sprintf("A_%d", a), res.Rots[a][2])
+			fmt.Sprintf(ABC[0], a), res.Rots[a][2])
 		fmt.Fprintf(&str, "%8s%10.6f\n",
-			fmt.Sprintf("B_%d", a), res.Rots[a][0])
+			fmt.Sprintf(ABC[1], a), res.Rots[a][0])
 		fmt.Fprintf(&str, "%8s%10.6f",
-			fmt.Sprintf("C_%d", a), res.Rots[a][1])
+			fmt.Sprintf(ABC[2], a), res.Rots[a][1])
 		if a != len(res.Rots)-1 {
 			fmt.Fprint(&str, "\n")
 		}
@@ -81,9 +83,9 @@ func makeDeltas(res *summarize.Result) *Table {
 	}
 	return &Table{
 		Caption:   "Deltas",
-		Alignment: "cccccc",
+		Alignment: "lrrrrr",
 		Header: fmt.Sprintf("%8s%15s%15s%15s%15s%18s",
-			"", "GHz", "MHz", "kHz", "Hz", "mHz"),
+			"Constant", "GHz", "MHz", "kHz", "Hz", "mHz"),
 		Body: str.String(),
 	}
 }
@@ -100,9 +102,9 @@ func makePhis(res *summarize.Result) *Table {
 	}
 	return &Table{
 		Caption:   "Phis",
-		Alignment: "cccccc",
+		Alignment: "lrrrrr",
 		Header: fmt.Sprintf("%8s%15s%15s%15s%15s%18s",
-			"", "kHz", "Hz", "mHz", "uHz", "nHz"),
+			"Constant", "kHz", "Hz", "mHz", "uHz", "nHz"),
 		Body: str.String(),
 	}
 }
@@ -118,7 +120,7 @@ func makeGeom(res *summarize.Result) *Table {
 	}
 	return &Table{
 		Caption:   "Geom (A or Deg)",
-		Alignment: "ccc",
+		Alignment: "rrr",
 		Header: fmt.Sprintf("%15s%15s%15s",
 			"COORD", "R(EQUIL)", "R(ALPHA)"),
 		Body: str.String(),
@@ -167,5 +169,11 @@ func main() {
 		os.Exit(1)
 	}
 	res := summarize.Spectro(filename, nfreqs)
+	if *tex && !*nohead {
+		fmt.Print("\\documentclass{article}\n\\begin{document}\n\n")
+	}
 	printAll(os.Stdout, res)
+	if *tex && !*nohead {
+		fmt.Print("\\end{document}\n")
+	}
 }
