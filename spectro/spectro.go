@@ -359,19 +359,11 @@ func RunSpectro(filename string) (err error) {
 	if err != nil {
 		return fmt.Errorf("stdin: %w", err)
 	}
+	cmd.Stdout, err = os.Create(filepath.Join(cmd.Dir, file+".out"))
 	if err != nil {
 		return fmt.Errorf("stdout: %w", err)
 	}
-	outfile, err := os.Create(filepath.Join(cmd.Dir, file+".out"))
-	if err != nil {
-		return err
-	}
-	cmd.Stdout = outfile
-	err = cmd.Run()
-	if err != nil {
-		return err
-	}
-	return nil
+	return cmd.Run()
 }
 
 // UpdateHeader turns on resonance accounting if the resonance fields
