@@ -46,3 +46,11 @@ to disable the Unicode characters in the Delta and Phi output.
 ### TODO
 * Implement -org flag
 * Make tables from multiple input files
+
+## spectro
+
+spectro is a library for actually running SPECTRO. Eventually it will
+also be a standalone executable wrapping the Fortran version of
+SPECTRO.
+
+
