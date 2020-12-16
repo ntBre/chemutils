@@ -31,9 +31,8 @@ type Result struct {
 
 // FreqReport gathers harmonic, anharmonic, and resonance-corrected
 // frequencies from a spectro  output file for reporting
-func Spectro(filename string, nfreqs int) *Result {
+func Spectro(filename string) *Result {
 	res := new(Result)
-	res.Corr = make([]float64, nfreqs, nfreqs)
 	fermiMap := make(map[string][]string)
 	f, err := os.Open(filename)
 	if err != nil {
@@ -42,10 +41,16 @@ func Spectro(filename string, nfreqs int) *Result {
 	defer f.Close()
 	scanner := bufio.NewScanner(f)
 	var (
-		line     string
-		skip     int
-		freqs    int
-		nrot     int
+		line   string
+		fields []string
+		skip   int
+		corr     bool
+		holdFreq float64
+		holdZPT  float64
+		pos      int
+		state    []string
+		good     bool
+		one      bool
 		harmFund bool
 		rot      bool
 		geom     bool
@@ -62,57 +67,82 @@ func Spectro(filename string, nfreqs int) *Result {
 	atom := regexp.MustCompile(`([0-9]+)\(([A-Za-z ]+)\)`)
 	for scanner.Scan() {
 		line = scanner.Text()
+		fields = strings.Fields(line)
 		switch {
 		case skip > 0:
 			skip--
 		case strings.Contains(line, "BAND CENTER ANALYSIS"):
 			skip += 3
-			freqs = nfreqs
 			harmFund = true
-		case harmFund && freqs > 0 && len(line) > 1:
-			fields := strings.Fields(line)
-			if freq.MatchString(fields[0]) {
+		case harmFund && len(line) > 1:
+			if strings.Contains(line, "DUNHAM") {
+				harmFund = false
+			} else if freq.MatchString(fields[0]) && len(fields) > 2 {
 				h, _ := strconv.ParseFloat(fields[1], 64)
 				f, _ := strconv.ParseFloat(fields[2], 64)
 				res.Harm = append(res.Harm, h)
 				res.Fund = append(res.Fund, f)
-				freqs--
-			}
-			if freqs == 0 {
-				harmFund = false
 			}
 		case strings.Contains(line, "STATE NO."):
 			skip += 2
-			freqs = nfreqs + 1 // add ZPT
-		case !harmFund && freqs > 0 && len(line) > 1:
-			fields := strings.Fields(line)
-			if strings.Contains(line, "NON-DEG") &&
-				freq.MatchString(fields[0]) {
-				state, _ := strconv.Atoi(fields[0])
-				if state == 1 {
-					res.ZPT, _ = strconv.ParseFloat(fields[1], 64)
-					freqs--
-				} else if state <= nfreqs+1 {
-					f, _ := strconv.ParseFloat(fields[2], 64)
-					res.Corr[state-2] = f
-					freqs--
+			corr = true
+		case corr && strings.Contains(line, "*******************"):
+			corr = false
+			good = true
+		case corr && strings.Contains(line, "NON-DEG"):
+			// need to grab freq, then check if the next line
+			// contains more state info before appending
+			holdZPT, _ = strconv.ParseFloat(fields[1], 64)
+			holdFreq, _ = strconv.ParseFloat(fields[2], 64)
+			pos, _ = strconv.Atoi(fields[0])
+			state = nil
+			good = true
+			one = false
+			for _, f := range fields[6:] {
+				// if there's a 2 or a second one it's bad
+				if f == "2" || (one && f == "1") {
+					good = false
+					break
+				} else if f == "1" {
+					one = true
 				}
+				state = append(state, f)
+			}
+		case corr && len(fields) > 0:
+			for _, f := range fields {
+				if f == "2" || (one && f == "1") {
+					good = false
+					break
+				} else if f == "1" {
+					one = true
+				}
+				state = append(state, f)
+			}
+		case corr && len(fields) == 0 && good:
+			if !one {
+				res.ZPT = holdZPT
+			} else {
+				for pos-2 >= len(res.Corr) {
+					res.Corr = append(res.Corr, 0)
+				}
+				res.Corr[pos-2] = holdFreq
 			}
 		case strings.Contains(line, "NON-DEG(Vt)"):
-			if nrot < nfreqs+1 { /* include 0th */
-				if nfreqs > 10 { /* two lines of NON-DEG(Vt) if > 10 */
-					skip += 7
-				} else {
-					skip += 3
+			for _, f := range fields[2:] {
+				if f == "2" || (one && f == "1") {
+					good = false
+					break
+				} else if f == "1" {
+					one = true
 				}
-				rot = true
-				nrot++
+				state = append(state, f)
 			}
-		case rot:
-			// order is A0 -> An
-			// in cm-1
+		case good && strings.Contains(line, "BZA"):
+			rot = true
+		case rot && good:
+			state = nil
 			rot = false
-			fields := strings.Fields(line)
+			one = false
 			tmp := make([]float64, 0, 3)
 			for f := range fields {
 				v, err := strconv.ParseFloat(fields[f], 64)

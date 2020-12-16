@@ -6,8 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"strconv"
-
 	"bytes"
 
 	"text/template"
@@ -153,7 +151,7 @@ func printAll(out io.Writer, res *summarize.Result) {
 
 func main() {
 	args := parseFlags()
-	if len(args) < 2 {
+	if len(args) < 1 {
 		fmt.Fprintln(os.Stderr, "summarize: not enough arguments")
 		os.Exit(1)
 	}
@@ -163,12 +161,7 @@ func main() {
 			filename)
 		os.Exit(1)
 	}
-	nfreqs, err := strconv.Atoi(args[1])
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "summarize: %v\n", err)
-		os.Exit(1)
-	}
-	res := summarize.Spectro(filename, nfreqs)
+	res := summarize.Spectro(filename)
 	if *tex && !*nohead {
 		fmt.Print("\\documentclass{article}\n\\begin{document}\n\n")
 	}

@@ -266,28 +266,32 @@ func TestSpectro(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		got := *Spectro(test.file, test.nfreq)
+		got := *Spectro(test.file)
 		if !reflect.DeepEqual(got, test.res) {
 			if !reflect.DeepEqual(got.ZPT, test.res.ZPT) {
-				t.Error("zpt")
+				t.Errorf("got %v, wanted %v\n", got.ZPT, test.res.ZPT)
 			}
 			if !reflect.DeepEqual(got.Harm, test.res.Harm) {
-				t.Error("harm")
+				t.Errorf("got %v, wanted %v\n", got.Harm, test.res.Harm)
 			}
 			if !reflect.DeepEqual(got.Fund, test.res.Fund) {
 				t.Error("fund")
 			}
 			if !reflect.DeepEqual(got.Corr, test.res.Corr) {
-				t.Error("corr")
+				t.Errorf("got %v, wanted %v\n", got.Corr, test.res.Corr)
 			}
 			if !reflect.DeepEqual(got.Rots, test.res.Rots) {
 				// check manually to handle NaN
-				for i := range got.Rots {
-					for j := range got.Rots[i] {
-						// not equal and both are non-NaN
-						if got.Rots[i][j] != test.res.Rots[i][j] &&
-							!(math.IsNaN(got.Rots[i][j]) && math.IsNaN(test.res.Rots[i][j])) {
-							t.Errorf("got %v, wanted %v\n", got.Rots, test.res.Rots)
+				if len(got.Rots) != len(test.res.Rots) {
+					t.Errorf("got %v, wanted %v\n", got.Rots, test.res.Rots)
+				} else {
+					for i := range got.Rots {
+						for j := range got.Rots[i] {
+							// not equal and both are non-NaN
+							if got.Rots[i][j] != test.res.Rots[i][j] &&
+								!(math.IsNaN(got.Rots[i][j]) && math.IsNaN(test.res.Rots[i][j])) {
+								t.Errorf("got %v, wanted %v\n", got.Rots, test.res.Rots)
+							}
 						}
 					}
 				}

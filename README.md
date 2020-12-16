@@ -30,12 +30,11 @@ program that formats it nicely.
 
 ### Usage
 
-summarize takes the SPECTRO output file as its first argument and the
-expected number of frequencies as its second argument. For the example
-in testfiles:
+summarize takes the SPECTRO output file as its first argument. For the
+example in testfiles:
 
 ```
-$ summarize spectro.out 6
+$ summarize spectro.out
 ```
 
 will write the text output to stdout. The `-tex` flag will convert the

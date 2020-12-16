@@ -28,7 +28,7 @@ func TestColPrint(t *testing.T) {
 
 func TestPrintResult(t *testing.T) {
 	initConst()
-	res := summarize.Spectro("testfiles/spectro.out", 6)
+	res := summarize.Spectro("testfiles/spectro.out")
 	truefile := "testfiles/summary.txt"
 	var got bytes.Buffer
 	printAll(&got, res)
@@ -58,7 +58,7 @@ func TestTex(t *testing.T) {
 		*tex = hold
 		texfile.Close()
 	}()
-	res := summarize.Spectro("testfiles/spectro.out", 6)
+	res := summarize.Spectro("testfiles/spectro.out")
 	fmt.Fprint(texfile, "\\documentclass{article}\n\\begin{document}\n\n")
 	printAll(texfile, res)
 	fmt.Fprint(texfile, "\\end{document}\n")
