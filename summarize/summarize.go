@@ -41,9 +41,9 @@ func Spectro(filename string) *Result {
 	defer f.Close()
 	scanner := bufio.NewScanner(f)
 	var (
-		line   string
-		fields []string
-		skip   int
+		line     string
+		fields   []string
+		skip     int
 		corr     bool
 		holdFreq float64
 		holdZPT  float64
@@ -209,12 +209,12 @@ func Spectro(filename string) *Result {
 			// just set them both instead of checking
 			fermi1 = false
 			fermi2 = false
-		case fermi1:
+		case fermi1 && !strings.Contains(line, "NOT FOUND"):
 			fields := strings.Fields(line)
 			key := fields[3]
 			fermiMap[key] = append(fermiMap[key],
 				fmt.Sprintf("2v_%s", fields[1]))
-		case fermi2:
+		case fermi2 && !strings.Contains(line, "NOT FOUND"):
 			fields := strings.Fields(line)
 			key := fields[3]
 			fermiMap[key] = append(fermiMap[key],

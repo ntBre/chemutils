@@ -8,13 +8,11 @@ import (
 
 func TestSpectro(t *testing.T) {
 	tests := []struct {
-		file  string
-		nfreq int
-		res   Result
+		file string
+		res  Result
 	}{
 		{
-			file:  "testfiles/long.spectro.out",
-			nfreq: 12,
+			file: "testfiles/long.spectro.out",
 			res: Result{
 				ZPT: 11096.158700,
 				Harm: []float64{3248.349, 3222.482, 3155.97,
@@ -55,8 +53,7 @@ func TestSpectro(t *testing.T) {
 			},
 		},
 		{
-			file:  "testfiles/spectro.out",
-			nfreq: 6,
+			file: "testfiles/spectro.out",
 			res: Result{
 				ZPT: 4682.2527,
 				Harm: []float64{3811.360, 2337.700, 1267.577,
@@ -104,8 +101,7 @@ func TestSpectro(t *testing.T) {
 			},
 		},
 		{
-			file:  "testfiles/bn.spectro.out",
-			nfreq: 18,
+			file: "testfiles/bn.spectro.out",
 			res: Result{
 				ZPT: 15183.1168,
 				Harm: []float64{
@@ -203,8 +199,7 @@ func TestSpectro(t *testing.T) {
 			},
 		},
 		{
-			file:  "testfiles/jax.prob.out",
-			nfreq: 9,
+			file: "testfiles/jax.prob.out",
 			res: Result{
 				ZPT: 6847.4520,
 				Harm: []float64{
@@ -264,6 +259,68 @@ func TestSpectro(t *testing.T) {
 				},
 			},
 		},
+		{
+			file: "testfiles/nofermi2.out",
+			res: Result{
+				ZPT: 6974.5686,
+				Harm: []float64{
+					3281.244, 3247.542, 1623.324,
+					1307.596, 1090.695, 992.978,
+					908.490, 901.527, 785.379,
+				},
+				Fund: []float64{
+					3140.115, 3113.252, 1589.153,
+					1273.128, 1059.592, 967.523,
+					887.009, 845.919, 769.511,
+				},
+				Corr: []float64{
+					3128.0166, 3113.2520, 1590.4451,
+					1273.1281, 1059.5924, 967.5230,
+					887.0092, 845.9192, 769.5109,
+				},
+				Rots: [][]float64{
+					[]float64{1.0938807, 0.5645509, 1.1728388},
+					[]float64{1.1019479, 0.5662932, 1.1708971},
+					[]float64{1.1015505, 0.5662303, 1.1709113},
+					[]float64{1.1082936, 0.5680195, 1.1731129},
+					[]float64{1.0962916, 0.5658264, 1.1697352},
+					[]float64{1.0971252, 0.5605153, 1.1683363},
+					[]float64{1.0890950, 0.5648179, 1.1737299},
+					[]float64{1.0942300, 0.5618767, 1.1711949},
+					[]float64{1.0935530, 0.5641348, 1.1748108},
+					[]float64{1.0877676, 0.5637609, 1.1683857},
+				},
+				Deltas: []float64{
+					0.0452918791, -0.0314863134,
+					0.1330975467, 0.0140192418,
+					0.0763005051,
+				},
+				Phis: []float64{
+					0.2976480237E+00, 0.5011295115E+01, 0.1221389490E+01,
+					-0.5534684999E+01, 0.2248273880E+00, 0.1403699085E+01,
+					-0.7512823561E-01,
+				},
+				Requil: []float64{
+					1.3215820, 1.4160153, 1.4160153,
+					1.0748590, 1.0748590, 147.7726162,
+					147.7726162,
+				},
+				Ralpha: []float64{
+					1.3151069, 1.4204888, 1.4204890,
+					1.0743545, 1.0743537, 147.6296447,
+					147.6296238,
+				},
+				Rhead: []string{
+					"r(C2-C3)", "r(C1-C2)", "r(C1-C3)",
+					"r(C2-H4)", "r(C3-H5)", "<(C2-H4-C1)",
+					"<(C3-H5-C1)",
+				},
+				Fermi: []string{
+					"2v_3=v_1",
+					"2v_7=2v_8=2v_9=v_3",
+				},
+			},
+		},
 	}
 	for _, test := range tests {
 		got := *Spectro(test.file)
@@ -312,7 +369,8 @@ func TestSpectro(t *testing.T) {
 				t.Error("requil")
 			}
 			if !reflect.DeepEqual(got.Fermi, test.res.Fermi) {
-				t.Error("fermi")
+				t.Errorf("fermi:\ngot %v, wanted %v\n",
+					got.Fermi, test.res.Fermi)
 			}
 		}
 	}

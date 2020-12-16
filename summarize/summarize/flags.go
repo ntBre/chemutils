@@ -10,7 +10,7 @@ const (
 programs. Currently supported programs are
 - spectro
 Usage:
-$ summarize <filename> <nfreqs>
+$ summarize <filename>
 Flags:
 `
 )
