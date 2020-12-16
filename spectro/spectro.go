@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -96,7 +97,7 @@ func (s *Spectro) FormatGeom(names []string, coords string) {
 }
 
 // WriteInput writes a Spectro to an input file for use
-func (s *Spectro) WriteInput(filename string) {
+func (s *Spectro) WriteInput(filename string) error {
 	var buf bytes.Buffer
 	buf.WriteString(s.Head)
 	buf.WriteString(s.Geometry)
@@ -125,7 +126,7 @@ func (s *Spectro) WriteInput(filename string) {
 	} else {
 		fmt.Fprintf(&buf, "%5d\n", 0)
 	}
-	ioutil.WriteFile(filename, buf.Bytes(), 0755)
+	return ioutil.WriteFile(filename, buf.Bytes(), 0755)
 }
 
 // ParseCoriol parse a coriolis resonance from a spectro
@@ -340,26 +341,90 @@ func EqnSeparate(line string) (lhs []int, rhs int) {
 }
 
 // RunSpectro runs SpectroCommand on filename
-func RunSpectro(filename string) {
+func RunSpectro(filename string) (err error) {
 	file := path.Base(filename)
 	cmd := exec.Command(SpectroCommand)
 	cmd.Dir = path.Dir(filename)
-	cmd.Stdin, _ = os.Open(file + ".in")
-	stdout, _ := cmd.StdoutPipe()
-	cmd.Run()
-	outfile, _ := os.Create(file + ".out")
-	io.Copy(outfile, stdout)
+	cmd.Stdin, err = os.Open(filepath.Join(cmd.Dir, file+".in"))
+	if err != nil {
+		return fmt.Errorf("stdin: %w", err)
+	}
+	var stdout io.Reader
+	stdout, err = cmd.StdoutPipe()
+	if err != nil {
+		return fmt.Errorf("stdout: %w", err)
+	}
+	err = cmd.Start()
+	outfile, err := os.Create(filepath.Join(cmd.Dir, file+".out"))
+	if err != nil {
+		return err
+	}
+	nbytes, err := io.Copy(outfile, stdout)
+	if err != nil {
+		return fmt.Errorf("%w after %d bytes", err, nbytes)
+	}
+	cmd.Wait()
+	return nil
 }
 
-// DoSpectro runs spectro in /-terminated dir, assuming there are nharms harmonic frequencies
-func DoSpectro(spectro *Spectro, dir string, nharms int) (float64, []float64, []float64, []float64) {
-	spectro.Nfreqs = nharms
-	spectro.WriteInput(dir + "spectro.in")
-	RunSpectro(dir + "spectro")
-	spectro.ReadOutput(dir + "spectro.out")
-	spectro.WriteInput(dir + "spectro2.in")
-	RunSpectro(dir + "spectro2")
-	// have rotational constants from FreqReport, but need to incorporate them
-	res := summarize.Spectro(dir + "spectro2.out")
+// UpdateHeader turns on resonance accounting if the resonance fields
+// of s are non-empty
+func (s *Spectro) UpdateHeader() {
+	lines := strings.Split(s.Head, "\n")
+	top := lines[0]
+	bot := lines[3]
+	fields := strings.Fields(lines[1] + lines[2])
+	if s.Coriol != "" {
+		fields[15] = "1"
+	}
+	if s.Fermi1 != "" {
+		if s.Polyad != "" {
+			fields[16] = "4"
+		} else {
+			fields[16] = "1"
+		}
+	}
+	if s.Fermi2 != "" {
+		if s.Polyad != "" {
+			fields[17] = "4"
+		} else {
+			fields[17] = "1"
+		}
+	}
+	var str strings.Builder
+	str.WriteString(top + "\n")
+	for i, f := range fields {
+		fmt.Fprintf(&str, "%5s", f)
+		if (i+1)%15 == 0 {
+			fmt.Fprint(&str, "\n")
+		}
+	}
+	str.WriteString(bot + "\n")
+	s.Head = str.String()
+}
+
+// DoSpectro runs spectro dir, assuming there are nharms harmonic
+// frequencies
+func (s *Spectro) DoSpectro(dir string, nharms int) (float64, []float64, []float64, []float64) {
+	s.Nfreqs = nharms
+	err := s.WriteInput(filepath.Join(dir, "spectro.in"))
+	if err != nil {
+		panic(err)
+	}
+	err = RunSpectro(filepath.Join(dir, "spectro"))
+	if err != nil {
+		panic(err)
+	}
+	s.ReadOutput(filepath.Join(dir, "spectro.out"))
+	s.UpdateHeader()
+	err = s.WriteInput(filepath.Join(dir, "spectro2.in"))
+	if err != nil {
+		panic(err)
+	}
+	err = RunSpectro(filepath.Join(dir, "spectro2"))
+	if err != nil {
+		panic(err)
+	}
+	res := summarize.Spectro(filepath.Join(dir, "spectro2.out"))
 	return res.ZPT, res.Harm, res.Fund, res.Corr
 }

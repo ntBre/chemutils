@@ -1,7 +1,9 @@
 package spectro
 
 import (
+	"io"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -28,7 +30,7 @@ func TestLoadSpectro(t *testing.T) {
 	want := &Spectro{
 		Head: `# SPECTRO ##########################################
     1    1    3    2    0    0    1    4    0    1    0    0    0    0    0
-    1    1    1    0    0    1    0    0    0    0    0    0    0    0    0
+    0    0    0    0    0    1    0    0    0    0    0    0    0    0    0
 # GEOM #######################################
 `,
 		Geometry: `   4   1
@@ -195,4 +197,66 @@ func TestResinLine(t *testing.T) {
 			t.Errorf("got %v, wanted %v\n", got, want)
 		}
 	})
+}
+
+func TestDoSpectro(t *testing.T) {
+	SpectroCommand = "/home/brent/Downloads/spec3jm/backup/spectro.x"
+	spec, _ := LoadSpectro("testfiles/spectro.in",
+		[]string{"N", "C", "O", "H"},
+		`0.0000000000       -0.0115666469        2.4598228639
+ 0.0000000000       -0.0139207809        0.2726915161
+ 0.0000000000        0.1184234620       -2.1785371074
+ 0.0000000000       -1.5591967852       -2.8818447886`)
+	tmp := t.TempDir()
+	for _, file := range []string{"fort.15", "fort.30", "fort.40"} {
+		src, _ := os.Open(filepath.Join("testfiles", file))
+		dst, _ := os.Create(filepath.Join(tmp, file))
+		io.Copy(dst, src)
+	}
+	zpt, harm, fund, corr := spec.DoSpectro(tmp, 6)
+	wpt := 4682.7491
+	warm := []float64{
+		3811.360, 2337.700, 1267.577,
+		1086.351, 496.788, 437.756,
+	}
+	wund := []float64{
+		3623.015, 2294.998, 1231.309,
+		1071.641, 513.228, 454.579,
+	}
+	worr := []float64{
+		3623.0149, 2298.5272, 1231.3094,
+		1087.3762, 513.2276, 454.5787,
+	}
+	if zpt != wpt {
+		t.Errorf("got %v, wanted %v\n", zpt, wpt)
+	}
+	if !reflect.DeepEqual(harm, warm) {
+		t.Errorf("got %v, wanted %v\n", harm, warm)
+	}
+	if !reflect.DeepEqual(fund, wund) {
+		t.Errorf("got %v, wanted %v\n", fund, wund)
+	}
+	if !reflect.DeepEqual(corr, worr) {
+		t.Errorf("got %v, wanted %v\n", corr, worr)
+	}
+}
+
+func TestUpdateHeader(t *testing.T) {
+	spec, _ := LoadSpectro("testfiles/spectro.in",
+		[]string{"N", "C", "O", "H"},
+		`0.0000000000       -0.0115666469        2.4598228639
+ 0.0000000000       -0.0139207809        0.2726915161
+ 0.0000000000        0.1184234620       -2.1785371074
+ 0.0000000000       -1.5591967852       -2.8818447886`)
+	spec.ReadOutput("testfiles/spectro.out")
+	spec.UpdateHeader()
+	got := spec.Head
+	want := `# SPECTRO ##########################################
+    1    1    3    2    0    0    1    4    0    1    0    0    0    0    0
+    1    4    4    0    0    1    0    0    0    0    0    0    0    0    0
+# GEOM #######################################
+`
+	if got != want {
+		t.Errorf("got\n%v, wanted\n%v\n", got, want)
+	}
 }
