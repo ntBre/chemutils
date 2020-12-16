@@ -158,7 +158,6 @@ func TestCheckPolyad(t *testing.T) {
 	if err != nil {
 		t.Errorf("LoadSpectro failed")
 	}
-	spec.Nfreqs = 6
 	spec.ReadOutput("testfiles/spectro.out")
 	got := spec.Polyad
 	want := `    1
@@ -213,7 +212,7 @@ func TestDoSpectro(t *testing.T) {
 		dst, _ := os.Create(filepath.Join(tmp, file))
 		io.Copy(dst, src)
 	}
-	zpt, harm, fund, corr := spec.DoSpectro(tmp, 6)
+	zpt, harm, fund, corr := spec.DoSpectro(tmp)
 	wpt := 4682.7491
 	warm := []float64{
 		3811.360, 2337.700, 1267.577,

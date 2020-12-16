@@ -181,14 +181,29 @@ func (s *Spectro) ReadOutput(filename string) {
 		coriolCount int
 		fermi1Count int
 		fermi2Count int
+		freqs       bool
 	)
+	freq := regexp.MustCompile(`([0-9]+)\*?`)
 	for scanner.Scan() {
 		line = scanner.Text()
-		if skip > 0 {
+		switch {
+		case strings.Contains(line, "FUNDAMENTAL"):
+			freqs = true
+		case freqs:
+			fields := strings.Fields(line)
+			if len(fields) == 4 &&
+				freq.MatchString(fields[0]) {
+				s.Nfreqs, _ = strconv.Atoi(
+					freq.ReplaceAllString(
+						fields[0], "$1",
+					))
+			}
+		case strings.Contains(line, "DUNHAM"):
+			freqs = false
+		case skip > 0:
 			skip--
 			continue
-		}
-		if coriol {
+		case coriol:
 			if line == "" ||
 				strings.Contains(line, "NO MODES FOUND") {
 				coriol = false
@@ -196,8 +211,7 @@ func (s *Spectro) ReadOutput(filename string) {
 				coriolCount++
 				s.Coriol += ParseCoriol(line)
 			}
-		}
-		if fermi1 {
+		case fermi1:
 			if line == "" ||
 				strings.Contains(line, "NOT FOUND") {
 				fermi1 = false
@@ -205,8 +219,7 @@ func (s *Spectro) ReadOutput(filename string) {
 				fermi1Count++
 				s.Fermi1 += ParseFermi1(line)
 			}
-		}
-		if fermi2 {
+		case fermi2:
 			if line == "" ||
 				strings.Contains(line, "NOT FOUND") {
 				fermi2 = false
@@ -214,12 +227,11 @@ func (s *Spectro) ReadOutput(filename string) {
 				fermi2Count++
 				s.Fermi2 += ParseFermi2(line)
 			}
-		}
-		if strings.Contains(line, "CORIOLIS RESONANCES") {
+		case strings.Contains(line, "CORIOLIS RESONANCES"):
 			skip = 3
 			coriol = true
 			// avoid fermi resonance in other contexts
-		} else if strings.Contains(line, "  FERMI RESONANCE  ") {
+		case strings.Contains(line, "  FERMI RESONANCE  "):
 			fields := strings.Fields(line)
 			if fields[3] == "1" {
 				fermi1 = true
@@ -405,8 +417,7 @@ func (s *Spectro) UpdateHeader() {
 
 // DoSpectro runs spectro dir, assuming there are nharms harmonic
 // frequencies
-func (s *Spectro) DoSpectro(dir string, nharms int) (float64, []float64, []float64, []float64) {
-	s.Nfreqs = nharms
+func (s *Spectro) DoSpectro(dir string) (float64, []float64, []float64, []float64) {
 	err := s.WriteInput(filepath.Join(dir, "spectro.in"))
 	if err != nil {
 		panic(err)
