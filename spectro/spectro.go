@@ -14,8 +14,6 @@ import (
 	"os/exec"
 	"path"
 
-	"io"
-
 	"github.com/ntBre/chemutils/summarize"
 )
 
@@ -361,21 +359,18 @@ func RunSpectro(filename string) (err error) {
 	if err != nil {
 		return fmt.Errorf("stdin: %w", err)
 	}
-	var stdout io.Reader
-	stdout, err = cmd.StdoutPipe()
 	if err != nil {
 		return fmt.Errorf("stdout: %w", err)
 	}
-	err = cmd.Start()
 	outfile, err := os.Create(filepath.Join(cmd.Dir, file+".out"))
 	if err != nil {
 		return err
 	}
-	nbytes, err := io.Copy(outfile, stdout)
+	cmd.Stdout = outfile
+	err = cmd.Run()
 	if err != nil {
-		return fmt.Errorf("%w after %d bytes", err, nbytes)
+		return err
 	}
-	cmd.Wait()
 	return nil
 }
 
