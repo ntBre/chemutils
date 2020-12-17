@@ -265,7 +265,7 @@ func (s *Spectro) ReadOutput(filename string) {
 	if fermi2Count > 0 {
 		s.Fermi2 = fmt.Sprintf("%5d\n", fermi2Count) + s.Fermi2
 	}
-	if fermi1Count > 0 && fermi2Count > 0 {
+	if fermi1Count > 0 || fermi2Count > 0 {
 		s.CheckPolyad()
 	}
 }
@@ -279,24 +279,30 @@ func (s *Spectro) CheckPolyad() {
 	lhSet := make(map[string]bool)
 	var poly bool
 	// skip count line and empty last split
-	for _, line := range f1[1 : len(f1)-1] {
-		lhs, rhs := EqnSeparate(line)
-		if !rhSet[rhs] {
-			rhSet[rhs] = true
-		}
-		if !lhSet[MakeKey(lhs)] {
-			lhSet[MakeKey(lhs)] = true
+	if len(f1) > 1 {
+		for _, line := range f1[1 : len(f1)-1] {
+			lhs, rhs := EqnSeparate(line)
+			if rhSet[rhs] {
+				poly = true
+			} else {
+				rhSet[rhs] = true
+			}
+			if !lhSet[MakeKey(lhs)] {
+				lhSet[MakeKey(lhs)] = true
+			}
 		}
 	}
-	for _, line := range f2[1 : len(f2)-1] {
-		lhs, rhs := EqnSeparate(line)
-		if rhSet[rhs] {
-			poly = true
-		} else {
-			rhSet[rhs] = true
-		}
-		if !lhSet[MakeKey(lhs)] {
-			lhSet[MakeKey(lhs)] = true
+	if len(f2) > 1 {
+		for _, line := range f2[1 : len(f2)-1] {
+			lhs, rhs := EqnSeparate(line)
+			if rhSet[rhs] {
+				poly = true
+			} else {
+				rhSet[rhs] = true
+			}
+			if !lhSet[MakeKey(lhs)] {
+				lhSet[MakeKey(lhs)] = true
+			}
 		}
 	}
 	if !poly {

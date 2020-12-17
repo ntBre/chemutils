@@ -92,11 +92,9 @@ func TestWriteSpectroInput(t *testing.T) {
 
 func TestReadSpectroOutput(t *testing.T) {
 	tests := []struct {
-		msg    string
-		load   string
-		names  []string
-		coords string
-		read   string
+		msg  string
+		load string
+		read string
 		// assume other fields tested by Load
 		fermi1 string
 		fermi2 string
@@ -106,11 +104,9 @@ func TestReadSpectroOutput(t *testing.T) {
 		nfreqs int
 	}{
 		{
-			msg:    "all resonances present",
-			load:   "testfiles/spectro.in",
-			names:  names,
-			coords: coords,
-			read:   "testfiles/spectro.out",
+			msg:  "all resonances present",
+			load: "testfiles/spectro.in",
+			read: "testfiles/spectro.out",
 			fermi1: `    2
     4    2
     5    4
@@ -136,11 +132,9 @@ func TestReadSpectroOutput(t *testing.T) {
 			nfreqs: 6,
 		},
 		{
-			msg:    "no fermi 2 resonances present",
-			load:   "testfiles/spectro.in",
-			names:  names,
-			coords: coords,
-			read:   "testfiles/spectro.prob",
+			msg:  "no fermi 2 resonances present",
+			load: "testfiles/spectro.in",
+			read: "testfiles/spectro.prob",
 			fermi1: `    1
     6    5
 `,
@@ -167,8 +161,6 @@ func TestReadSpectroOutput(t *testing.T) {
 		{
 			msg:    "no coriolis resonances present",
 			load:   "testfiles/spectro.in",
-			names:  names,
-			coords: coords,
 			read:   "testfiles/spectro.nocoriol",
 			fermi1: "",
 			fermi2: "",
@@ -178,6 +170,53 @@ func TestReadSpectroOutput(t *testing.T) {
     2    1
 `,
 			nfreqs: 3,
+		},
+		{
+			msg:  "no fermi 2 but polyad",
+			load: "testfiles/prob.in",
+			read: "testfiles/prob.out",
+			fermi1: `    4
+    3    1
+    7    3
+    8    3
+    9    3
+`,
+			fermi2: "",
+			polyad: `    1
+    6
+    1    0    0    0    0    0    0    0    0
+    0    0    1    0    0    0    0    0    0
+    0    0    2    0    0    0    0    0    0
+    0    0    0    0    0    0    2    0    0
+    0    0    0    0    0    0    0    2    0
+    0    0    0    0    0    0    0    0    2
+`,
+			coriol: `    7
+    0
+    6    5    1    0    0
+    0
+    7    6    1    0    0
+    0
+    8    5    0    0    1
+    0
+    8    6    0    1    0
+    0
+    8    7    0    0    1
+    0
+    9    7    0    1    0
+    0
+    9    8    1    0    0
+`,
+			darlin: `    7
+    2    1
+    6    5
+    7    6
+    8    6
+    8    7
+    9    7
+    9    8
+`,
+			nfreqs: 9,
 		},
 	}
 	for _, test := range tests {
