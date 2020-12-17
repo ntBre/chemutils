@@ -30,8 +30,7 @@ program that formats it nicely.
 
 ### Usage
 
-summarize takes the SPECTRO output file as its first argument. For the
-example in testfiles:
+summarize takes a SPECTRO output file as its only argument. For example,
 
 ```
 $ summarize spectro.out
@@ -49,8 +48,19 @@ to disable the Unicode characters in the Delta and Phi output.
 
 ## spectro
 
-spectro is a library for actually running SPECTRO. Eventually it will
-also be a standalone executable wrapping the Fortran version of
-SPECTRO.
+spectro is a library for running SPECTRO and a standalone executable
+wrapping the Fortran version of SPECTRO.
 
+### Usage
 
+spectro takes a SPECTRO intput file as an argument, runs the Fortran
+version of SPECTRO on it, parses the output to identify Fermi,
+Coriolis, and Darling-Dennison resonances, then writes spectro2.in and
+reruns SPECTRO. The command line looks like:
+
+```
+$ spectro spectro.in
+```
+
+The `-cmd` flag can be used to specify an alternative SPECTRO
+executable.
