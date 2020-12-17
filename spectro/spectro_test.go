@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/ntBre/chemutils/summarize"
 )
 
 var (
@@ -212,7 +214,8 @@ func TestDoSpectro(t *testing.T) {
 		dst, _ := os.Create(filepath.Join(tmp, file))
 		io.Copy(dst, src)
 	}
-	zpt, harm, fund, corr := spec.DoSpectro(tmp)
+	spec.DoSpectro(tmp)
+	res := summarize.Spectro(filepath.Join(tmp, "spectro2.out"))
 	wpt := 4682.7491
 	warm := []float64{
 		3811.360, 2337.700, 1267.577,
@@ -226,17 +229,17 @@ func TestDoSpectro(t *testing.T) {
 		3623.0149, 2298.5272, 1231.3094,
 		1087.3762, 513.2276, 454.5787,
 	}
-	if zpt != wpt {
-		t.Errorf("got %v, wanted %v\n", zpt, wpt)
+	if res.ZPT != wpt {
+		t.Errorf("got %v, wanted %v\n", res.ZPT, wpt)
 	}
-	if !reflect.DeepEqual(harm, warm) {
-		t.Errorf("got %v, wanted %v\n", harm, warm)
+	if !reflect.DeepEqual(res.Harm, warm) {
+		t.Errorf("got %v, wanted %v\n", res.Harm, warm)
 	}
-	if !reflect.DeepEqual(fund, wund) {
-		t.Errorf("got %v, wanted %v\n", fund, wund)
+	if !reflect.DeepEqual(res.Fund, wund) {
+		t.Errorf("got %v, wanted %v\n", res.Fund, wund)
 	}
-	if !reflect.DeepEqual(corr, worr) {
-		t.Errorf("got %v, wanted %v\n", corr, worr)
+	if !reflect.DeepEqual(res.Corr, worr) {
+		t.Errorf("got %v, wanted %v\n", res.Corr, worr)
 	}
 }
 

@@ -13,8 +13,6 @@ import (
 
 	"os/exec"
 	"path"
-
-	"github.com/ntBre/chemutils/summarize"
 )
 
 var (
@@ -402,27 +400,26 @@ func (s *Spectro) UpdateHeader() {
 	s.Head = str.String()
 }
 
-// DoSpectro runs spectro dir, assuming there are nharms harmonic
-// frequencies
-func (s *Spectro) DoSpectro(dir string) (float64, []float64, []float64, []float64) {
-	err := s.WriteInput(filepath.Join(dir, "spectro.in"))
+// DoSpectro runs spectro on spectro.in in dir, then corrects for
+// resonances in spectro2.in and runs spectro again
+func (s *Spectro) DoSpectro(dir string) (err error) {
+	err = s.WriteInput(filepath.Join(dir, "spectro.in"))
 	if err != nil {
-		panic(err)
+		return err
 	}
 	err = RunSpectro(filepath.Join(dir, "spectro"))
 	if err != nil {
-		panic(err)
+		return err
 	}
 	s.ReadOutput(filepath.Join(dir, "spectro.out"))
 	s.UpdateHeader()
 	err = s.WriteInput(filepath.Join(dir, "spectro2.in"))
 	if err != nil {
-		panic(err)
+		return err
 	}
 	err = RunSpectro(filepath.Join(dir, "spectro2"))
 	if err != nil {
-		panic(err)
+		return err
 	}
-	res := summarize.Spectro(filepath.Join(dir, "spectro2.out"))
-	return res.ZPT, res.Harm, res.Fund, res.Corr
+	return nil
 }
