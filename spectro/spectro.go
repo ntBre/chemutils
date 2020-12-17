@@ -41,9 +41,9 @@ type Spectro struct {
 	Nfreqs   int
 }
 
-// LoadSpectro loads a spectro input file, assuming no resonances
-// included, into a *Spectro
-func LoadSpectro(filename string) (*Spectro, error) {
+// Load loads a spectro input file, assuming no resonances included,
+// into a *Spectro
+func Load(filename string) (*Spectro, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err

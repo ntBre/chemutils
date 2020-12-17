@@ -21,8 +21,8 @@ var (
 `
 )
 
-func TestLoadSpectro(t *testing.T) {
-	got, _ := LoadSpectro("testfiles/spectro.in")
+func TestLoad(t *testing.T) {
+	got, _ := Load("testfiles/spectro.in")
 	got.FormatGeom([]string{"N", "C", "O", "H"},
 		`0.0000000000       -0.0115666469        2.4598228639
       0.0000000000      -0.0139207809       0.2726915161
@@ -77,7 +77,7 @@ func TestWriteSpectroInput(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		spec, _ := LoadSpectro(test.load)
+		spec, _ := Load(test.load)
 		spec.FormatGeom(test.names, test.coords)
 		temp := t.TempDir()
 		write := filepath.Join(temp, "spectro.in")
@@ -97,7 +97,7 @@ func TestReadSpectroOutput(t *testing.T) {
 		names  []string
 		coords string
 		read   string
-		// assume other fields tested by LoadSpectro
+		// assume other fields tested by Load
 		fermi1 string
 		fermi2 string
 		polyad string
@@ -182,7 +182,7 @@ func TestReadSpectroOutput(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.msg, func(t *testing.T) {
-			spec, _ := LoadSpectro(test.load)
+			spec, _ := Load(test.load)
 			spec.ReadOutput(test.read)
 			if spec.Fermi1 != test.fermi1 {
 				t.Errorf("got %v, wanted %v\n", spec.Fermi1, test.fermi1)
@@ -240,9 +240,9 @@ func polyEqual(p1, p2 string) bool {
 }
 
 func TestCheckPolyad(t *testing.T) {
-	spec, err := LoadSpectro("testfiles/spectro.in")
+	spec, err := Load("testfiles/spectro.in")
 	if err != nil {
-		t.Errorf("LoadSpectro failed")
+		t.Errorf("Load failed")
 	}
 	spec.ReadOutput("testfiles/spectro.out")
 	got := spec.Polyad
@@ -286,7 +286,7 @@ func TestResinLine(t *testing.T) {
 
 func TestDoSpectro(t *testing.T) {
 	SpectroCommand = "/home/brent/Downloads/spec3jm/backup/spectro.x"
-	spec, _ := LoadSpectro("testfiles/spectro.in")
+	spec, _ := Load("testfiles/spectro.in")
 	tmp := t.TempDir()
 	for _, file := range []string{"fort.15", "fort.30", "fort.40"} {
 		src, _ := os.Open(filepath.Join("testfiles", file))
@@ -324,7 +324,7 @@ func TestDoSpectro(t *testing.T) {
 }
 
 func TestUpdateHeader(t *testing.T) {
-	spec, _ := LoadSpectro("testfiles/spectro.in")
+	spec, _ := Load("testfiles/spectro.in")
 	spec.ReadOutput("testfiles/spectro.out")
 	spec.UpdateHeader()
 	got := spec.Head

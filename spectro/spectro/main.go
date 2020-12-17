@@ -9,7 +9,7 @@ import (
 
 // Flags
 var (
-	cmd = flag.String(cmd,
+	cmd = flag.String("cmd",
 		"~r2533/programs/spec3jm.ifort-O0.static.x",
 		"command to use for running SPECTRO")
 )
@@ -24,5 +24,13 @@ func main() {
 	args := ParseFlags()
 	if len(args) < 1 {
 		log.Fatal("spectro: not enough input arguments\n")
+	}
+	spec, err := spectro.Load(args[0])
+	if err != nil {
+		log.Fatalf("spectro: %v\n", err)
+	}
+	err = spec.DoSpectro(".")
+	if err != nil {
+		log.Fatalf("spectro: %v\n", err)
 	}
 }
