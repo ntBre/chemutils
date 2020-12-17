@@ -174,7 +174,7 @@ func TestReadSpectroOutput(t *testing.T) {
 			if spec.Fermi2 != test.fermi2 {
 				t.Errorf("got %v, wanted %v\n", spec.Fermi2, test.fermi2)
 			}
-			if spec.Polyad != test.polyad {
+			if !polyEqual(spec.Polyad, test.polyad) {
 				t.Errorf("got %v, wanted %v\n", spec.Polyad, test.polyad)
 			}
 			if spec.Coriol != test.coriol {
@@ -190,6 +190,9 @@ func TestReadSpectroOutput(t *testing.T) {
 func polyEqual(p1, p2 string) bool {
 	if len(p1) != len(p2) {
 		return false
+	}
+	if len(p1) == len(p2) && len(p1) == 0 {
+		return true
 	}
 	sp1 := strings.Split(p1, "\n")
 	sp2 := strings.Split(p2, "\n")
