@@ -10,7 +10,7 @@ import (
 // Flags
 var (
 	cmd = flag.String("cmd",
-		"~r2533/programs/spec3jm.ifort-O0.static.x",
+		"/ddn/home6/r2533/programs/spec3jm.ifort-O0.static.x",
 		"command to use for running SPECTRO")
 )
 

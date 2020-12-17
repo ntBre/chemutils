@@ -236,7 +236,7 @@ func (s *Spectro) ReadOutput(filename string) {
 				fermi2 = true
 			}
 			skip = 3
-		case strings.Contains(line, "DARLING-DENNISON"):
+		case strings.Contains(line, "DARLING-DENNISON RESONANCES"):
 			skip = 3
 			darlin = true
 		case darlin && strings.Contains(line, "<>"):

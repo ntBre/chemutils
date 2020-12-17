@@ -286,40 +286,76 @@ func TestResinLine(t *testing.T) {
 
 func TestDoSpectro(t *testing.T) {
 	SpectroCommand = "/home/brent/Downloads/spec3jm/backup/spectro.x"
-	spec, _ := Load("testfiles/spectro.in")
-	tmp := t.TempDir()
-	for _, file := range []string{"fort.15", "fort.30", "fort.40"} {
-		src, _ := os.Open(filepath.Join("testfiles", file))
-		dst, _ := os.Create(filepath.Join(tmp, file))
-		io.Copy(dst, src)
+	tests := []struct {
+		load  string
+		forts []string
+		zpt   float64
+		harm  []float64
+		fund  []float64
+		corr  []float64
+	}{
+		{
+			load:  "testfiles/spectro.in",
+			forts: []string{"fort.15", "fort.30", "fort.40"},
+			zpt:   4682.7491,
+			harm: []float64{
+				3811.360, 2337.700, 1267.577,
+				1086.351, 496.788, 437.756,
+			},
+			fund: []float64{
+				3623.015, 2294.998, 1231.309,
+				1071.641, 513.228, 454.579,
+			},
+			corr: []float64{
+				3623.0149, 2298.5272, 1231.3094,
+				1087.3762, 513.2276, 454.5787,
+			},
+		},
+		{
+			load:  "testfiles/prob.in",
+			forts: []string{"prob.15", "prob.30", "prob.40"},
+			zpt:   6974.5686,
+			harm: []float64{
+				3281.244, 3247.542, 1623.324,
+				1307.596, 1090.695, 992.978,
+				908.490, 901.527, 785.379,
+			},
+			fund: []float64{
+				3140.115, 3113.252, 1589.153,
+				1273.128, 1059.592, 967.523,
+				887.009, 845.919, 769.511,
+			},
+			corr: []float64{
+				3128.0166, 3113.2520, 1590.4451,
+				1273.1281, 1059.5924, 967.5230,
+				887.0092, 845.9192, 769.5109,
+			},
+		},
 	}
-	spec.WriteInput(filepath.Join(tmp, "spectro.in"))
-	spec.DoSpectro(tmp)
-	res := summarize.Spectro(filepath.Join(tmp, "spectro2.out"))
-	wpt := 4682.7491
-	warm := []float64{
-		3811.360, 2337.700, 1267.577,
-		1086.351, 496.788, 437.756,
-	}
-	wund := []float64{
-		3623.015, 2294.998, 1231.309,
-		1071.641, 513.228, 454.579,
-	}
-	worr := []float64{
-		3623.0149, 2298.5272, 1231.3094,
-		1087.3762, 513.2276, 454.5787,
-	}
-	if res.ZPT != wpt {
-		t.Errorf("got %v, wanted %v\n", res.ZPT, wpt)
-	}
-	if !reflect.DeepEqual(res.Harm, warm) {
-		t.Errorf("got %v, wanted %v\n", res.Harm, warm)
-	}
-	if !reflect.DeepEqual(res.Fund, wund) {
-		t.Errorf("got %v, wanted %v\n", res.Fund, wund)
-	}
-	if !reflect.DeepEqual(res.Corr, worr) {
-		t.Errorf("got %v, wanted %v\n", res.Corr, worr)
+	dests := []string{"fort.15", "fort.30", "fort.40"}
+	for _, test := range tests {
+		spec, _ := Load(test.load)
+		tmp := t.TempDir()
+		for i, file := range test.forts {
+			src, _ := os.Open(filepath.Join("testfiles", file))
+			dst, _ := os.Create(filepath.Join(tmp, dests[i]))
+			io.Copy(dst, src)
+		}
+		spec.WriteInput(filepath.Join(tmp, "spectro.in"))
+		spec.DoSpectro(tmp)
+		res := summarize.Spectro(filepath.Join(tmp, "spectro2.out"))
+		if res.ZPT != test.zpt {
+			t.Errorf("got %v, wanted %v\n", res.ZPT, test.zpt)
+		}
+		if !reflect.DeepEqual(res.Harm, test.harm) {
+			t.Errorf("got %v, wanted %v\n", res.Harm, test.harm)
+		}
+		if !reflect.DeepEqual(res.Fund, test.fund) {
+			t.Errorf("got %v, wanted %v\n", res.Fund, test.fund)
+		}
+		if !reflect.DeepEqual(res.Corr, test.corr) {
+			t.Errorf("got %v, wanted %v\n", res.Corr, test.corr)
+		}
 	}
 }
 
