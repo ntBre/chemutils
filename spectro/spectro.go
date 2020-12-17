@@ -287,8 +287,13 @@ func (s *Spectro) CheckPolyad() {
 			} else {
 				rhSet[rhs] = true
 			}
-			if !lhSet[MakeKey(lhs)] {
-				lhSet[MakeKey(lhs)] = true
+			if key := MakeKey(lhs); !lhSet[key] {
+				lhSet[key] = true
+			}
+			// also a polyad if the lhs is found in the
+			// rhs set
+			if rhSet[lhs[0]] {
+				poly = true
 			}
 		}
 	}
