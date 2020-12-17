@@ -96,6 +96,12 @@ func TestReadSpectroOutput(t *testing.T) {
 		names  []string
 		coords string
 		read   string
+		// assume other fields tested by LoadSpectro
+		fermi1 string
+		fermi2 string
+		polyad string
+		coriol string
+		nfreqs int
 	}{
 		{
 			msg:    "all resonances present",
@@ -103,6 +109,26 @@ func TestReadSpectroOutput(t *testing.T) {
 			names:  names,
 			coords: coords,
 			read:   "testfiles/spectro.out",
+			fermi1: `    2
+    4    2
+    5    4
+`,
+			fermi2: `    1
+    4    3    2
+`,
+			polyad: `    1
+    5
+    0    1    0    0    0    0
+    0    0    0    1    0    0
+    0    0    0    2    0    0
+    0    0    0    0    2    0
+    0    0    1    1    0    0
+`,
+			coriol: `    1
+    0
+    6    5    1    0    0
+`,
+			nfreqs: 6,
 		},
 		{
 			msg:    "no fermi 2 resonances present",
@@ -110,6 +136,20 @@ func TestReadSpectroOutput(t *testing.T) {
 			names:  names,
 			coords: coords,
 			read:   "testfiles/spectro.prob",
+			fermi1: `    1
+    6    5
+`,
+			fermi2: "",
+			polyad: "",
+			coriol: `    3
+    0
+    3    2    0    0    1
+    0
+    4    1    0    0    1
+    0
+    5    4    0    0    1
+`,
+			nfreqs: 6,
 		},
 		{
 			msg:    "no coriolis resonances present",
@@ -117,12 +157,32 @@ func TestReadSpectroOutput(t *testing.T) {
 			names:  names,
 			coords: coords,
 			read:   "testfiles/spectro.nocoriol",
+			fermi1: "",
+			fermi2: "",
+			polyad: "",
+			coriol: "",
+			nfreqs: 3,
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.msg, func(t *testing.T) {
 			spec, _ := LoadSpectro(test.load, test.names, test.coords)
 			spec.ReadOutput(test.read)
+			if spec.Fermi1 != test.fermi1 {
+				t.Errorf("got %v, wanted %v\n", spec.Fermi1, test.fermi1)
+			}
+			if spec.Fermi2 != test.fermi2 {
+				t.Errorf("got %v, wanted %v\n", spec.Fermi2, test.fermi2)
+			}
+			if spec.Polyad != test.polyad {
+				t.Errorf("got %v, wanted %v\n", spec.Polyad, test.polyad)
+			}
+			if spec.Coriol != test.coriol {
+				t.Errorf("got %v, wanted %v\n", spec.Coriol, test.coriol)
+			}
+			if spec.Nfreqs != test.nfreqs {
+				t.Errorf("got %v, wanted %v\n", spec.Nfreqs, test.nfreqs)
+			}
 		})
 	}
 }

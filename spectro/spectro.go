@@ -237,11 +237,23 @@ func (s *Spectro) ReadOutput(filename string) {
 			skip = 3
 		}
 	}
-	// prepend the counts
-	s.Coriol = fmt.Sprintf("%5d\n%5d\n", coriolCount, 0) + s.Coriol
-	s.Fermi1 = fmt.Sprintf("%5d\n", fermi1Count) + s.Fermi1
-	s.Fermi2 = fmt.Sprintf("%5d\n", fermi2Count) + s.Fermi2
-	s.CheckPolyad()
+	// TODO hacky, should avoid putting on the 0 in the first place
+	// trim extra 0 line
+	if coriolCount > 0 {
+		temp := strings.Split(s.Coriol, "\n")
+		s.Coriol = strings.Join(temp[:len(temp)-2], "\n") + "\n"
+		// prepend the counts
+		s.Coriol = fmt.Sprintf("%5d\n%5d\n", coriolCount, 0) + s.Coriol
+	}
+	if fermi1Count > 0 {
+		s.Fermi1 = fmt.Sprintf("%5d\n", fermi1Count) + s.Fermi1
+	}
+	if fermi2Count > 0 {
+		s.Fermi2 = fmt.Sprintf("%5d\n", fermi2Count) + s.Fermi2
+	}
+	if fermi1Count > 0 && fermi2Count > 0 {
+		s.CheckPolyad()
+	}
 }
 
 // CheckPolyad checks for Fermi Polyads and set the Polyad field of s
