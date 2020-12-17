@@ -297,6 +297,7 @@ func TestDoSpectro(t *testing.T) {
 		dst, _ := os.Create(filepath.Join(tmp, file))
 		io.Copy(dst, src)
 	}
+	spec.WriteInput(filepath.Join(tmp, "spectro.in"))
 	spec.DoSpectro(tmp)
 	res := summarize.Spectro(filepath.Join(tmp, "spectro2.out"))
 	wpt := 4682.7491

@@ -41,7 +41,9 @@ type Spectro struct {
 	Nfreqs   int
 }
 
-// LoadSpectro loads a spectro input file, assumes no resonances included
+// LoadSpectro loads a spectro input file, assuming no resonances
+// included, and combines it with the passed atom names and
+// coordinates into a *Spectro
 func LoadSpectro(filename string, names []string, coords string) (*Spectro, error) {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -246,6 +248,7 @@ func (s *Spectro) ReadOutput(filename string) {
 		}
 	}
 	// TODO hacky, should avoid putting on the 0 in the first place
+	// honestly not sure you even need it based on the manual
 	// trim extra 0 line
 	if coriolCount > 0 {
 		temp := strings.Split(s.Coriol, "\n")
@@ -429,10 +432,6 @@ func (s *Spectro) UpdateHeader() {
 // DoSpectro runs spectro on spectro.in in dir, then corrects for
 // resonances in spectro2.in and runs spectro again
 func (s *Spectro) DoSpectro(dir string) (err error) {
-	err = s.WriteInput(filepath.Join(dir, "spectro.in"))
-	if err != nil {
-		return err
-	}
 	err = RunSpectro(filepath.Join(dir, "spectro"))
 	if err != nil {
 		return err
