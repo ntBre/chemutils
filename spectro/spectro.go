@@ -37,6 +37,7 @@ type Spectro struct {
 	Fermi2   string
 	Polyad   string
 	Coriol   string
+	Darlin   string
 	Nfreqs   int
 }
 
@@ -98,29 +99,25 @@ func (s *Spectro) WriteInput(filename string) error {
 	buf.WriteString(s.Head)
 	buf.WriteString(s.Geometry)
 	buf.WriteString(s.Body)
-	buf.WriteString("# CORIOL #####\n")
 	if s.Coriol != "" {
+		buf.WriteString("# CORIOL #####\n")
 		buf.WriteString(s.Coriol)
-	} else {
-		fmt.Fprintf(&buf, "%5d\n", 0)
 	}
-	buf.WriteString("# FERMI1 ####\n")
 	if s.Fermi1 != "" {
+		buf.WriteString("# FERMI1 ####\n")
 		buf.WriteString(s.Fermi1)
-	} else {
-		fmt.Fprintf(&buf, "%5d\n", 0)
 	}
-	buf.WriteString("# FERMI2 ####\n")
 	if s.Fermi2 != "" {
+		buf.WriteString("# FERMI2 ####\n")
 		buf.WriteString(s.Fermi2)
-	} else {
-		fmt.Fprintf(&buf, "%5d\n", 0)
 	}
-	buf.WriteString("# RESIN ####\n")
 	if s.Polyad != "" {
+		buf.WriteString("# RESIN ####\n")
 		buf.WriteString(s.Polyad)
-	} else {
-		fmt.Fprintf(&buf, "%5d\n", 0)
+	}
+	if s.Darlin != "" {
+		buf.WriteString("# DARLING ####\n")
+		buf.WriteString(s.Darlin)
 	}
 	return ioutil.WriteFile(filename, buf.Bytes(), 0755)
 }
@@ -173,10 +170,12 @@ func (s *Spectro) ReadOutput(filename string) {
 		coriol      bool
 		fermi1      bool
 		fermi2      bool
+		darlin      bool
 		skip        int
 		coriolCount int
 		fermi1Count int
 		fermi2Count int
+		darlinCount int
 		freqs       bool
 	)
 	freq := regexp.MustCompile(`([0-9]+)\*?`)
@@ -235,6 +234,15 @@ func (s *Spectro) ReadOutput(filename string) {
 				fermi2 = true
 			}
 			skip = 3
+		case strings.Contains(line, "DARLING-DENNISON"):
+			skip = 3
+			darlin = true
+		case darlin && strings.Contains(line, "<>"):
+			darlin = false
+		case darlin:
+			darlinCount++
+			fields := strings.Fields(line)
+			s.Darlin += fmt.Sprintf("%5s%5s\n", fields[0], fields[1])
 		}
 	}
 	// TODO hacky, should avoid putting on the 0 in the first place
@@ -244,6 +252,9 @@ func (s *Spectro) ReadOutput(filename string) {
 		s.Coriol = strings.Join(temp[:len(temp)-2], "\n") + "\n"
 		// prepend the counts
 		s.Coriol = fmt.Sprintf("%5d\n%5d\n", coriolCount, 0) + s.Coriol
+	}
+	if darlinCount > 0 {
+		s.Darlin = fmt.Sprintf("%5d\n", darlinCount) + s.Darlin
 	}
 	if fermi1Count > 0 {
 		s.Fermi1 = fmt.Sprintf("%5d\n", fermi1Count) + s.Fermi1
@@ -399,6 +410,9 @@ func (s *Spectro) UpdateHeader() {
 		} else {
 			fields[17] = "1"
 		}
+	}
+	if s.Darlin != "" {
+		fields[26] = "1"
 	}
 	var str strings.Builder
 	str.WriteString(top + "\n")

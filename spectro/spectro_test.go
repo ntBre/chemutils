@@ -101,6 +101,7 @@ func TestReadSpectroOutput(t *testing.T) {
 		fermi2 string
 		polyad string
 		coriol string
+		darlin string
 		nfreqs int
 	}{
 		{
@@ -128,6 +129,9 @@ func TestReadSpectroOutput(t *testing.T) {
     0
     6    5    1    0    0
 `,
+			darlin: `    1
+    6    5
+`,
 			nfreqs: 6,
 		},
 		{
@@ -149,6 +153,14 @@ func TestReadSpectroOutput(t *testing.T) {
     0
     5    4    0    0    1
 `,
+			darlin: `    6
+    2    1
+    3    1
+    3    2
+    4    2
+    4    3
+    5    4
+`,
 			nfreqs: 6,
 		},
 		{
@@ -161,6 +173,9 @@ func TestReadSpectroOutput(t *testing.T) {
 			fermi2: "",
 			polyad: "",
 			coriol: "",
+			darlin: `    1
+    2    1
+`,
 			nfreqs: 3,
 		},
 	}
@@ -180,6 +195,9 @@ func TestReadSpectroOutput(t *testing.T) {
 			if spec.Coriol != test.coriol {
 				t.Errorf("got %v, wanted %v\n", spec.Coriol, test.coriol)
 			}
+			if spec.Darlin != test.darlin {
+				t.Errorf("got\n%v, wanted\n%v\n", spec.Darlin, test.darlin)
+			}
 			if spec.Nfreqs != test.nfreqs {
 				t.Errorf("got %v, wanted %v\n", spec.Nfreqs, test.nfreqs)
 			}
@@ -187,6 +205,8 @@ func TestReadSpectroOutput(t *testing.T) {
 	}
 }
 
+// check if polyads are equal even though they come from unordered
+// maps
 func polyEqual(p1, p2 string) bool {
 	if len(p1) != len(p2) {
 		return false
@@ -318,7 +338,7 @@ func TestUpdateHeader(t *testing.T) {
 	got := spec.Head
 	want := `# SPECTRO ##########################################
     1    1    3    2    0    0    1    4    0    1    0    0    0    0    0
-    1    4    4    0    0    1    0    0    0    0    0    0    0    0    0
+    1    4    4    0    0    1    0    0    0    0    0    1    0    0    0
 # GEOM #######################################
 `
 	if got != want {
