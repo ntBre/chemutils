@@ -42,9 +42,8 @@ type Spectro struct {
 }
 
 // LoadSpectro loads a spectro input file, assuming no resonances
-// included, and combines it with the passed atom names and
-// coordinates into a *Spectro
-func LoadSpectro(filename string, names []string, coords string) (*Spectro, error) {
+// included, into a *Spectro
+func LoadSpectro(filename string) (*Spectro, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -59,23 +58,24 @@ func LoadSpectro(filename string, names []string, coords string) (*Spectro, erro
 	)
 	for scanner.Scan() {
 		line = scanner.Text()
-		if !geom {
+		switch {
+		case strings.Contains(line, "GEOM"):
 			buf.WriteString(line + "\n")
-		}
-		if strings.Contains(line, "GEOM") {
 			sp.Head = buf.String()
 			buf.Reset()
 			geom = true
-		}
 		// order agnostic
-		if geom && (strings.Contains(line, "WEIGHT") ||
-			strings.Contains(line, "CURVIL")) {
+		case geom && (strings.Contains(line, "WEIGHT") ||
+			strings.Contains(line, "CURVIL")):
+			sp.Geometry = buf.String()
+			buf.Reset()
 			geom = false
+			buf.WriteString(line + "\n")
+		default:
 			buf.WriteString(line + "\n")
 		}
 	}
 	sp.Body = buf.String()
-	sp.FormatGeom(names, coords)
 	return &sp, nil
 }
 

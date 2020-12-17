@@ -22,8 +22,8 @@ var (
 )
 
 func TestLoadSpectro(t *testing.T) {
-	got, _ := LoadSpectro("testfiles/spectro.in",
-		[]string{"N", "C", "O", "H"},
+	got, _ := LoadSpectro("testfiles/spectro.in")
+	got.FormatGeom([]string{"N", "C", "O", "H"},
 		`0.0000000000       -0.0115666469        2.4598228639
       0.0000000000      -0.0139207809       0.2726915161
       0.0000000000       0.1184234620      -2.1785371074
@@ -77,14 +77,15 @@ func TestWriteSpectroInput(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		spec, _ := LoadSpectro(test.load, test.names, test.coords)
+		spec, _ := LoadSpectro(test.load)
+		spec.FormatGeom(test.names, test.coords)
 		temp := t.TempDir()
 		write := filepath.Join(temp, "spectro.in")
 		spec.WriteInput(write)
 		got, _ := ioutil.ReadFile(write)
 		want, _ := ioutil.ReadFile(test.right)
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("got %s, wanted %s\n", got, want)
+			t.Errorf("got\n%s, wanted\n%s\n", got, want)
 		}
 	}
 }
@@ -181,7 +182,7 @@ func TestReadSpectroOutput(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.msg, func(t *testing.T) {
-			spec, _ := LoadSpectro(test.load, test.names, test.coords)
+			spec, _ := LoadSpectro(test.load)
 			spec.ReadOutput(test.read)
 			if spec.Fermi1 != test.fermi1 {
 				t.Errorf("got %v, wanted %v\n", spec.Fermi1, test.fermi1)
@@ -239,7 +240,7 @@ func polyEqual(p1, p2 string) bool {
 }
 
 func TestCheckPolyad(t *testing.T) {
-	spec, err := LoadSpectro("testfiles/spectro.in", names, coords)
+	spec, err := LoadSpectro("testfiles/spectro.in")
 	if err != nil {
 		t.Errorf("LoadSpectro failed")
 	}
@@ -285,12 +286,7 @@ func TestResinLine(t *testing.T) {
 
 func TestDoSpectro(t *testing.T) {
 	SpectroCommand = "/home/brent/Downloads/spec3jm/backup/spectro.x"
-	spec, _ := LoadSpectro("testfiles/spectro.in",
-		[]string{"N", "C", "O", "H"},
-		`0.0000000000       -0.0115666469        2.4598228639
- 0.0000000000       -0.0139207809        0.2726915161
- 0.0000000000        0.1184234620       -2.1785371074
- 0.0000000000       -1.5591967852       -2.8818447886`)
+	spec, _ := LoadSpectro("testfiles/spectro.in")
 	tmp := t.TempDir()
 	for _, file := range []string{"fort.15", "fort.30", "fort.40"} {
 		src, _ := os.Open(filepath.Join("testfiles", file))
@@ -328,12 +324,7 @@ func TestDoSpectro(t *testing.T) {
 }
 
 func TestUpdateHeader(t *testing.T) {
-	spec, _ := LoadSpectro("testfiles/spectro.in",
-		[]string{"N", "C", "O", "H"},
-		`0.0000000000       -0.0115666469        2.4598228639
- 0.0000000000       -0.0139207809        0.2726915161
- 0.0000000000        0.1184234620       -2.1785371074
- 0.0000000000       -1.5591967852       -2.8818447886`)
+	spec, _ := LoadSpectro("testfiles/spectro.in")
 	spec.ReadOutput("testfiles/spectro.out")
 	spec.UpdateHeader()
 	got := spec.Head
