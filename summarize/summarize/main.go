@@ -69,40 +69,81 @@ func makeABC(res *summarize.Result) *Table {
 	}
 }
 
+type Unit struct {
+	Name  string
+	Scale float64
+}
+
+// tryUnit takes a value and a scale to multiply by and returns the
+// string version and its length
+func tryUnit(val, scale float64) (string, int) {
+	ret := fmt.Sprintf("%.3f", val*scale)
+	l := len(ret)
+	// don't count the sign toward the length
+	if val < 0 {
+		return ret, l - 1
+	}
+	return ret, l
+}
+
 func makeDeltas(res *summarize.Result) *Table {
+	units := []Unit{
+		{"GHz", 1e-3},
+		{"MHz", 1.0},
+		{"kHz", 1e3},
+		{"Hz", 1e6},
+		{"mHz", 1e9},
+	}
 	var str strings.Builder
 	for d := range res.Deltas {
-		fmt.Fprintf(&str, "%8s%15.3f%15.3f%15.3f%15.3f%18.3f",
-			DeltaOrder[d], res.Deltas[d]/1e3, res.Deltas[d],
-			res.Deltas[d]*1e3, res.Deltas[d]*1e6, res.Deltas[d]*1e9)
+		for _, u := range units {
+			s, l := tryUnit(res.Deltas[d], u.Scale)
+			if l > 4 && s[0] != '0' && l <= 7 {
+				fmt.Fprintf(&str, "%8s%10s%10s",
+					DeltaOrder[d], u.Name, s)
+				break
+			}
+		}
 		if d != len(res.Deltas)-1 {
 			fmt.Fprint(&str, "\n")
 		}
 	}
 	return &Table{
 		Caption:   "Deltas",
-		Alignment: "lrrrrr",
-		Header: fmt.Sprintf("%8s%15s%15s%15s%15s%18s",
-			"Constant", "GHz", "MHz", "kHz", "Hz", "mHz"),
+		Alignment: "llr",
+		Header: fmt.Sprintf("%8s%10s%10s",
+			"Constant", "Units", "Value"),
 		Body: str.String(),
 	}
 }
 
 func makePhis(res *summarize.Result) *Table {
+	units := []Unit{
+		{"kHz", 1e-3},
+		{"Hz", 1.0},
+		{"mHz", 1e3},
+		{"uHz", 1e6},
+		{"nHz", 1e9},
+	}
 	var str strings.Builder
 	for p := range res.Phis {
-		fmt.Fprintf(&str, "%8s%15.3f%15.3f%15.3f%15.3f%18.3f",
-			PhiOrder[p], res.Phis[p]/1e3, res.Phis[p],
-			res.Phis[p]*1e3, res.Phis[p]*1e6, res.Phis[p]*1e9)
+		for _, u := range units {
+			s, l := tryUnit(res.Phis[p], u.Scale)
+			if l > 4 && s[0] != '0' && s[:2] != "-0" && l <= 7 {
+				fmt.Fprintf(&str, "%8s%10s%10s",
+					PhiOrder[p], u.Name, s)
+				break
+			}
+		}
 		if p != len(res.Phis)-1 {
 			fmt.Fprint(&str, "\n")
 		}
 	}
 	return &Table{
 		Caption:   "Phis",
-		Alignment: "lrrrrr",
-		Header: fmt.Sprintf("%8s%15s%15s%15s%15s%18s",
-			"Constant", "kHz", "Hz", "mHz", "uHz", "nHz"),
+		Alignment: "llr",
+		Header: fmt.Sprintf("%8s%10s%10s",
+			"Constant", "Units", "Value"),
 		Body: str.String(),
 	}
 }
