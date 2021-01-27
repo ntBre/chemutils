@@ -180,6 +180,7 @@ func (s *Spectro) ReadOutput(filename string) {
 		darlinCount int
 		freqs       bool
 	)
+	fermap := make(map[string]struct{})
 	freq := regexp.MustCompile(`([0-9]+)\*?`)
 	for scanner.Scan() {
 		line = scanner.Text()
@@ -214,16 +215,24 @@ func (s *Spectro) ReadOutput(filename string) {
 				strings.Contains(line, "NOT FOUND") {
 				fermi1 = false
 			} else {
-				fermi1Count++
-				s.Fermi1 += ParseFermi1(line)
+				tmp := ParseFermi1(line)
+				if _, ok := fermap[tmp]; !ok {
+					s.Fermi1 += tmp
+					fermap[tmp] = struct{}{}
+					fermi1Count++
+				}
 			}
 		case fermi2:
 			if line == "" ||
 				strings.Contains(line, "NOT FOUND") {
 				fermi2 = false
 			} else {
-				fermi2Count++
-				s.Fermi2 += ParseFermi2(line)
+				tmp := ParseFermi2(line)
+				if _, ok := fermap[tmp]; !ok {
+					s.Fermi2 += tmp
+					fermap[tmp] = struct{}{}
+					fermi2Count++
+				}
 			}
 		case strings.Contains(line, "CORIOLIS RESONANCES"):
 			skip = 3
