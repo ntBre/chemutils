@@ -218,6 +218,51 @@ func TestReadSpectroOutput(t *testing.T) {
 `,
 			nfreqs: 9,
 		},
+		{
+			msg:  "mason had a problem",
+			load: "testfiles/mason.in",
+			read: "testfiles/mason.out",
+			fermi1: `    3
+    5    4
+    6    4
+    6    4
+`,
+			fermi2: `    6
+    4    6    6
+    5    4    5
+    5    2    6
+    5    6    2
+    6    2    5
+    6    2    5
+`,
+			polyad: `    1
+   11
+    0    1    0    0    0    0
+    0    0    0    1    0    0
+    0    0    0    0    1    0
+    0    0    0    0    0    1
+    0    0    0    0    2    0
+    0    0    0    0    0    2
+    0    0    0    1    0    1
+    0    0    0    1    1    0
+    0    1    0    0    1    0
+    0    0    0    0    1    1
+    0    1    0    0    0    1
+`,
+			coriol: `    2
+    0
+    5    6    0    1    0
+    0
+    6    5    0    1    0
+`,
+			darlin: `    2
+    5    4
+    5    6
+`,
+			nfreqs: 6,
+		},
+		// darlin string
+		// nfreqs int
 	}
 	for _, test := range tests {
 		t.Run(test.msg, func(t *testing.T) {

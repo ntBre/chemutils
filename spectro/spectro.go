@@ -186,6 +186,9 @@ func (s *Spectro) ReadOutput(filename string) {
 		switch {
 		case strings.Contains(line, "FUNDAMENTAL"):
 			freqs = true
+		case strings.Contains(line, "DUNHAM"),
+			strings.Contains(line, "VIBRATIONAL ENERGY"):
+			freqs = false
 		case freqs:
 			fields := strings.Fields(line)
 			if len(fields) == 4 &&
@@ -195,8 +198,6 @@ func (s *Spectro) ReadOutput(filename string) {
 						fields[0], "$1",
 					))
 			}
-		case strings.Contains(line, "DUNHAM"):
-			freqs = false
 		case skip > 0:
 			skip--
 			continue
