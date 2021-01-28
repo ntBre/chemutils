@@ -14,6 +14,14 @@ import (
 	"strings"
 )
 
+type Axis int
+
+const (
+	X Axis = iota
+	Y
+	Z
+)
+
 const (
 	width  = 256
 	height = 256
@@ -37,6 +45,27 @@ type Atom struct {
 	Z      float64
 }
 
+// Coords returns the X, Y, and Z coordinates of a as a slice of float
+func (a Atom) Coords() []float64 {
+	return []float64{a.X, a.Y, a.Z}
+}
+
+// Swap swaps axes i and j
+func (a Atom) Swap(i, j Axis) Atom {
+	coords := []float64{a.X, a.Y, a.Z}
+	coords[i], coords[j] = coords[j], coords[i]
+	a.X, a.Y, a.Z = coords[0], coords[1], coords[2]
+	return a
+}
+
+// Invert negates the ith coordinate of a
+func (a Atom) Invert(i Axis) Atom {
+	c := a.Coords()
+	c[i] *= -1.0
+	a.X, a.Y, a.Z = c[0], c[1], c[2]
+	return a
+}
+
 func (a Atom) String() string {
 	return fmt.Sprintf("%s %8.4f %8.4f %8.4f",
 		a.Symbol, a.X, a.Y, a.Z)
@@ -56,12 +85,13 @@ func Cart2D(x, y, z float64) image.Point {
 }
 
 // Normalize the geometries of atoms such that the largest coordinate
-// has a magnitude of 1.0
+// has a magnitude of 0.75
 func (o Output) NormalizeGeom() {
+	scale := 2.0
 	for i := range o.Geom {
-		o.Geom[i].X /= o.max
-		o.Geom[i].Y /= o.max
-		o.Geom[i].Z /= o.max
+		o.Geom[i].X /= scale * o.max
+		o.Geom[i].Y /= scale * o.max
+		o.Geom[i].Z /= scale * o.max
 	}
 }
 
@@ -147,7 +177,7 @@ func DrawLine(img *image.NRGBA, from, to image.Point) int {
 		return to.Y - from.Y
 	}
 	// needed the precision from floating point here
-	m := float64(to.Y - from.Y) / float64(to.X - from.X)
+	m := float64(to.Y-from.Y) / float64(to.X-from.X)
 	b := float64(to.Y) - m*float64(to.X)
 	for x := from.X; x <= to.X; x++ {
 		img.Set(x, int(m*float64(x)+b), color.NRGBA{0, 0, 0, 255})
@@ -175,17 +205,21 @@ func PlotAxes(img *image.NRGBA) {
 	)
 }
 
+// I have swap and invert, but need to apply them programatically
+// instead of by eyeballing
+
 func main() {
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	PlotAxes(img)
 	out := ReadOut("tests/dip.out")
 	out.NormalizeGeom()
 	for _, atom := range out.Geom {
+		// atom = atom.Swap(X, Z)
+		atom = atom.Invert(Z)
 		fmt.Println(atom)
 		pt := Cart2D(atom.X, atom.Y, atom.Z)
 		DrawCircle(img, pt, 5, ptable[atom.Symbol])
 	}
-	// hydrogens are on top of each other for some reason
 	f, _ := os.Create("test.png")
 	png.Encode(f, img)
 	f.Close()
