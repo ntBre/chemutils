@@ -146,10 +146,11 @@ func DrawLine(img *image.NRGBA, from, to image.Point) int {
 		}
 		return to.Y - from.Y
 	}
-	m := (to.Y - from.Y) / (to.X - from.X)
-	b := to.Y - m*to.X
+	// needed the precision from floating point here
+	m := float64(to.Y - from.Y) / float64(to.X - from.X)
+	b := float64(to.Y) - m*float64(to.X)
 	for x := from.X; x <= to.X; x++ {
-		img.Set(x, m*x+b, color.NRGBA{0, 0, 0, 255})
+		img.Set(x, int(m*float64(x)+b), color.NRGBA{0, 0, 0, 255})
 	}
 	x := from.X - to.X
 	y := from.Y - to.Y
@@ -185,10 +186,6 @@ func main() {
 		DrawCircle(img, pt, 5, ptable[atom.Symbol])
 	}
 	// hydrogens are on top of each other for some reason
-	DrawCircle(img, image.Point{165, 219}, 5, BLACK)
-	l := DrawLine(img, image.Point{width/2, height/2}, image.Point{165, 219})
-	fmt.Println(l) // should be 181?
-	// drawline coming out at a weird angle, something wrong there
 	f, _ := os.Create("test.png")
 	png.Encode(f, img)
 	f.Close()
