@@ -29,6 +29,8 @@ const (
 
 var (
 	RED   = color.NRGBA{255, 0, 0, 255}
+	GREEN = color.NRGBA{0, 255, 0, 255}
+	BLUE  = color.NRGBA{0, 0, 255, 255}
 	BLACK = color.NRGBA{0, 0, 0, 255}
 )
 
@@ -46,8 +48,8 @@ type Atom struct {
 }
 
 // Coords returns the X, Y, and Z coordinates of a as a slice of float
-func (a Atom) Coords() []float64 {
-	return []float64{a.X, a.Y, a.Z}
+func (a Atom) Coords() Vec {
+	return Vec{a.X, a.Y, a.Z}
 }
 
 // Swap swaps axes i and j
@@ -71,17 +73,91 @@ func (a Atom) String() string {
 		a.Symbol, a.X, a.Y, a.Z)
 }
 
+type Vec [3]float64
+
+func (v Vec) Add(w Vec) (ret Vec) {
+	for i := range v {
+		ret[i] = v[i] + w[i]
+	}
+	return
+}
+
+func (v Vec) Sub(w Vec) (ret Vec) {
+	for i := range v {
+		ret[i] = v[i] - w[i]
+	}
+	return
+}
+
+func (v Vec) Mul(a float64) (ret Vec) {
+	for i := range v {
+		ret[i] = v[i] * a
+	}
+	return
+}
+
+func (v Vec) Dot(w Vec) (ret float64) {
+	for i := range v {
+		ret += v[i] * w[i]
+	}
+	return
+}
+
+func (v Vec) Cross(w Vec) (ret Vec) {
+	return Vec{
+		v[1]*w[2] - v[2]*w[1],
+		v[2]*w[0] - v[0]*w[2],
+		v[0]*w[1] - v[1]*w[0],
+	}
+}
+
+func (v Vec) Size() (ret float64) {
+	for i := range v {
+		ret += v[i] * v[i]
+	}
+	return math.Sqrt(ret)
+}
+
+func (v Vec) Unit() Vec {
+	size := v.Size()
+	if size == 0 {
+		return v
+	}
+	return v.Mul(1 / v.Size())
+}
+
+// Order returns the axes of v in descending order
+func (v Vec) Order() []Axis {
+	switch {
+	case v[X] > v[Y] && v[X] > v[Z]:
+		if v[Y] >= v[Z] {
+			return []Axis{X, Y, Z}
+		}
+		return []Axis{X, Z, Y}
+	case v[X] > v[Y]:
+		return []Axis{Z, X, Y}
+	case v[X] > v[Z]:
+		return []Axis{Y, X, Z}
+	case v[Y] > v[Z]:
+		return []Axis{Y, Z, X}
+	case v[Z] > v[Y]:
+		return []Axis{Z, Y, X}
+	default:
+		panic("order not found")
+	}
+}
+
 type Output struct {
 	Geom []Atom
 	max  float64
 }
 
 // Cart2D converts the point (x, y, z) to an image.Point
-func Cart2D(x, y, z float64) image.Point {
+func Cart2D(vec Vec) image.Point {
 	cw, ch := float64(width/2), float64(height/2)
-	wx := math.Round(-math.Sqrt2 / 2 * x * cw)
-	hx := math.Round(math.Sqrt2 / 2 * x * ch)
-	return image.Point{int(cw + y*cw + wx), int(ch - z*ch + hx)}
+	wx := math.Round(-math.Sqrt2 / 2 * vec[X] * cw)
+	hx := math.Round(math.Sqrt2 / 2 * vec[X] * ch)
+	return image.Point{int(cw + vec[Y]*cw + wx), int(ch - vec[Z]*ch + hx)}
 }
 
 // Normalize the geometries of atoms such that the largest coordinate
@@ -129,7 +205,7 @@ func ReadOut(filename string) (out Output) {
 	return
 }
 
-// plot axes
+// DONE plot axes
 
 // identify the center of mass of the molecule
 
@@ -171,6 +247,9 @@ func DrawRect(img *image.NRGBA, from, to image.Point) {
 func DrawLine(img *image.NRGBA, from, to image.Point) int {
 	// vertical line
 	if from.X == to.X {
+		if from.Y > to.Y {
+			to, from = from, to
+		}
 		for y := from.Y; y <= to.Y; y++ {
 			img.Set(to.X, y, color.NRGBA{0, 0, 0, 255})
 		}
@@ -179,12 +258,46 @@ func DrawLine(img *image.NRGBA, from, to image.Point) int {
 	// needed the precision from floating point here
 	m := float64(to.Y-from.Y) / float64(to.X-from.X)
 	b := float64(to.Y) - m*float64(to.X)
+	if from.X > to.X {
+		to, from = from, to
+	}
 	for x := from.X; x <= to.X; x++ {
 		img.Set(x, int(m*float64(x)+b), color.NRGBA{0, 0, 0, 255})
 	}
 	x := from.X - to.X
 	y := from.Y - to.Y
 	return int(math.Sqrt(float64(x*x + y*y)))
+}
+
+// Rodrigues applies Rodrigues' rotation formula to v using the unit
+// vector k as the axis of rotation and theta as the rotation angle in
+// radians
+func Rodrigues(v, k Vec, theta float64) (ret Vec) {
+	return v.Mul(math.Cos(theta)).
+		Add(k.Cross(v).Mul(math.Sin(theta))).
+		Add(k.Mul(k.Dot(v)).Mul(1 - math.Cos(theta)))
+}
+
+// DrawVec calls DrawLine and adds an arrow tip at to
+func DrawVec(img *image.NRGBA, from, to Vec) int {
+	// need to take this vector and do some trig on it to get the
+	// tips
+	v := to.Sub(from)
+	// w is a vector perpendicular to v
+	w := Vec{v[0], v[1], v[2]}
+	ord := v.Order()
+	w[ord[0]], w[ord[1]] = w[ord[1]], w[ord[0]]
+	w = w.Mul(-1)
+	if v.Dot(w) > 1e-4 {
+		panic("nonzero dot product")
+	}
+	// k is a unit vector perpendicular to the v-w plane
+	k := v.Cross(w).Unit()
+	rod := Rodrigues(v, k, 7.5*math.Pi/6).Unit().Mul(0.1)
+	mrod := Rodrigues(v, k, -7.5*math.Pi/6).Unit().Mul(0.1)
+	DrawLine(img, Cart2D(to), Cart2D(to.Add(rod)))
+	DrawLine(img, Cart2D(to), Cart2D(to.Add(mrod)))
+	return DrawLine(img, Cart2D(from), Cart2D(to))
 }
 
 // PlotAxes draws axes onto img using DrawLine
@@ -213,13 +326,15 @@ func main() {
 	PlotAxes(img)
 	out := ReadOut("tests/dip.out")
 	out.NormalizeGeom()
-	for _, atom := range out.Geom {
-		// atom = atom.Swap(X, Z)
-		atom = atom.Invert(Z)
-		fmt.Println(atom)
-		pt := Cart2D(atom.X, atom.Y, atom.Z)
-		DrawCircle(img, pt, 5, ptable[atom.Symbol])
-	}
+	// for _, atom := range out.Geom {
+	// 	// atom = atom.Swap(X, Z)
+	// 	atom = atom.Invert(Z)
+	// 	// fmt.Println(atom)
+	// 	pt := Cart2D(atom.Coords())
+	// 	DrawCircle(img, pt, 5, ptable[atom.Symbol])
+	// }
+	DrawVec(img, Vec{0, 0.5, 0}, Vec{0.5, 0.5, 0})
+	DrawVec(img, Vec{0, 0.5, 0}, Vec{0, 0.5, 0.5})
 	f, _ := os.Create("test.png")
 	png.Encode(f, img)
 	f.Close()

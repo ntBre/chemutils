@@ -2,6 +2,7 @@ package main
 
 import (
 	"image"
+	"math"
 	"reflect"
 	"testing"
 )
@@ -32,20 +33,42 @@ func TestReadOut(t *testing.T) {
 	}
 }
 
+func compAtom(a, b []Atom) bool {
+	eps := 1e-4
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].Symbol != b[i].Symbol {
+			return false
+		}
+		ac, bc := a[i].Coords(), b[i].Coords()
+		for c := range ac {
+			if math.Abs(ac[c]-bc[c]) > eps {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func TestNormalizeGeom(t *testing.T) {
 	out := ReadOut("tests/dip.out")
 	out.NormalizeGeom()
 	want := Output{
 		Geom: []Atom{
-			{"O", 0.008381603658656676, -0.0, -0.9100266619440347},
-			{"O", -0.07412624475690441, -0.0, 0.784029436951006},
-			{"H", 0.5217943577237824, 0.8597314317445198, 1.0},
-			{"H", 0.5217943577237824, -0.8597314317445198, 1.0},
+			{"O", 0.0041908, 0, -0.455013},
+			{"O", -0.0370631, 0, 0.392015},
+			{"H", 0.260897, 0.429866, 0.5},
+			{"H", 0.260897, -0.429866, 0.5},
 		},
 		max: 1.719075321,
 	}
-	if !reflect.DeepEqual(out, want) {
-		t.Errorf("got %v, wanted %v\n", out, want)
+	if !compAtom(out.Geom, want.Geom) {
+		t.Errorf("got %v, wanted %v\n", out.Geom, want.Geom)
+	}
+	if math.Abs(out.max-want.max) > 1e-4 {
+		t.Errorf("got %v, wanted %v\n", out.max, want.max)
 	}
 }
 
@@ -64,12 +87,31 @@ func TestCart2D(t *testing.T) {
 		{"-z", 0, 0, -1, image.Point{width / 2, height}},
 		{"yz", 0, 1, 1, image.Point{width, 0}},
 		{"y,-z", 0, 1, -1, image.Point{width, height}},
-		{"xy", 1, 1, 0, image.Point{width, 0}},
+		{"xy", 1, 1, 0, image.Point{165, 219}},
 	}
 	for _, test := range tests {
-		got := Cart2D(test.x, test.y, test.z)
+		got := Cart2D(Vec{test.x, test.y, test.z})
 		if got != test.want {
-			t.Errorf("%s: got %v, wanted %v\n", test.msg, got, test.want)
+			t.Errorf("%s: got %v, wanted %v\n", test.msg,
+				got, test.want)
+		}
+	}
+}
+
+func TestOrder(t *testing.T) {
+	tests := []struct {
+		v    Vec
+		want []Axis
+	}{
+		{
+			v:    Vec{1, 2, 3},
+			want: []Axis{Z, Y, X},
+		},
+	}
+	for _, test := range tests {
+		got := test.v.Order()
+		if !reflect.DeepEqual(got, test.want) {
+			t.Errorf("got %v, wanted %v\n", got, test.want)
 		}
 	}
 }
