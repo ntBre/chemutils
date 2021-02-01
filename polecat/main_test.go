@@ -57,7 +57,7 @@ func compAtom(a, b []Atom) bool {
 
 func TestNormalizeGeom(t *testing.T) {
 	out := ReadOut("tests/dip.out")
-	out.NormalizeGeom()
+	out.Normalize()
 	want := Output{
 		Geom: []Atom{
 			{"O", 0.0041908, 0, -0.455013},

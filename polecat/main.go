@@ -10,6 +10,7 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -32,12 +33,32 @@ var (
 	GREEN = color.NRGBA{0, 255, 0, 255}
 	BLUE  = color.NRGBA{0, 0, 255, 255}
 	BLACK = color.NRGBA{0, 0, 0, 255}
+
+	Origin = Vec{0, 0, 0}
 )
 
-var ptable = map[string]color.NRGBA{
-	"H": {0, 0, 0, 64},
-	"C": BLACK,
-	"O": RED,
+type Element struct {
+	Mass  float64
+	Size  int
+	Color color.NRGBA
+}
+
+var ptable = map[string]Element{
+	"H": {
+		Mass:  1.00782503223,
+		Size:  6,
+		Color: color.NRGBA{0, 0, 0, 64},
+	},
+	"C": {
+		Mass:  12.0,
+		Size:  8,
+		Color: BLACK,
+	},
+	"O": {
+		Mass:  15.99491462957,
+		Size:  8,
+		Color: RED,
+	},
 }
 
 type Atom struct {
@@ -65,6 +86,13 @@ func (a Atom) Invert(i Axis) Atom {
 	c := a.Coords()
 	c[i] *= -1.0
 	a.X, a.Y, a.Z = c[0], c[1], c[2]
+	return a
+}
+
+func (a Atom) Translate(v Vec) Atom {
+	a.X -= v[X]
+	a.Y -= v[Y]
+	a.Z -= v[Z]
 	return a
 }
 
@@ -165,6 +193,10 @@ type Output struct {
 	max  float64
 }
 
+func (o Output) Dips() []float64 {
+	return []float64{o.Dipx, o.Dipy, o.Dipz}
+}
+
 // Cart2D converts the point (x, y, z) to an image.Point
 func Cart2D(vec Vec) image.Point {
 	cw, ch := float64(width/2), float64(height/2)
@@ -173,15 +205,21 @@ func Cart2D(vec Vec) image.Point {
 	return image.Point{int(cw + vec[Y]*cw + wx), int(ch - vec[Z]*ch + hx)}
 }
 
-// Normalize the geometries of atoms such that the largest coordinate
-// has a magnitude of 0.75
-func (o Output) NormalizeGeom() {
+// Normalize the geometries and dipoles of atoms such that the largest
+// coordinate has a magnitude of 0.5
+func (o *Output) Normalize() {
 	scale := 2.0
 	for i := range o.Geom {
 		o.Geom[i].X /= scale * o.max
 		o.Geom[i].Y /= scale * o.max
 		o.Geom[i].Z /= scale * o.max
 	}
+	dips := []float64{o.Dipx, o.Dipy, o.Dipz}
+	sort.Sort(sort.Reverse(sort.Float64Slice(dips)))
+	max := dips[0]
+	o.Dipx /= scale * max
+	o.Dipy /= scale * max
+	o.Dipz /= scale * max
 }
 
 func ReadOut(filename string) (out Output) {
@@ -310,6 +348,11 @@ func Rodrigues(v, k Vec, theta float64) (ret Vec) {
 func DrawVec(img *image.NRGBA, from, to Vec) int {
 	// need to take this vector and do some trig on it to get the
 	// tips
+	l := DrawLine(img, BLACK, Cart2D(from), Cart2D(to))
+	// for very short vectors, the head is larger so don't draw
+	if l <= 1 {
+		return l
+	}
 	v := to.Sub(from)
 	// w is a vector perpendicular to v
 	w := Vec{v[0], v[1], v[2]}
@@ -325,7 +368,7 @@ func DrawVec(img *image.NRGBA, from, to Vec) int {
 	mrod := Rodrigues(v, k, -7.5*math.Pi/6).Unit().Mul(0.1)
 	DrawLine(img, BLACK, Cart2D(to), Cart2D(to.Add(rod)))
 	DrawLine(img, BLACK, Cart2D(to), Cart2D(to.Add(mrod)))
-	return DrawLine(img, BLACK, Cart2D(from), Cart2D(to))
+	return l
 }
 
 // PlotAxes draws axes onto img using DrawLine
@@ -346,21 +389,49 @@ func PlotAxes(img *image.NRGBA) {
 	)
 }
 
+// COM computes the center of mass vector for atoms
+func COM(atoms []Atom) Vec {
+	var (
+		m, mtot, xcm, ycm, zcm float64
+	)
+	for _, atom := range atoms {
+		m = ptable[atom.Symbol].Mass
+		mtot += m
+		xcm += m * atom.X
+		ycm += m * atom.Y
+		zcm += m * atom.Z
+	}
+	return Vec{
+		xcm / mtot,
+		ycm / mtot,
+		zcm / mtot,
+	}
+}
+
 func main() {
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	PlotAxes(img)
 	out := ReadOut("tests/dip.out")
-	out.NormalizeGeom()
+	out.Normalize()
+	com := COM(out.Geom)
 	for i := 0; i < len(out.Geom); i++ {
+		out.Geom[i] = out.Geom[i].Translate(com)
 		a := Cart2D(out.Geom[i].Coords())
 		for j := i + 1; j < len(out.Geom); j++ {
 			dist := out.Geom[i].Dist(out.Geom[j])
 			if dist < 1.0 {
-				DrawLine(img, BLACK, a, Cart2D(out.Geom[j].Coords()))
+				DrawLine(img, BLACK, a,
+					Cart2D(out.Geom[j].Coords()))
 			}
 		}
-		DrawCircle(img, a, 8, ptable[out.Geom[i].Symbol])
+		element := ptable[out.Geom[i].Symbol]
+		DrawCircle(img, a, element.Size, element.Color)
 	}
+	fmt.Println(out.Dips())
+	DrawVec(img, Origin.Add(com), Vec{out.Dipx, 0, 0}.Add(com))
+	// some problem with this drawvec call, should be tiny
+	DrawVec(img, Origin.Add(com), Vec{0, out.Dipy, 0}.Add(com))
+	DrawVec(img, Origin.Add(com), Vec{0, 0, out.Dipz}.Add(com))
 	f, _ := os.Create("test.png")
 	png.Encode(f, img)
 	f.Close()
