@@ -35,7 +35,7 @@ var (
 )
 
 var ptable = map[string]color.NRGBA{
-	"H": {0, 0, 0, 128},
+	"H": {0, 0, 0, 64},
 	"C": BLACK,
 	"O": RED,
 }
@@ -66,6 +66,11 @@ func (a Atom) Invert(i Axis) Atom {
 	c[i] *= -1.0
 	a.X, a.Y, a.Z = c[0], c[1], c[2]
 	return a
+}
+
+func (a Atom) Dist(b Atom) float64 {
+	vec := a.Coords().Sub(b.Coords())
+	return vec.Size()
 }
 
 func (a Atom) String() string {
@@ -243,26 +248,44 @@ func DrawRect(img *image.NRGBA, from, to image.Point) {
 	}
 }
 
+func Abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
 // DrawLine draws a line from from to to
-func DrawLine(img *image.NRGBA, from, to image.Point) int {
-	// vertical line
+func DrawLine(img *image.NRGBA, color color.NRGBA, from, to image.Point) int {
+	// // vertical line
 	if from.X == to.X {
 		if from.Y > to.Y {
 			to, from = from, to
 		}
 		for y := from.Y; y <= to.Y; y++ {
-			img.Set(to.X, y, color.NRGBA{0, 0, 0, 255})
+			img.Set(to.X, y, color)
 		}
 		return to.Y - from.Y
 	}
 	// needed the precision from floating point here
 	m := float64(to.Y-from.Y) / float64(to.X-from.X)
 	b := float64(to.Y) - m*float64(to.X)
-	if from.X > to.X {
-		to, from = from, to
-	}
-	for x := from.X; x <= to.X; x++ {
-		img.Set(x, int(m*float64(x)+b), color.NRGBA{0, 0, 0, 255})
+	// loop over the larger component
+	if Abs(from.X-to.X) > Abs(from.Y-to.Y) {
+		if from.X > to.X {
+			to, from = from, to
+		}
+		for x := from.X; x <= to.X; x++ {
+			img.Set(x, int(m*float64(x)+b), color)
+		}
+	} else {
+		if from.Y > to.Y {
+			to, from = from, to
+		}
+		// y = mx + b => (y - b)/m = x
+		for y := from.Y; y <= to.Y; y++ {
+			img.Set(int((float64(y)-b)/m), y, color)
+		}
 	}
 	x := from.X - to.X
 	y := from.Y - to.Y
@@ -295,15 +318,15 @@ func DrawVec(img *image.NRGBA, from, to Vec) int {
 	k := v.Cross(w).Unit()
 	rod := Rodrigues(v, k, 7.5*math.Pi/6).Unit().Mul(0.1)
 	mrod := Rodrigues(v, k, -7.5*math.Pi/6).Unit().Mul(0.1)
-	DrawLine(img, Cart2D(to), Cart2D(to.Add(rod)))
-	DrawLine(img, Cart2D(to), Cart2D(to.Add(mrod)))
-	return DrawLine(img, Cart2D(from), Cart2D(to))
+	DrawLine(img, BLACK, Cart2D(to), Cart2D(to.Add(rod)))
+	DrawLine(img, BLACK, Cart2D(to), Cart2D(to.Add(mrod)))
+	return DrawLine(img, BLACK, Cart2D(from), Cart2D(to))
 }
 
 // PlotAxes draws axes onto img using DrawLine
 func PlotAxes(img *image.NRGBA) {
-	DrawLine(img, image.Point{width / 2, 0}, image.Point{width / 2, height})
-	DrawLine(img,
+	DrawLine(img, BLUE, image.Point{width / 2, 0}, image.Point{width / 2, height})
+	DrawLine(img, GREEN,
 		image.Point{0, height / 2},
 		image.Point{width, height / 2},
 	)
@@ -312,7 +335,7 @@ func PlotAxes(img *image.NRGBA) {
 	// are the same, need the sqrt(w^2 + h^2)/2 if they are
 	// different
 	sw := int(math.Round(float64(width/2) * math.Sqrt2 / 2))
-	DrawLine(img,
+	DrawLine(img, RED,
 		image.Point{width/2 - sw, height/2 + sw},
 		image.Point{width/2 + sw, height/2 - sw},
 	)
@@ -326,15 +349,16 @@ func main() {
 	PlotAxes(img)
 	out := ReadOut("tests/dip.out")
 	out.NormalizeGeom()
-	// for _, atom := range out.Geom {
-	// 	// atom = atom.Swap(X, Z)
-	// 	atom = atom.Invert(Z)
-	// 	// fmt.Println(atom)
-	// 	pt := Cart2D(atom.Coords())
-	// 	DrawCircle(img, pt, 5, ptable[atom.Symbol])
-	// }
-	DrawVec(img, Vec{0, 0.5, 0}, Vec{0.5, 0.5, 0})
-	DrawVec(img, Vec{0, 0.5, 0}, Vec{0, 0.5, 0.5})
+	for i := 0; i < len(out.Geom); i++ {
+		a := Cart2D(out.Geom[i].Coords())
+		for j := i + 1; j < len(out.Geom); j++ {
+			dist := out.Geom[i].Dist(out.Geom[j])
+			if dist < 1.0 {
+				DrawLine(img, BLACK, a, Cart2D(out.Geom[j].Coords()))
+			}
+		}
+		DrawCircle(img, a, 5, ptable[out.Geom[i].Symbol])
+	}
 	f, _ := os.Create("test.png")
 	png.Encode(f, img)
 	f.Close()
