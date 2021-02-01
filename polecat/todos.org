@@ -1,0 +1,12 @@
+* TASKS [0/0]
+** TODO extract dipoles from file
+** TODO plot dipole vectors 
+** TODO identify the center of mass of the molecule
+** TODO translate the molecule to its center of mass 
+** TODO also have to translate the dipole vectors by this
+** TODO determine moments of inertia to get rotation axes
+** TODO plot the axes for the moments of inertia
+** TODO flag(s) for changing input orientation
+   Handles:
+   - identify plane of molecule, make that be plane of screen
+** DONE plot axes

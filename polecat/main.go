@@ -152,8 +152,16 @@ func (v Vec) Order() []Axis {
 	}
 }
 
+// Output is a type for holding information from a Molpro dipole
+// calculation output file. Geom is the cartesian geometry expressed
+// as a slice of Atoms; Dip{x,y,z} are the dipole moments (in AU) in
+// the respective directions; and max is the maximum value in the
+// geometry, used for normalization.
 type Output struct {
 	Geom []Atom
+	Dipx float64
+	Dipy float64
+	Dipz float64
 	max  float64
 }
 
@@ -190,6 +198,18 @@ func ReadOut(filename string) (out Output) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		switch {
+		case strings.Contains(line, "SETTING DIP"):
+			fields := strings.Fields(line)
+			// replace D scientific notation with E
+			fields[3] = strings.Replace(fields[3], "D", "E", -1)
+			switch fields[1] {
+			case "DIPX":
+				out.Dipx, _ = strconv.ParseFloat(fields[3], 64)
+			case "DIPY":
+				out.Dipy, _ = strconv.ParseFloat(fields[3], 64)
+			case "DIPZ":
+				out.Dipz, _ = strconv.ParseFloat(fields[3], 64)
+			}
 		case strings.Contains(line, "ATOMIC COORDINATES"):
 			geom = true
 		case strings.Contains(line, "Bond lengths in Bohr"):
@@ -209,21 +229,6 @@ func ReadOut(filename string) (out Output) {
 	}
 	return
 }
-
-// DONE plot axes
-
-// identify the center of mass of the molecule
-
-// translate the molecule so its center of mass is at the origin
-
-// also have to translate the dipole vectors by this
-
-// determine the moments of inertia to identify the rotation axes for
-// each constant
-
-// plot those axes
-
-// identify plane of molecule, make that be plane of screen
 
 // DrawCircle draws a circle of radius r at c
 func DrawCircle(img *image.NRGBA, c image.Point, r int, color color.NRGBA) {
@@ -341,9 +346,6 @@ func PlotAxes(img *image.NRGBA) {
 	)
 }
 
-// I have swap and invert, but need to apply them programatically
-// instead of by eyeballing
-
 func main() {
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	PlotAxes(img)
@@ -357,7 +359,7 @@ func main() {
 				DrawLine(img, BLACK, a, Cart2D(out.Geom[j].Coords()))
 			}
 		}
-		DrawCircle(img, a, 5, ptable[out.Geom[i].Symbol])
+		DrawCircle(img, a, 8, ptable[out.Geom[i].Symbol])
 	}
 	f, _ := os.Create("test.png")
 	png.Encode(f, img)
