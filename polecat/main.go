@@ -442,18 +442,45 @@ func MOI(atoms []Atom) (ia, ib, ic float64) {
 			}
 		}
 	}
+	fmt.Println("Moment of inertia tensor:")
+	printMat(moi)
 	var eig mat.Eigen
-	ok := eig.Factorize(moi, mat.EigenLeft)
+	ok := eig.Factorize(moi, mat.EigenRight)
 	if !ok {
 		panic("eigen decomposition failed")
 	}
 	dst := eig.Values(nil)
+	// extract eigenvectors to determine what the values match to
+	// columns should be the vectors
+	var vecs mat.CDense
+	eig.VectorsTo(&vecs)
+	rows, cols := vecs.Dims()
+	realVecs := mat.NewDense(rows, cols, nil)
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			realVecs.Set(i, j,
+				real(vecs.At(i, j)))
+		}
+	}
+	fmt.Println("Eigenvectors")
+	printMat(realVecs)
 	for _, v := range dst {
 		if imag(v) > 0 {
 			panic("imaginary moment of inertia")
 		}
 	}
 	return real(dst[0]), real(dst[1]), real(dst[2])
+}
+
+func printMat(matrix *mat.Dense) {
+	r, _ := matrix.Dims()
+	for row := 0; row < r; row++ {
+		fmt.Printf("%12.8f%12.8f%12.8f\n",
+			matrix.At(row, 0),
+			matrix.At(row, 1),
+			matrix.At(row, 2),
+		)
+	}
 }
 
 // Rot takes a principal moment of inertia and returns the
@@ -482,6 +509,9 @@ func main() {
 		DrawCircle(img, a, element.Size, element.Color)
 	}
 	ia, ib, ic := MOI(out.Geom)
+	fmt.Println("Moments of inertia:")
+	fmt.Println(ia, ib, ic)
+	fmt.Println("Rotational constants:")
 	fmt.Println(Rot(ia), Rot(ib), Rot(ic))
 	DrawVec(img, Origin.Add(com), Vec{out.Dipx, 0, 0}.Add(com))
 	DrawVec(img, Origin.Add(com), Vec{0, out.Dipy, 0}.Add(com))
