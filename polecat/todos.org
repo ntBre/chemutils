@@ -12,8 +12,9 @@
    - move the whole molecule -> origin += com
      and dip += com
 ** TODO determine moments of inertia to get rotation axes
-** TODO plot the axes for the moments of inertia
+** TODO plot the rotation axes
 ** TODO colored tubes for joining atoms
+   - halfway from color, half to color
 ** TODO flag(s) for changing input orientation
    Handles:
    - identify plane of molecule, make that be plane of screen

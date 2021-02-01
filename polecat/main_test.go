@@ -4,6 +4,7 @@ import (
 	"image"
 	"math"
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -114,6 +115,74 @@ func TestOrder(t *testing.T) {
 	for _, test := range tests {
 		got := test.v.Order()
 		if !reflect.DeepEqual(got, test.want) {
+			t.Errorf("got %v, wanted %v\n", got, test.want)
+		}
+	}
+}
+
+func compareFloats(a, b []float64, eps float64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if math.Abs(a[i]-b[i]) > eps {
+			return false
+		}
+	}
+	return true
+}
+
+func TestMOI(t *testing.T) {
+	eps := 1e-6
+	atoms := []Atom{
+		{"C", 0.000000000000, 0.000000000000, 0.000000000000},
+		{"C", 0.000000000000, 0.000000000000, 2.845112131228},
+		{"O", 1.899115961744, 0.000000000000, 4.139062527233},
+		{"H", -1.894048308506, 0.000000000000, 3.747688672216},
+		{"H", 1.942500819960, 0.000000000000, -0.701145981971},
+		{"H", -1.007295466862, -1.669971842687, -0.705916966833},
+		{"H", -1.007295466862, 1.669971842687, -0.705916966833},
+	}
+	com := COM(atoms)
+	for a := range atoms {
+		atoms[a] = atoms[a].Translate(com)
+	}
+	ia, ib, ic := MOI(atoms)
+	got := []float64{ia, ib, ic}
+	sort.Float64s(got)
+	want := []float64{31.964078, 178.649562, 199.371127}
+	if !compareFloats(got, want, eps) {
+		t.Errorf("got %v, wanted %v\n", got, want)
+	}
+}
+
+func TestRot(t *testing.T) {
+	eps := 1e-4
+	atoms := []Atom{
+		{"C", 0.000000000000, 0.000000000000, 0.000000000000},
+		{"C", 0.000000000000, 0.000000000000, 2.845112131228},
+		{"O", 1.899115961744, 0.000000000000, 4.139062527233},
+		{"H", -1.894048308506, 0.000000000000, 3.747688672216},
+		{"H", 1.942500819960, 0.000000000000, -0.701145981971},
+		{"H", -1.007295466862, -1.669971842687, -0.705916966833},
+		{"H", -1.007295466862, 1.669971842687, -0.705916966833},
+	}
+	com := COM(atoms)
+	for a := range atoms {
+		atoms[a] = atoms[a].Translate(com)
+	}
+	ia, ib, ic := MOI(atoms)
+	tests := []struct {
+		I    float64
+		want float64
+	}{
+		{ib, 1.8834},
+		{ia, 0.3370},
+		{ic, 0.3019},
+	}
+	for _, test := range tests {
+		got := Rot(test.I)
+		if math.Abs(got-test.want) > eps {
 			t.Errorf("got %v, wanted %v\n", got, test.want)
 		}
 	}

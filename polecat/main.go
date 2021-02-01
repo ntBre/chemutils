@@ -13,6 +13,14 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"gonum.org/v1/gonum/mat"
+)
+
+const (
+	h    = 6.62607554e-34 // m^2 kg/s
+	c    = 299792458.0    // m/s
+	toCm = 1 / 1.6605402e-27 / 5.29177249e-11 / 5.29177249e-11 / 100 / c
 )
 
 type Axis int
@@ -337,7 +345,8 @@ func DrawLine(img *image.NRGBA, color color.NRGBA, from, to image.Point) int {
 
 // Rodrigues applies Rodrigues' rotation formula to v using the unit
 // vector k as the axis of rotation and theta as the rotation angle in
-// radians
+// radians. Idea from
+// stackoverflow.com/questions/14607640/rotating-a-vector-in-3d-space
 func Rodrigues(v, k Vec, theta float64) (ret Vec) {
 	return v.Mul(math.Cos(theta)).
 		Add(k.Cross(v).Mul(math.Sin(theta))).
@@ -346,8 +355,6 @@ func Rodrigues(v, k Vec, theta float64) (ret Vec) {
 
 // DrawVec calls DrawLine and adds an arrow tip at to
 func DrawVec(img *image.NRGBA, from, to Vec) int {
-	// need to take this vector and do some trig on it to get the
-	// tips
 	l := DrawLine(img, BLACK, Cart2D(from), Cart2D(to))
 	// for very short vectors, the head is larger so don't draw
 	if l <= 1 {
@@ -408,6 +415,53 @@ func COM(atoms []Atom) Vec {
 	}
 }
 
+// MOI computes the principal moments of inertia in amu * bohr^2
+func MOI(atoms []Atom) (ia, ib, ic float64) {
+	moi := mat.NewDense(3, 3, nil)
+	var (
+		m    float64
+		c    Vec
+		f, g int
+	)
+	for _, atom := range atoms {
+		m = ptable[atom.Symbol].Mass
+		c = atom.Coords()
+		// x,y,z -> 0,1,2
+		for i := 0; i < 3; i++ {
+			for j := 0; j < 3; j++ {
+				if i == j {
+					f = (i + 1) % 3
+					g = (i + 2) % 3
+					moi.Set(i, j, moi.At(i, j)+
+						m*(c[f]*c[f]+
+							c[g]*c[g]))
+				} else {
+					moi.Set(i, j, moi.At(i, j)-
+						m*c[i]*c[j])
+				}
+			}
+		}
+	}
+	var eig mat.Eigen
+	ok := eig.Factorize(moi, mat.EigenLeft)
+	if !ok {
+		panic("eigen decomposition failed")
+	}
+	dst := eig.Values(nil)
+	for _, v := range dst {
+		if imag(v) > 0 {
+			panic("imaginary moment of inertia")
+		}
+	}
+	return real(dst[0]), real(dst[1]), real(dst[2])
+}
+
+// Rot takes a principal moment of inertia and returns the
+// associated principal rotational constant in cm-1
+func Rot(I float64) float64 {
+	return toCm * h / (8 * math.Pi * math.Pi * I)
+}
+
 func main() {
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	PlotAxes(img)
@@ -427,9 +481,9 @@ func main() {
 		element := ptable[out.Geom[i].Symbol]
 		DrawCircle(img, a, element.Size, element.Color)
 	}
-	fmt.Println(out.Dips())
+	ia, ib, ic := MOI(out.Geom)
+	fmt.Println(Rot(ia), Rot(ib), Rot(ic))
 	DrawVec(img, Origin.Add(com), Vec{out.Dipx, 0, 0}.Add(com))
-	// some problem with this drawvec call, should be tiny
 	DrawVec(img, Origin.Add(com), Vec{0, out.Dipy, 0}.Add(com))
 	DrawVec(img, Origin.Add(com), Vec{0, 0, out.Dipz}.Add(com))
 	f, _ := os.Create("test.png")
