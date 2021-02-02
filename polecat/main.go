@@ -15,7 +15,14 @@ import (
 	"strconv"
 	"strings"
 
+	"flag"
+
 	"gonum.org/v1/gonum/mat"
+)
+
+// flags
+var (
+	noax = flag.Bool("noax", false, "turn off axes")
 )
 
 const (
@@ -38,10 +45,11 @@ const (
 )
 
 var (
-	RED   = color.NRGBA{255, 0, 0, 255}
-	GREEN = color.NRGBA{0, 255, 0, 255}
-	BLUE  = color.NRGBA{0, 0, 255, 255}
-	BLACK = color.NRGBA{0, 0, 0, 255}
+	RED    = color.NRGBA{255, 0, 0, 255}
+	GREEN  = color.NRGBA{0, 255, 0, 255}
+	BLUE   = color.NRGBA{0, 0, 255, 255}
+	BLACK  = color.NRGBA{0, 0, 0, 255}
+	ORANGE = color.NRGBA{252, 186, 3, 255}
 
 	Origin = Vec{0, 0, 0}
 )
@@ -355,8 +363,8 @@ func Rodrigues(v, k Vec, theta float64) (ret Vec) {
 }
 
 // DrawVec calls DrawLine and adds an arrow tip at to
-func DrawVec(img *image.NRGBA, from, to Vec) int {
-	l := DrawLine(img, BLACK, Cart2D(from), Cart2D(to))
+func DrawVec(img *image.NRGBA, color color.NRGBA, from, to Vec) int {
+	l := DrawLine(img, color, Cart2D(from), Cart2D(to))
 	// for very short vectors, the head is larger so don't draw
 	if l <= 1 {
 		return l
@@ -374,8 +382,8 @@ func DrawVec(img *image.NRGBA, from, to Vec) int {
 	k := v.Cross(w).Unit()
 	rod := Rodrigues(v, k, 7.5*math.Pi/6).Unit().Mul(0.1)
 	mrod := Rodrigues(v, k, -7.5*math.Pi/6).Unit().Mul(0.1)
-	DrawLine(img, BLACK, Cart2D(to), Cart2D(to.Add(rod)))
-	DrawLine(img, BLACK, Cart2D(to), Cart2D(to.Add(mrod)))
+	DrawLine(img, color, Cart2D(to), Cart2D(to.Add(rod)))
+	DrawLine(img, color, Cart2D(to), Cart2D(to.Add(mrod)))
 	return l
 }
 
@@ -496,15 +504,17 @@ func Rot(I float64) float64 {
 	return toCm * h / (8 * math.Pi * math.Pi * I)
 }
 
-// NEED TO DO THE MOI BEFORE CONVERTING TO IMAGE UNITS
-// compare output from fake.out to make sure we're correct
 func main() {
-	if len(os.Args) < 2 {
+	flag.Parse()
+	args := flag.Args()
+	if len(args) < 1 {
 		panic("no input file given")
 	}
-	infile := os.Args[1]
+	infile := args[0]
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
-	PlotAxes(img)
+	if !*noax {
+		PlotAxes(img)
+	}
 	out := ReadOut(infile)
 	com := COM(out.Geom)
 	for i := range out.Geom {
@@ -529,13 +539,15 @@ func main() {
 		DrawCircle(img, a, element.Size, element.Color)
 	}
 	// dipole vectors
-	DrawVec(img, Origin.Add(com), Vec{out.Dipx, 0, 0}.Add(com))
-	DrawVec(img, Origin.Add(com), Vec{0, out.Dipy, 0}.Add(com))
-	DrawVec(img, Origin.Add(com), Vec{0, 0, out.Dipz}.Add(com))
+	DrawVec(img, BLACK, Origin.Add(com), Vec{out.Dipx, 0, 0}.Add(com))
+	DrawVec(img, BLACK, Origin.Add(com), Vec{0, out.Dipy, 0}.Add(com))
+	DrawVec(img, BLACK, Origin.Add(com), Vec{0, 0, out.Dipz}.Add(com))
+	null, _ := os.Open(os.DevNull)
+	fmt.Fprint(null, eva, evb, evc)
 	// moment of inertia axes
-	DrawVec(img, Origin.Add(com), eva.Add(com))
-	DrawVec(img, Origin.Add(com), evb.Add(com))
-	DrawVec(img, Origin.Add(com), evc.Add(com))
+	// DrawVec(img, RED, Origin.Add(com), eva.Add(com))
+	// DrawVec(img, GREEN, Origin.Add(com), evb.Add(com))
+	// DrawVec(img, BLUE, Origin.Add(com), evc.Add(com))
 	f, _ := os.Create("test.png")
 	png.Encode(f, img)
 	f.Close()
