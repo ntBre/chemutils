@@ -1,4 +1,5 @@
 // (wobuf "sxiv test.png")
+// (zap "~/School/Research/Pubs/Oxywater/" "main")
 package main
 
 import (
@@ -475,7 +476,7 @@ func MOI(atoms []Atom) (ia, ib, ic float64) {
 func printMat(matrix *mat.Dense) {
 	r, _ := matrix.Dims()
 	for row := 0; row < r; row++ {
-		fmt.Printf("%12.8f%12.8f%12.8f\n",
+		fmt.Printf("%14.8f%14.8f%14.8f\n",
 			matrix.At(row, 0),
 			matrix.At(row, 1),
 			matrix.At(row, 2),
@@ -489,14 +490,27 @@ func Rot(I float64) float64 {
 	return toCm * h / (8 * math.Pi * math.Pi * I)
 }
 
+// NEED TO DO THE MOI BEFORE CONVERTING TO IMAGE UNITS
+// compare output from fake.out to make sure we're correct
 func main() {
+	if len(os.Args) < 2 {
+		panic("no input file given")
+	}
+	infile := os.Args[1]
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	PlotAxes(img)
-	out := ReadOut("tests/dip.out")
-	out.Normalize()
+	out := ReadOut(infile)
 	com := COM(out.Geom)
-	for i := 0; i < len(out.Geom); i++ {
+	for i := range out.Geom {
 		out.Geom[i] = out.Geom[i].Translate(com)
+	}
+	ia, ib, ic := MOI(out.Geom)
+	fmt.Println("Moments of inertia:")
+	fmt.Println(ia, ib, ic)
+	fmt.Println("Rotational constants:")
+	fmt.Println(Rot(ia), Rot(ib), Rot(ic))
+	out.Normalize()
+	for i := 0; i < len(out.Geom); i++ {
 		a := Cart2D(out.Geom[i].Coords())
 		for j := i + 1; j < len(out.Geom); j++ {
 			dist := out.Geom[i].Dist(out.Geom[j])
@@ -508,11 +522,6 @@ func main() {
 		element := ptable[out.Geom[i].Symbol]
 		DrawCircle(img, a, element.Size, element.Color)
 	}
-	ia, ib, ic := MOI(out.Geom)
-	fmt.Println("Moments of inertia:")
-	fmt.Println(ia, ib, ic)
-	fmt.Println("Rotational constants:")
-	fmt.Println(Rot(ia), Rot(ib), Rot(ic))
 	DrawVec(img, Origin.Add(com), Vec{out.Dipx, 0, 0}.Add(com))
 	DrawVec(img, Origin.Add(com), Vec{0, out.Dipy, 0}.Add(com))
 	DrawVec(img, Origin.Add(com), Vec{0, 0, out.Dipz}.Add(com))
