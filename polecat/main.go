@@ -416,8 +416,9 @@ func COM(atoms []Atom) Vec {
 	}
 }
 
-// MOI computes the principal moments of inertia in amu * bohr^2
-func MOI(atoms []Atom) (ia, ib, ic float64) {
+// MOI computes the principal moments of inertia in amu * bohr^2 and
+// returns the eigenvectors corresponding to each moment
+func MOI(atoms []Atom) (ia, ib, ic float64, eva, evb, evc Vec) {
 	moi := mat.NewDense(3, 3, nil)
 	var (
 		m    float64
@@ -465,12 +466,17 @@ func MOI(atoms []Atom) (ia, ib, ic float64) {
 	}
 	fmt.Println("Eigenvectors")
 	printMat(realVecs)
+	evs := make([]Vec, 3)
+	for i := 0; i < rows; i++ {
+		col := realVecs.ColView(i)
+		evs[i] = Vec{col.AtVec(0), col.AtVec(1), col.AtVec(2)}
+	}
 	for _, v := range dst {
 		if imag(v) > 0 {
 			panic("imaginary moment of inertia")
 		}
 	}
-	return real(dst[0]), real(dst[1]), real(dst[2])
+	return real(dst[0]), real(dst[1]), real(dst[2]), evs[0], evs[1], evs[2]
 }
 
 func printMat(matrix *mat.Dense) {
@@ -504,11 +510,11 @@ func main() {
 	for i := range out.Geom {
 		out.Geom[i] = out.Geom[i].Translate(com)
 	}
-	ia, ib, ic := MOI(out.Geom)
-	fmt.Println("Moments of inertia:")
-	fmt.Println(ia, ib, ic)
-	fmt.Println("Rotational constants:")
-	fmt.Println(Rot(ia), Rot(ib), Rot(ic))
+	ia, ib, ic, eva, evb, evc := MOI(out.Geom)
+	fmt.Println("Moments of inertia (amu bohr^2):")
+	fmt.Printf("%14.8f%14.8f%14.8f\n", ia, ib, ic)
+	fmt.Println("Rotational constants (cm-1):")
+	fmt.Printf("%14.8f%14.8f%14.8f\n", Rot(ia), Rot(ib), Rot(ic))
 	out.Normalize()
 	for i := 0; i < len(out.Geom); i++ {
 		a := Cart2D(out.Geom[i].Coords())
@@ -522,9 +528,14 @@ func main() {
 		element := ptable[out.Geom[i].Symbol]
 		DrawCircle(img, a, element.Size, element.Color)
 	}
+	// dipole vectors
 	DrawVec(img, Origin.Add(com), Vec{out.Dipx, 0, 0}.Add(com))
 	DrawVec(img, Origin.Add(com), Vec{0, out.Dipy, 0}.Add(com))
 	DrawVec(img, Origin.Add(com), Vec{0, 0, out.Dipz}.Add(com))
+	// moment of inertia axes
+	DrawVec(img, Origin.Add(com), eva.Add(com))
+	DrawVec(img, Origin.Add(com), evb.Add(com))
+	DrawVec(img, Origin.Add(com), evc.Add(com))
 	f, _ := os.Create("test.png")
 	png.Encode(f, img)
 	f.Close()

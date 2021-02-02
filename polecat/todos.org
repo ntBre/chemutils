@@ -1,4 +1,4 @@
-* TASKS [6/10]
+* TASKS [8/10]
 ** DONE extract dipoles from file
 ** DONE plot dipole vectors 
    - kinda ugly but technically done
@@ -11,8 +11,12 @@
    - dip vector is origin -> dip
    - move the whole molecule -> origin += com
      and dip += com
-** TODO determine moments of inertia to get rotation axes
-** TODO plot the rotation axes
+** DONE determine moments of inertia to get rotation axes
+** DONE plot the rotation axes
+   - MOI eigenvectors (cols of ev matrix) are the axes, need to match
+     them to the eigenvalues
+   - maybe make these colors, original axes black
+** TODO figure out how to represent everything pictorially
 ** TODO colored tubes for joining atoms
    - halfway from color, half to color
 ** TODO flag(s) for changing input orientation
