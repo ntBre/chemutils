@@ -119,7 +119,7 @@ func (a Atom) Dist(b Atom) float64 {
 }
 
 func (a Atom) String() string {
-	return fmt.Sprintf("%s %8.4f %8.4f %8.4f",
+	return fmt.Sprintf("%s %12.8f %12.8f %12.8f",
 		a.Symbol, a.X, a.Y, a.Z)
 }
 
@@ -517,8 +517,10 @@ func main() {
 	}
 	out := ReadOut(infile)
 	com := COM(out.Geom)
+	fmt.Println("Translated geometry:")
 	for i := range out.Geom {
 		out.Geom[i] = out.Geom[i].Translate(com)
+		fmt.Println(out.Geom[i])
 	}
 	ia, ib, ic, eva, evb, evc := MOI(out.Geom)
 	fmt.Println("Moments of inertia (amu bohr^2):")
