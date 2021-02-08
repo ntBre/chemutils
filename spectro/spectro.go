@@ -39,6 +39,7 @@ type Spectro struct {
 	Coriol   string
 	Darlin   string
 	Nfreqs   int
+	Dummies  string
 }
 
 // Load loads a spectro input file, assuming no resonances included,
@@ -51,13 +52,16 @@ func Load(filename string) (*Spectro, error) {
 	defer f.Close()
 	scanner := bufio.NewScanner(f)
 	var (
-		buf  bytes.Buffer
-		line string
-		sp   Spectro
-		geom bool
+		buf    bytes.Buffer
+		line   string
+		sp     Spectro
+		geom   bool
+		dummy  bool
+		fields []string
 	)
 	for scanner.Scan() {
 		line = scanner.Text()
+		fields = strings.Fields(line)
 		switch {
 		case strings.Contains(line, "GEOM"):
 			buf.WriteString(line + "\n")
@@ -71,6 +75,18 @@ func Load(filename string) (*Spectro, error) {
 			buf.Reset()
 			geom = false
 			buf.WriteString(line + "\n")
+		case dummy && (strings.Contains(line, "WEIGHT") ||
+			strings.Contains(line, "CURVIL")):
+			sp.Dummies = buf.String()
+			buf.Reset()
+			dummy = false
+			buf.WriteString(line + "\n")
+		case geom && fields[0] == "0.00":
+			sp.Geometry = buf.String()
+			buf.Reset()
+			geom = false
+			buf.WriteString(line + "\n")
+			dummy = true
 		default:
 			buf.WriteString(line + "\n")
 		}
@@ -92,6 +108,31 @@ func (s *Spectro) FormatGeom(names []string, coords string) {
 			atmNum[strings.ToUpper(names[n])],
 			fields[0], fields[1], fields[2])
 	}
+	if len(s.Dummies) > 0 {
+		fcord := strings.Fields(coords)
+		fgeom := make([]string, 0)
+		fdumm := make([]string, 0)
+		// skip natoms with 1: and trailing newline with trimspace
+		glines := strings.Split(strings.TrimSpace(s.Geometry), "\n")[1:]
+		dlines := strings.Split(strings.TrimSpace(s.Dummies), "\n")
+		for g := range glines {
+			fgeom = append(fgeom, strings.Fields(glines[g])[1:]...)
+			fdumm = append(fdumm, strings.Fields(dlines[g])[1:]...)
+		}
+		for i := range fgeom {
+			for j := range fdumm {
+				if fdumm[j] == fgeom[i] {
+					fdumm[j] = fcord[i]
+				}
+			}
+		}
+		var str strings.Builder
+		for i := 0; i < len(fdumm); i += 3 {
+			fmt.Fprintf(&str, "%5.2f%18s%18s%18s\n",
+				0.00, fdumm[i], fdumm[i+1], fdumm[i+2])
+		}
+		s.Dummies = str.String()
+	}
 	s.Geometry = buf.String()
 }
 
@@ -100,6 +141,7 @@ func (s *Spectro) WriteInput(filename string) error {
 	var buf bytes.Buffer
 	buf.WriteString(s.Head)
 	buf.WriteString(s.Geometry)
+	buf.WriteString(s.Dummies)
 	buf.WriteString(s.Body)
 	if s.Coriol != "" {
 		buf.WriteString("# CORIOL #####\n")
