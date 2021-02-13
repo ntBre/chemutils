@@ -56,6 +56,7 @@ func Spectro(filename string) *Result {
 		geom     bool
 		fermi1   bool
 		fermi2   bool
+		nobza    bool = true
 		buf      bytes.Buffer
 		// this is cute
 		gparams = []string{"", "", "r", "<"}
@@ -75,7 +76,8 @@ func Spectro(filename string) *Result {
 			skip += 3
 			harmFund = true
 		case harmFund && len(line) > 1:
-			if strings.Contains(line, "DUNHAM") {
+			if strings.Contains(line, "DUNHAM") ||
+				strings.Contains(line, "VIBRATIONAL ENERGY AND") {
 				harmFund = false
 			} else if freq.MatchString(fields[0]) && len(fields) > 2 {
 				h, _ := strconv.ParseFloat(fields[1], 64)
@@ -83,13 +85,14 @@ func Spectro(filename string) *Result {
 				res.Harm = append(res.Harm, h)
 				res.Fund = append(res.Fund, f)
 			}
-		case strings.Contains(line, "STATE NO."):
+		case strings.Contains(line, "STATE NO.") &&
+			!strings.Contains(line, "SPECTRUM"):
 			skip += 2
 			corr = true
 		case corr && strings.Contains(line, "*******************"):
 			corr = false
 			good = true
-		case corr && strings.Contains(line, "NON-DEG"):
+		case corr && strings.Contains(line, "NON-DEG (Vs)"):
 			// need to grab freq, then check if the next line
 			// contains more state info before appending
 			holdZPT, _ = strconv.ParseFloat(fields[1], 64)
@@ -108,7 +111,22 @@ func Spectro(filename string) *Result {
 				}
 				state = append(state, f)
 			}
-		case corr && len(fields) > 0:
+		case corr && good && strings.Contains(line, "DEGEN   (Vt)"):
+			for _, f := range fields[3:] {
+				// if there's a 2 or a second one it's bad
+				if f == "2" || (one && f == "1") {
+					good = false
+					break
+				} else if f == "1" {
+					one = true
+				}
+				state = append(state, f)
+			}
+		case corr && good && strings.Contains(line, "DEGEN   (Vl)"):
+		case corr && good && len(fields) > 0:
+			if filename == "testfiles/degen.out" {
+				fmt.Println(good, holdFreq, line)
+			}
 			for _, f := range fields {
 				if f == "2" || (one && f == "1") {
 					good = false
@@ -121,6 +139,8 @@ func Spectro(filename string) *Result {
 		case corr && len(fields) == 0 && good:
 			if !one {
 				res.ZPT = holdZPT
+			} else if pos < 2 {
+				continue
 			} else {
 				for pos-2 >= len(res.Corr) {
 					res.Corr = append(res.Corr, 0)
@@ -138,6 +158,9 @@ func Spectro(filename string) *Result {
 				state = append(state, f)
 			}
 		case good && strings.Contains(line, "BZA"):
+			rot = true
+			nobza = false
+		case good && nobza && strings.Contains(line, "BZS"):
 			rot = true
 		case rot && good:
 			state = nil
