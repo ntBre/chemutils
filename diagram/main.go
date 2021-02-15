@@ -34,6 +34,8 @@ var (
 	grid = flag.String("grid", "",
 		"h,v: draw a grid of h horizontal and v "+
 			"vertical lines on the image")
+	outfile = flag.String("o", "",
+		"save the resulting image to file")
 )
 
 // Display encodes img to a temporary file and displays it using Viewer
@@ -181,6 +183,9 @@ func ParseGrid(str string) (h, v int) {
 	return
 }
 
+// TODO flag for displaying, default to writing file
+// - check for existing file with same name
+
 func main() {
 	log.SetFlags(0)
 	log.SetPrefix("diagram: ")
@@ -213,8 +218,19 @@ func main() {
 			caption.Position.Y+lh/2,
 		), label, image.Point{0, 0}, draw.Over)
 	}
-	err = Display(&pic)
-	if err != nil {
-		panic(err)
+	if *outfile != "" {
+		f, err := os.Create(*outfile)
+		if err != nil {
+			panic(err)
+		}
+		err = png.Encode(f, &pic)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		err = Display(&pic)
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 }
