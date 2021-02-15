@@ -19,11 +19,6 @@ import (
 	"strings"
 )
 
-// Globals
-var (
-	Viewer = "sxiv"
-)
-
 // Colors
 var (
 	Black = color.NRGBA{0, 0, 0, 255}
@@ -38,7 +33,8 @@ var (
 		"save the resulting image to file")
 )
 
-// Display encodes img to a temporary file and displays it using Viewer
+// Display encodes img to a temporary file and displays it using the
+// system default image viewer
 func Display(img image.Image) error {
 	tmp, err := ioutil.TempFile("", "img*.png")
 	defer func() {
@@ -52,7 +48,7 @@ func Display(img image.Image) error {
 	if err != nil {
 		return err
 	}
-	cmd := exec.Command(Viewer, tmp.Name())
+	cmd := exec.Command("xdg-open", tmp.Name())
 	return cmd.Run()
 }
 
@@ -182,9 +178,6 @@ func ParseGrid(str string) (h, v int) {
 	v, _ = strconv.Atoi(split[1])
 	return
 }
-
-// TODO flag for displaying, default to writing file
-// - check for existing file with same name
 
 func main() {
 	log.SetFlags(0)
