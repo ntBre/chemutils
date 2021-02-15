@@ -24,6 +24,16 @@ var (
 	Black = color.NRGBA{0, 0, 0, 255}
 )
 
+const (
+	help = `diagram <captions> <image.png>
+where captions is a caption file with lines of the format
+    text size xpos,ypos 
+text is a string for the caption (without spaces), size is an integer
+font size in points, and xpos and ypos are coordinates for the caption
+in pixels.
+Flags:`
+)
+
 // Flags
 var (
 	grid = flag.String("grid", "",
@@ -180,6 +190,11 @@ func ParseGrid(str string) (h, v int) {
 }
 
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(),
+			"Usage: %s\n", help)
+		flag.PrintDefaults()
+	}
 	log.SetFlags(0)
 	log.SetPrefix("diagram: ")
 	flag.Parse()
