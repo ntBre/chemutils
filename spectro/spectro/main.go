@@ -1,3 +1,5 @@
+// (setq compile-command "go build . && scp spectro woods:Programs/gspectro/gspectro")
+// (recompile)
 package main
 
 import (

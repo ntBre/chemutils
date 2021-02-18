@@ -291,7 +291,8 @@ func (s *Spectro) ReadOutput(filename string) {
 		case strings.Contains(line, "DARLING-DENNISON RESONANCES"):
 			skip = 3
 			darlin = true
-		case darlin && strings.Contains(line, "<>"):
+		case darlin && (strings.Contains(line, "<>") ||
+			strings.Contains(line, "NO MODES")):
 			darlin = false
 		case darlin:
 			darlinCount++

@@ -316,6 +316,29 @@ func TestReadSpectroOutput(t *testing.T) {
 `,
 			nfreqs: 6,
 		},
+		{
+			msg:  "no darling",
+			load: "testfiles/zach.in",
+			read: "testfiles/zach.out",
+			fermi1: `    2
+    5    3
+    6    5
+`,
+			fermi2: `    1
+    6    4    3
+`,
+			polyad: `    1
+    5
+    0    0    1    0    0    0
+    0    0    0    0    1    0
+    0    0    0    0    2    0
+    0    0    0    0    0    2
+    0    0    0    1    0    1
+`,
+			coriol: "",
+			darlin: "",
+			nfreqs: 6,
+		},
 		// darlin string
 		// nfreqs int
 	}
