@@ -310,6 +310,13 @@ func (id Intder) PrintSiic(siic []int) string {
 			id.Geom[siic[2]].Sym, siic[2]+1,
 			id.Geom[siic[3]].Sym, siic[3]+1,
 		)
+	case LIN1:
+		fmt.Fprintf(&str, "LIN(%s_%d - %s_%d - %s_%d - %s_%d)",
+			id.Geom[siic[0]].Sym, siic[0]+1,
+			id.Geom[siic[1]].Sym, siic[1]+1,
+			id.Geom[siic[2]].Sym, siic[2]+1,
+			id.Geom[siic[3]].Sym, siic[3]+1,
+		)
 	}
 	return str.String()
 }
@@ -349,14 +356,16 @@ func (id Intder) String() string {
 // ptable is a map from the default string masses in intder to the
 // corresponding atomic symbols
 var ptable = map[string]string{
-	"12.000000": "C",
 	"1.007825":  "H",
+	"4.002600":  "He",
+	"12.000000": "C",
 }
 
 const (
 	STRE int = iota
 	BEND
 	TORS
+	LIN1
 )
 
 func ReadIntder(filename string) *Intder {
@@ -457,6 +466,8 @@ func ReadIntder(filename string) *Intder {
 				ids = append(ids, BEND)
 			case "TORS":
 				ids = append(ids, TORS)
+			case "LIN1":
+				ids = append(ids, LIN1)
 			default:
 				panic("this type of coordinate not implemented")
 			}

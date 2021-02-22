@@ -445,43 +445,48 @@ func TestSpectro(t *testing.T) {
 }
 
 func TestIntder(t *testing.T) {
-	got := ReadIntder("testfiles/intder.out")
-	want := Intder{
-		Geom: []Atom{
-			{"C", 0.0000000000, 0.0000000000, -0.8888094004},
-			{"C", 0.0000000000, 0.6626968171, 0.3682892206},
-			{"C", 0.0000000000, -0.6626968171, 0.3682892206},
-			{"H", 0.0000000000, 1.5951938489, 0.9069605214},
-			{"H", 0.0000000000, -1.5951938489, 0.9069605214},
-		},
-		SiIC: [][]int{
-			{1, 2, -1, -1, 0},
-			{0, 1, -1, -1, 0},
-			{0, 2, -1, -1, 0},
-			{1, 3, -1, -1, 0},
-			{2, 4, -1, -1, 0},
-			{3, 1, 0, -1, 1},
-			{4, 2, 0, -1, 1},
-			{3, 1, 0, 2, 2},
-			{4, 2, 0, 1, 2},
-		},
-		SyIC: [][]int{
-			{0},
-			{1, 2},
-			{3, 4},
-			{5, 6},
-			{1, -2},
-			{3, -4},
-			{5, -6},
-			{7, -8},
-			{7, 8},
-		},
-		Freq: []float64{
-			785.1, 901.7, 908.6,
-			992.8, 1090.6, 1307.4,
-			1623.6, 3247.6, 3281.4,
-		},
-		Vibs: `1.000S_{8}
+	tests := []struct {
+		infile string
+		want   Intder
+	}{
+		{
+			infile: "testfiles/intder.out",
+			want: Intder{
+				Geom: []Atom{
+					{"C", 0.0000000000, 0.0000000000, -0.8888094004},
+					{"C", 0.0000000000, 0.6626968171, 0.3682892206},
+					{"C", 0.0000000000, -0.6626968171, 0.3682892206},
+					{"H", 0.0000000000, 1.5951938489, 0.9069605214},
+					{"H", 0.0000000000, -1.5951938489, 0.9069605214},
+				},
+				SiIC: [][]int{
+					{1, 2, -1, -1, 0},
+					{0, 1, -1, -1, 0},
+					{0, 2, -1, -1, 0},
+					{1, 3, -1, -1, 0},
+					{2, 4, -1, -1, 0},
+					{3, 1, 0, -1, 1},
+					{4, 2, 0, -1, 1},
+					{3, 1, 0, 2, 2},
+					{4, 2, 0, 1, 2},
+				},
+				SyIC: [][]int{
+					{0},
+					{1, 2},
+					{3, 4},
+					{5, 6},
+					{1, -2},
+					{3, -4},
+					{5, -6},
+					{7, -8},
+					{7, 8},
+				},
+				Freq: []float64{
+					785.1, 901.7, 908.6,
+					992.8, 1090.6, 1307.4,
+					1623.6, 3247.6, 3281.4,
+				},
+				Vibs: `1.000S_{8}
 0.809S_{4}+0.133S_{2}-0.057S_{1}
 0.810S_{7}+0.189S_{5}
 1.000S_{9}
@@ -491,27 +496,81 @@ func TestIntder(t *testing.T) {
 0.998S_{6}
 0.971S_{3}
 `,
+			},
+		},
+		{
+			infile: "testfiles/mason.out",
+			want: Intder{
+				Geom: []Atom{
+					{"He", 0.0000000000, 0.0000000000, -1.7679827066},
+					{"H", 0.0000000000, 0.0000000000, -0.5307856662},
+					{"H", 0.0000000000, 0.0000000000, 0.5307856678},
+					{"He", 0.0000000000, 0.0000000000, 1.7679827049},
+				},
+				SiIC: [][]int{
+					{1, 2, -1, -1, 0},
+					{0, 1, -1, -1, 0},
+					{0, 2, -1, -1, 0},
+					{1, 3, -1, -1, 0},
+					{2, 4, -1, -1, 0},
+					{3, 1, 0, -1, 1},
+					{4, 2, 0, -1, 1},
+					{3, 1, 0, 2, 2},
+					{4, 2, 0, 1, 2},
+				},
+				SyIC: [][]int{
+					{0},
+					{1, 2},
+					{3, 4},
+					{5, 6},
+					{1, -2},
+					{3, -4},
+					{5, -6},
+					{7, -8},
+					{7, 8},
+				},
+				Freq: []float64{
+					785.1, 901.7, 908.6,
+					992.8, 1090.6, 1307.4,
+					1623.6, 3247.6, 3281.4,
+				},
+				Vibs: `1.000S_{8}
+0.809S_{4}+0.133S_{2}-0.057S_{1}
+0.810S_{7}+0.189S_{5}
+1.000S_{9}
+0.809S_{5}-0.190S_{7}
+0.686S_{2}-0.187S_{4}-0.126S_{1}
+0.793S_{1}+0.174S_{2}
+0.998S_{6}
+0.971S_{3}
+`,
+			},
+		},
 	}
-	if !reflect.DeepEqual(got, want) {
-		gfile := "/tmp/got.txt"
-		wfile := "/tmp/want.txt"
-		ioutil.WriteFile(gfile, []byte(got.String()), 0755)
-		ioutil.WriteFile(wfile, []byte(want.String()), 0755)
-		fmt.Printf("(diff %q %q)\n", gfile, wfile)
-		if !reflect.DeepEqual(got.Geom, want.Geom) {
-			t.Errorf("got\n%v, wanted\n%v\n", got.Geom, want.Geom)
-		}
-		if !reflect.DeepEqual(got.SiIC, want.SiIC) {
-			t.Errorf("got\n%v, wanted\n%v\n", got.SiIC, want.SiIC)
-		}
-		if !reflect.DeepEqual(got.SyIC, want.SyIC) {
-			t.Errorf("got\n%v, wanted\n%v\n", got.SyIC, want.SyIC)
-		}
-		if !reflect.DeepEqual(got.Freq, want.Freq) {
-			t.Errorf("got\n%v, wanted\n%v\n", got.Freq, want.Freq)
-		}
-		if !reflect.DeepEqual(got.Vibs, want.Vibs) {
-			t.Errorf("got\n%#+v, wanted\n%#+v\n", got.Vibs, want.Vibs)
+	for _, test := range tests {
+		got := ReadIntder(test.infile)
+		if !reflect.DeepEqual(got, test.want) {
+			gfile := "/tmp/got.txt"
+			wfile := "/tmp/want.txt"
+			ioutil.WriteFile(gfile, []byte(got.String()), 0755)
+			ioutil.WriteFile(wfile, []byte(test.want.String()), 0755)
+			fmt.Printf("(diff %q %q)\n", gfile, wfile)
+			if !reflect.DeepEqual(got.Geom, test.want.Geom) {
+				t.Errorf("got\n%v, test.wanted\n%v\n", got.Geom, test.want.Geom)
+			}
+			if !reflect.DeepEqual(got.SiIC, test.want.SiIC) {
+				t.Errorf("got\n%v, test.wanted\n%v\n", got.SiIC, test.want.SiIC)
+			}
+			if !reflect.DeepEqual(got.SyIC, test.want.SyIC) {
+				t.Errorf("got\n%v, test.wanted\n%v\n", got.SyIC, test.want.SyIC)
+			}
+			if !reflect.DeepEqual(got.Freq, test.want.Freq) {
+				t.Errorf("got\n%v, test.wanted\n%v\n", got.Freq, test.want.Freq)
+			}
+			if !reflect.DeepEqual(got.Vibs, test.want.Vibs) {
+				t.Errorf("got\n%#+v, test.wanted\n%#+v\n", got.Vibs,
+					test.want.Vibs)
+			}
 		}
 	}
 }
