@@ -321,11 +321,12 @@ func (id Intder) String() string {
 		str.WriteString(atom.String())
 	}
 	str.WriteString("Simple Internals:\n")
-	for _, siic := range id.SiIC {
-		str.WriteString(id.PrintSiic(siic) + "\n")
+	for d, siic := range id.SiIC {
+		fmt.Fprintf(&str, "%2d\t%s\n", d+1, id.PrintSiic(siic))
 	}
 	str.WriteString("Symmetry Internals:\n")
-	for _, syic := range id.SyIC {
+	for d, syic := range id.SyIC {
+		fmt.Fprintf(&str, "%2d\t", d+1)
 		for i, j := range syic {
 			if j < 0 {
 				fmt.Fprint(&str, " - ")
@@ -340,7 +341,7 @@ func (id Intder) String() string {
 	str.WriteString("Vibrational Assignments:\n")
 	vibs := strings.Split(strings.TrimSpace(id.Vibs), "\n")
 	for i := range id.Freq {
-		fmt.Fprintf(&str, "%8.1f  %s\n", id.Freq[i], vibs[i])
+		fmt.Fprintf(&str, "%6.1f\t%s\n", id.Freq[i], vibs[i])
 	}
 	return str.String()
 }
