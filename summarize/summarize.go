@@ -262,3 +262,223 @@ func Spectro(filename string) *Result {
 	}
 	return res
 }
+
+type Atom struct {
+	Sym     string
+	X, Y, Z float64
+}
+
+func (a Atom) String() string {
+	return fmt.Sprintf(
+		"%2s%15.10f%15.10f%15.10f\n",
+		a.Sym, a.X, a.Y, a.Z,
+	)
+}
+
+// Intder is a struct for holding the information in a frequency
+// intder output file. Geom is the geometry, SiIC is the simple
+// internal coordinate system, SyIC is the symmetry internal
+// coordinate system, and Vibs are the vibrational assignments in
+// terms of the SyICs.
+type Intder struct {
+	Geom []Atom
+	SiIC [][]int
+	SyIC [][]int
+	Freq []float64
+	Vibs string
+}
+
+func (id Intder) PrintSiic(siic []int) string {
+	var str strings.Builder
+	last := siic[len(siic)-1]
+	switch last {
+	case STRE:
+		fmt.Fprintf(&str, "r(%s_%d - %s_%d)",
+			id.Geom[siic[0]].Sym, siic[0]+1,
+			id.Geom[siic[1]].Sym, siic[1]+1,
+		)
+	case BEND:
+		fmt.Fprintf(&str, "<(%s_%d - %s_%d - %s_%d)",
+			id.Geom[siic[0]].Sym, siic[0]+1,
+			id.Geom[siic[1]].Sym, siic[1]+1,
+			id.Geom[siic[2]].Sym, siic[2]+1,
+		)
+	case TORS:
+		fmt.Fprintf(&str, "t(%s_%d - %s_%d - %s_%d - %s_%d)",
+			id.Geom[siic[0]].Sym, siic[0]+1,
+			id.Geom[siic[1]].Sym, siic[1]+1,
+			id.Geom[siic[2]].Sym, siic[2]+1,
+			id.Geom[siic[3]].Sym, siic[3]+1,
+		)
+	}
+	return str.String()
+}
+
+func (id Intder) String() string {
+	var str strings.Builder
+	str.WriteString("Geometry:\n")
+	for _, atom := range id.Geom {
+		str.WriteString(atom.String())
+	}
+	str.WriteString("Simple Internals:\n")
+	for _, siic := range id.SiIC {
+		str.WriteString(id.PrintSiic(siic) + "\n")
+	}
+	str.WriteString("Symmetry Internals:\n")
+	for _, syic := range id.SyIC {
+		for i, j := range syic {
+			if j < 0 {
+				fmt.Fprint(&str, " - ")
+				j = -j
+			} else if i > 0 {
+				fmt.Fprint(&str, " + ")
+			}
+			str.WriteString(id.PrintSiic(id.SiIC[j]))
+		}
+		str.WriteString("\n")
+	}
+	str.WriteString("Vibrational Assignments:\n")
+	vibs := strings.Split(strings.TrimSpace(id.Vibs), "\n")
+	for i := range id.Freq {
+		fmt.Fprintf(&str, "%8.1f  %s\n", id.Freq[i], vibs[i])
+	}
+	return str.String()
+}
+
+// ptable is a map from the default string masses in intder to the
+// corresponding atomic symbols
+var ptable = map[string]string{
+	"12.000000": "C",
+	"1.007825":  "H",
+}
+
+const (
+	STRE int = iota
+	BEND
+	TORS
+)
+
+func ReadIntder(filename string) *Intder {
+	id := new(Intder)
+	f, err := os.Open(filename)
+	defer f.Close()
+	if err != nil {
+		panic(err)
+	}
+	scanner := bufio.NewScanner(f)
+	var (
+		geom   bool
+		siic   bool
+		syic   bool
+		vibs   bool
+		skip   uint
+		line   string
+		fields []string
+	)
+	var str strings.Builder
+	contrib := regexp.MustCompile(`(-?)([0-9]+) \( *([0-9]{1,3}\.[0-9])\)`)
+	sint := regexp.MustCompile(`(L|S)\( ?([0-9]{1,2})\)=?`)
+	for scanner.Scan() {
+		line = scanner.Text()
+		fields = strings.Fields(line)
+		switch {
+		case skip > 0:
+			skip--
+		case strings.Contains(line,
+			"NUCLEAR CARTESIAN COORDINATES (ANG.)"):
+			skip += 3
+			geom = true
+			id.Geom = nil
+		case strings.Contains(line,
+			"VIBRATIONAL ASSIGNMENTS"):
+			skip += 4
+			vibs = true
+		case strings.Contains(line,
+			"DEFINITION OF INTERNAL COORDINATES"):
+			skip += 3
+			siic = true
+		case geom && len(fields) == 0:
+			geom = false
+		case vibs && len(fields) == 0:
+			vibs = false
+			id.Vibs = str.String()
+			str.Reset()
+		case siic && len(fields) == 0:
+			siic = false
+			skip += 2
+			syic = true
+		case syic && len(fields) == 0:
+			syic = false
+		case geom:
+			coords := make([]float64, 3)
+			for i, v := range fields[2:] {
+				coords[i], _ = strconv.ParseFloat(v, 64)
+			}
+			id.Geom = append(id.Geom, Atom{
+				ptable[fields[1]],
+				coords[0],
+				coords[1],
+				coords[2],
+			})
+		case vibs:
+			v, _ := strconv.ParseFloat(fields[1], 64)
+			id.Freq = append(id.Freq, v)
+			contribs := contrib.ReplaceAllString(
+				strings.Join(fields[2:], " "),
+				"${1}${3} S_{${2}}")
+			cf := strings.Fields(contribs)
+			var ret strings.Builder
+			for i, c := range cf {
+				if i%2 == 0 {
+					v, _ := strconv.ParseFloat(c, 64)
+					if i > 0 {
+						fmt.Fprintf(&ret, "%+5.3f", v/100)
+					} else {
+						fmt.Fprintf(&ret, "%5.3f", v/100)
+					}
+				} else {
+					fmt.Fprintf(&ret, "%s", c)
+				}
+			}
+			fmt.Fprintln(&str, ret.String())
+		case siic:
+			line = sint.ReplaceAllString(line, "")
+			fields = strings.Fields(line)
+			ids := make([]int, 4)
+			for i, f := range fields[1:] {
+				ids[i], _ = strconv.Atoi(f)
+				ids[i]-- // index from zero
+			}
+			switch fields[0] {
+			case "STRE":
+				ids = append(ids, STRE)
+			case "BEND":
+				ids = append(ids, BEND)
+			case "TORS":
+				ids = append(ids, TORS)
+			default:
+				panic("this type of coordinate not implemented")
+			}
+			id.SiIC = append(id.SiIC, ids)
+		case syic:
+			ids := make([]int, 0)
+			fields = strings.Fields(sint.ReplaceAllString(line, "${2}"))
+			var fac int = 1
+			for i, f := range fields[1:] {
+				if i%2 == 0 {
+					v, _ := strconv.ParseFloat(f, 64)
+					if math.Signbit(v) {
+						fac = -1
+					} else {
+						fac = 1
+					}
+				} else {
+					d, _ := strconv.Atoi(f)
+					ids = append(ids, fac*(d-1))
+				}
+			}
+			id.SyIC = append(id.SyIC, ids)
+		}
+	}
+	return id
+}

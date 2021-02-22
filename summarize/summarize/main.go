@@ -203,12 +203,16 @@ func main() {
 			filename)
 		os.Exit(1)
 	}
-	res := summarize.Spectro(filename)
-	if *tex && !*nohead {
-		fmt.Print("\\documentclass{article}\n\\begin{document}\n\n")
-	}
-	printAll(os.Stdout, res)
-	if *tex && !*nohead {
-		fmt.Print("\\end{document}\n")
+	if strings.Contains(filename, "spectro") || *spectro {
+		res := summarize.Spectro(filename)
+		if *tex && !*nohead {
+			fmt.Print("\\documentclass{article}\n\\begin{document}\n\n")
+		}
+		printAll(os.Stdout, res)
+		if *tex && !*nohead {
+			fmt.Print("\\end{document}\n")
+		}
+	} else if strings.Contains(filename, "intder") || *intder {
+		fmt.Print(summarize.ReadIntder(filename))
 	}
 }
