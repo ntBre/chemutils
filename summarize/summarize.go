@@ -15,6 +15,10 @@ import (
 	"strings"
 )
 
+const (
+	bohr2ang = 0.52917721067
+)
+
 type Result struct {
 	ZPT    float64
 	Harm   []float64
@@ -282,6 +286,7 @@ func (a Atom) String() string {
 // terms of the SyICs.
 type Intder struct {
 	Geom []Atom
+	Dumm []Atom
 	SiIC [][]int
 	SyIC [][]int
 	Freq []float64
@@ -311,11 +316,12 @@ func (id Intder) PrintSiic(siic []int) string {
 			id.Geom[siic[3]].Sym, siic[3]+1,
 		)
 	case LIN1:
+		geom := append(id.Geom, id.Dumm...)
 		fmt.Fprintf(&str, "LIN(%s_%d - %s_%d - %s_%d - %s_%d)",
-			id.Geom[siic[0]].Sym, siic[0]+1,
-			id.Geom[siic[1]].Sym, siic[1]+1,
-			id.Geom[siic[2]].Sym, siic[2]+1,
-			id.Geom[siic[3]].Sym, siic[3]+1,
+			geom[siic[0]].Sym, siic[0]+1,
+			geom[siic[1]].Sym, siic[1]+1,
+			geom[siic[2]].Sym, siic[2]+1,
+			geom[siic[3]].Sym, siic[3]+1,
 		)
 	}
 	return str.String()
@@ -324,7 +330,7 @@ func (id Intder) PrintSiic(siic []int) string {
 func (id Intder) String() string {
 	var str strings.Builder
 	str.WriteString("Geometry:\n")
-	for _, atom := range id.Geom {
+	for _, atom := range append(id.Geom, id.Dumm...) {
 		str.WriteString(atom.String())
 	}
 	str.WriteString("Simple Internals:\n")
@@ -381,6 +387,7 @@ func ReadIntder(filename string) *Intder {
 		siic   bool
 		syic   bool
 		vibs   bool
+		dumm   bool
 		skip   uint
 		line   string
 		fields []string
@@ -400,6 +407,10 @@ func ReadIntder(filename string) *Intder {
 			geom = true
 			id.Geom = nil
 		case strings.Contains(line,
+			"DUMMY ATOM VECTORS"):
+			skip++
+			dumm = true
+		case strings.Contains(line,
 			"VIBRATIONAL ASSIGNMENTS"):
 			skip += 4
 			vibs = true
@@ -409,6 +420,8 @@ func ReadIntder(filename string) *Intder {
 			siic = true
 		case geom && len(fields) == 0:
 			geom = false
+		case dumm && len(fields) == 0:
+			dumm = false
 		case vibs && len(fields) == 0:
 			vibs = false
 			id.Vibs = str.String()
@@ -429,6 +442,17 @@ func ReadIntder(filename string) *Intder {
 				coords[0],
 				coords[1],
 				coords[2],
+			})
+		case dumm:
+			coords := make([]float64, 3)
+			for i, v := range fields {
+				coords[i], _ = strconv.ParseFloat(v, 64)
+			}
+			id.Dumm = append(id.Dumm, Atom{
+				"X",
+				coords[0] * bohr2ang,
+				coords[1] * bohr2ang,
+				coords[2] * bohr2ang,
 			})
 		case vibs:
 			v, _ := strconv.ParseFloat(fields[1], 64)

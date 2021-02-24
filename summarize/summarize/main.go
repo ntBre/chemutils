@@ -1,4 +1,3 @@
-// (progn (setq compile-command "go build . && scp summarize woods:Programs/summarize/.") (recompile))
 package main
 
 import (
