@@ -190,6 +190,106 @@ func printAll(out io.Writer, res *summarize.Result) {
 	t.Execute(out, makeFermi(res))
 }
 
+func printSiic(id *summarize.Intder, siic []int) string {
+	var str strings.Builder
+	last := siic[len(siic)-1]
+	switch last {
+	case summarize.STRE:
+		fmt.Fprintf(&str, "r(%s_%d - %s_%d)",
+			id.Geom[siic[0]].Sym, siic[0]+1,
+			id.Geom[siic[1]].Sym, siic[1]+1,
+		)
+	case summarize.BEND:
+		fmt.Fprintf(&str, "<(%s_%d - %s_%d - %s_%d)",
+			id.Geom[siic[0]].Sym, siic[0]+1,
+			id.Geom[siic[1]].Sym, siic[1]+1,
+			id.Geom[siic[2]].Sym, siic[2]+1,
+		)
+	case summarize.TORS:
+		fmt.Fprintf(&str, "t(%s_%d - %s_%d - %s_%d - %s_%d)",
+			id.Geom[siic[0]].Sym, siic[0]+1,
+			id.Geom[siic[1]].Sym, siic[1]+1,
+			id.Geom[siic[2]].Sym, siic[2]+1,
+			id.Geom[siic[3]].Sym, siic[3]+1,
+		)
+	case summarize.LIN1:
+		geom := append(id.Geom, id.Dumm...)
+		fmt.Fprintf(&str, "LIN(%s_%d - %s_%d - %s_%d - %s_%d)",
+			geom[siic[0]].Sym, siic[0]+1,
+			geom[siic[1]].Sym, siic[1]+1,
+			geom[siic[2]].Sym, siic[2]+1,
+			geom[siic[3]].Sym, siic[3]+1,
+		)
+	}
+	return str.String()
+}
+
+func TrimNewline(str string) string {
+	return strings.TrimRight(str, "\n")
+}
+
+func makeIntderGeom(id *summarize.Intder) *Table {
+	tab := new(Table)
+	var str strings.Builder
+	tab.Caption = "Geometry"
+	for _, atom := range append(id.Geom, id.Dumm...) {
+		fmt.Fprintf(&str, "%s\n", atom.String())
+	}
+	tab.Body = TrimNewline(str.String())
+	return tab
+}
+
+func makeSiIC(id *summarize.Intder) *Table {
+	tab := new(Table)
+	var str strings.Builder
+	tab.Caption = "Simple Internals"
+	for d, siic := range id.SiIC {
+		fmt.Fprintf(&str, "%2d\t%s\n", d+1, printSiic(id, siic))
+	}
+	tab.Body = TrimNewline(str.String())
+	return tab
+}
+
+func makeSyIC(id *summarize.Intder) *Table {
+	tab := new(Table)
+	var str strings.Builder
+	tab.Caption = "Symmetry Internals"
+	for d, syic := range id.SyIC {
+		fmt.Fprintf(&str, "%2d\t", d+1)
+		for i, j := range syic {
+			if j < 0 {
+				fmt.Fprint(&str, " - ")
+				j = -j
+			} else if i > 0 {
+				fmt.Fprint(&str, " + ")
+			}
+			fmt.Fprint(&str, printSiic(id, id.SiIC[j]))
+		}
+		fmt.Fprint(&str, "\n")
+	}
+	tab.Body = TrimNewline(str.String())
+	return tab
+}
+
+func makeVibs(id *summarize.Intder) *Table {
+	tab := new(Table)
+	var str strings.Builder
+	tab.Caption = "Vibrational Assignments"
+	vibs := strings.Split(strings.TrimSpace(id.Vibs), "\n")
+	for i := range id.Freq {
+		fmt.Fprintf(&str, "%6.1f\t%s\n", id.Freq[i], vibs[i])
+	}
+	tab.Body = TrimNewline(str.String())
+	return tab
+}
+
+func printIntder(out io.Writer, id *summarize.Intder) {
+	t.Execute(out, makeIntderGeom(id))
+	t.Execute(out, makeSiIC(id))
+	t.Execute(out, makeSyIC(id))
+	t.Execute(out, makeVibs(id))
+}
+
 func main() {
 	args := parseFlags()
 	if len(args) < 1 {
@@ -202,16 +302,17 @@ func main() {
 			filename)
 		os.Exit(1)
 	}
+	if *tex && !*nohead {
+		fmt.Print("\\documentclass{article}\n\\begin{document}\n\n")
+		defer func() {
+			fmt.Print("\\end{document}\n")
+		}()
+	}
 	if strings.Contains(filename, "spectro") || *spectro {
 		res := summarize.Spectro(filename)
-		if *tex && !*nohead {
-			fmt.Print("\\documentclass{article}\n\\begin{document}\n\n")
-		}
 		printAll(os.Stdout, res)
-		if *tex && !*nohead {
-			fmt.Print("\\end{document}\n")
-		}
 	} else if strings.Contains(filename, "intder") || *intder {
-		fmt.Print(summarize.ReadIntder(filename))
+		id := summarize.ReadIntder(filename)
+		printIntder(os.Stdout, id)
 	}
 }

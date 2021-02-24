@@ -1,8 +1,6 @@
 package summarize
 
 import (
-	"fmt"
-	"io/ioutil"
 	"math"
 	"reflect"
 	"testing"
@@ -444,6 +442,22 @@ func TestSpectro(t *testing.T) {
 	}
 }
 
+func compAtom(a, b Atom, eps float64) bool {
+	if a.Sym != b.Sym {
+		return false
+	}
+	if math.Abs(a.X-b.X) > eps {
+		return false
+	}
+	if math.Abs(a.Y-b.Y) > eps {
+		return false
+	}
+	if math.Abs(a.Z-b.Z) > eps {
+		return false
+	}
+	return true
+}
+
 func TestIntder(t *testing.T) {
 	tests := []struct {
 		infile string
@@ -508,10 +522,10 @@ func TestIntder(t *testing.T) {
 					{"He", 0.0000000000, 0.0000000000, 1.7679827049},
 				},
 				Dumm: []Atom{
-					{"X", 1.1111111111, 0.0000000000, -1.0030394677},
-					{"X", 0.0000000000, 1.1111111111, -1.0030394677},
-					{"X", 1.1111111111, 0.0000000000, 1.0030394709},
-					{"X", 0.0000000000, 1.1111111111, 1.0030394709},
+					{"X", 0.5879746785, 0.0000000000, -0.5307856277},
+					{"X", 0.0000000000, 0.5879746785, -0.5307856277},
+					{"X", 0.5879746785, 0.0000000000, 0.5307856294},
+					{"X", 0.0000000000, 0.5879746785, 0.5307856294},
 				},
 				SiIC: [][]int{
 					{0, 1, -1, -1, STRE},
@@ -550,16 +564,16 @@ func TestIntder(t *testing.T) {
 	for _, test := range tests {
 		got := ReadIntder(test.infile)
 		if !reflect.DeepEqual(got, test.want) {
-			gfile := "/tmp/got.txt"
-			wfile := "/tmp/want.txt"
-			ioutil.WriteFile(gfile, []byte(got.String()), 0755)
-			ioutil.WriteFile(wfile, []byte(test.want.String()), 0755)
-			fmt.Printf("(diff %q %q)\n", gfile, wfile)
-			if !reflect.DeepEqual(got.Geom, test.want.Geom) {
-				t.Errorf("got\n%v, test.wanted\n%v\n", got.Geom, test.want.Geom)
-			}
-			if !reflect.DeepEqual(got.Dumm, test.want.Dumm) {
-				t.Errorf("got\n%v, test.wanted\n%v\n", got.Dumm, test.want.Dumm)
+			if !reflect.DeepEqual(got.Geom, test.want.Geom) ||
+				!reflect.DeepEqual(got.Dumm, test.want.Dumm) {
+				got := append(got.Geom, got.Dumm...)
+				want := append(test.want.Geom, test.want.Dumm...)
+				for i := range got {
+					if !compAtom(got[i], want[i], 1e-10) {
+						t.Errorf("got\n%v, wanted\n%v\n",
+							got[i], want[i])
+					}
+				}
 			}
 			if !reflect.DeepEqual(got.SiIC, test.want.SiIC) {
 				t.Errorf("got\n%v, test.wanted\n%v\n", got.SiIC, test.want.SiIC)

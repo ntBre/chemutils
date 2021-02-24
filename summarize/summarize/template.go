@@ -35,7 +35,9 @@ func (t *Table) Texify(part string) string {
 			str.WriteString("\n")
 		}
 	}
-	return strings.ReplaceAll(subscript.ReplaceAllString(str.String(), "$$\\nu$1$$"), "<", "$\\angle$")
+	return strings.ReplaceAll(
+		subscript.ReplaceAllString(str.String(), "$$\\nu$1$$"),
+		"<", "$\\angle$")
 }
 
 const (

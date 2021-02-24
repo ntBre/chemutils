@@ -1,9 +1,0 @@
-* Flags
-  - flag for bzs vs bza - linear or not
-    - BZS for linear
-    - BZA for all others (but sometimes near linear needs BZS?)
-  - flag for format of output: org, tex, etc
-
-* DONE report geometrical data
-  - want r(alpha) - vibrationally averaged data
-  - also want r(equil) - equilibrium geometry
