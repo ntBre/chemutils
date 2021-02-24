@@ -69,3 +69,40 @@ func TestTex(t *testing.T) {
 	zathura.Dir = dir
 	zathura.Run()
 }
+
+func TestEqnify(t *testing.T) {
+	tests := []struct {
+		give string
+		want string
+		end  bool
+	}{
+		{
+			give: "1	r(C_2 - C_3)",
+			want: `S_{1} &= &r(\text{C}_2 - \text{C}_3)\\`,
+		},
+		{
+			give: "2	r(C_1 - C_2) + r(C_1 - C_3)",
+			want: `S_{2} &= &\frac{1}{\sqrt{2}}[r(\text{C}_1 - \text{C}_2)` +
+				` + r(\text{C}_1 - \text{C}_3)]\\`,
+		},
+		{
+			give: "4	<(H_4 - C_2 - C_1) + <(H_5 - C_3 - C_1)",
+			want: `S_{4} &= &\frac{1}{\sqrt{2}}[` +
+				`\angle(\text{H}_4 - \text{C}_2 - \text{C}_1)` +
+				` + \angle(\text{H}_5 - \text{C}_3 - \text{C}_1)]\\`,
+		},
+		{
+			give: "8	t(H_4 - C_2 - C_1 - C_3) - t(H_5 - C_3 - C_1 - C_2)",
+			want: `S_{8} &= &\frac{1}{\sqrt{2}}[` +
+				`\tau(\text{H}_4 - \text{C}_2 - \text{C}_1 - \text{C}_3)` +
+				` - \tau(\text{H}_5 - \text{C}_3 - \text{C}_1 - ` +
+				`\text{C}_2)]\\`,
+		},
+	}
+	for _, test := range tests {
+		got := Eqnify(test.give, test.end)
+		if got != test.want {
+			t.Errorf("got\n%v\nwanted\n%v\n", got, test.want)
+		}
+	}
+}

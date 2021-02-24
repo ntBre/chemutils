@@ -10,6 +10,8 @@ import (
 
 	"text/template"
 
+	"regexp"
+
 	"github.com/ntBre/chemutils/summarize"
 )
 
@@ -250,21 +252,54 @@ func makeSiIC(id *summarize.Intder) *Table {
 	return tab
 }
 
+// eqnify converts SICs to the format needed for a LaTeX eqnarray
+func Eqnify(str string, end bool) string {
+	split := strings.Split(str, "\t")
+	atom := regexp.MustCompile(`([A-Z][a-z]?)_`)
+	cord := regexp.MustCompile(`(r|<|t)`)
+	cords := cord.FindAllString(str, -1)
+	split[1] = strings.Replace(split[1], "<", `\angle`, -1)
+	split[1] = strings.Replace(split[1], "t", `\tau`, -1)
+	split[1] = atom.ReplaceAllString(split[1], `\text{$1}_`)
+	term := `\\`
+	// don't want \\ on last line of eqnarray
+	if end {
+		term = ""
+	}
+	switch len(cords) {
+	case 1:
+		return fmt.Sprintf(`S_{%s} &= &%s%s`,
+			split[0], split[1], term)
+	case 2:
+		return fmt.Sprintf(`S_{%s} &= &\frac{1}{\sqrt{2}}[%s]%s`,
+			split[0], split[1], term)
+	default:
+		fmt.Println(str, cords)
+		panic("unrecognized number of SICs")
+	}
+}
+
 func makeSyIC(id *summarize.Intder) *Table {
 	tab := new(Table)
-	var str strings.Builder
+	var str, line strings.Builder
 	tab.Caption = "Symmetry Internals"
 	for d, syic := range id.SyIC {
-		fmt.Fprintf(&str, "%2d\t", d+1)
+		fmt.Fprintf(&line, "%2d\t", d+1)
 		for i, j := range syic {
 			if j < 0 {
-				fmt.Fprint(&str, " - ")
+				fmt.Fprint(&line, " - ")
 				j = -j
 			} else if i > 0 {
-				fmt.Fprint(&str, " + ")
+				fmt.Fprint(&line, " + ")
 			}
-			fmt.Fprint(&str, printSiic(id, id.SiIC[j]))
+			fmt.Fprint(&line, printSiic(id, id.SiIC[j]))
 		}
+		if *tex {
+			fmt.Fprint(&str, Eqnify(line.String(), d == len(id.SyIC)-1))
+		} else {
+			fmt.Fprint(&str, line.String())
+		}
+		line.Reset()
 		fmt.Fprint(&str, "\n")
 	}
 	tab.Body = TrimNewline(str.String())
@@ -275,6 +310,7 @@ func makeVibs(id *summarize.Intder) *Table {
 	tab := new(Table)
 	var str strings.Builder
 	tab.Caption = "Vibrational Assignments"
+	tab.Header = fmt.Sprintf("%6s\tContribs", "Freq")
 	vibs := strings.Split(strings.TrimSpace(id.Vibs), "\n")
 	for i := range id.Freq {
 		fmt.Fprintf(&str, "%6.1f\t%s\n", id.Freq[i], vibs[i])
@@ -302,7 +338,7 @@ func main() {
 			filename)
 		os.Exit(1)
 	}
-	if *tex && !*nohead {
+	if *tex && *spectro && !*nohead {
 		fmt.Print("\\documentclass{article}\n\\begin{document}\n\n")
 		defer func() {
 			fmt.Print("\\end{document}\n")
