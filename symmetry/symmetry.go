@@ -44,7 +44,6 @@ func Reflect(atoms []Atom, plane plane) []Atom {
 // RotaryReflect returns a copy of atoms, with its coordinates rotated
 // about axis and then mirrored through the plane perpendicular to
 // axis
-// TODO: untested
 func RotaryReflect(atoms []Atom, deg float64, axis axis) []Atom {
 	rot := Rotate(atoms, deg, axis)
 	pl := axis.not()

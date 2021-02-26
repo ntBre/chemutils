@@ -196,9 +196,39 @@ func TestRotaryReflect(t *testing.T) {
 	}
 }
 
-// func TestInvert(t *testing.T) {
-
-// 	if got != want {
-// 		t.Errorf("got %v, wanted %v\n", got, want)
-// 	}
-// }
+func TestInvert(t *testing.T) {
+	tests := []struct {
+		atoms string
+		axis  axis
+	}{
+		{
+			atoms: "tests/ethane.xyz",
+			axis:  Z,
+		},
+	}
+	tmp := eps
+	eps = 1e-11
+	defer func() {
+		eps = tmp
+	}()
+	var found bool
+	for _, test := range tests {
+		// want it to give itself back
+		wants := LoadXYZ(test.atoms)
+		gots := Invert(wants, test.axis)
+		for _, got := range gots {
+			found = false
+			for _, want := range wants {
+				if got.Label == want.Label &&
+					approxEqual(got.Coord, want.Coord) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("got\n%v,\nwanted\n%v\n", gots, wants)
+				break
+			}
+		}
+	}
+}
