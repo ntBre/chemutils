@@ -107,29 +107,43 @@ H 0.0000000000 -0.7574590974 0.5217905143
 		plane plane
 		want  []Atom
 	}{
-		{plane{Y, Z},
+		{
+			plane{Y, Z},
 			[]Atom{
 				{"H", []float64{0.0000000000, 0.7574590974, 0.5217905143}},
 				{"O", []float64{0.0000000000, 0.0000000000, -0.0657441568}},
 				{"H", []float64{0.0000000000, -0.7574590974, 0.5217905143}},
 			},
 		},
-		{plane{Y, X},
+		{
+			plane{Y, X},
 			[]Atom{
 				{"H", []float64{0.0000000000, 0.7574590974, -0.5217905143}},
 				{"O", []float64{0.0000000000, 0.0000000000, 0.0657441568}},
 				{"H", []float64{0.0000000000, -0.7574590974, -0.5217905143}},
 			},
 		},
-		{plane{X, Z},
+		{
+			plane{X, Z},
 			[]Atom{
-				{"H", []float64{0.0000000000, -0.7574590974, 0.5217905143}},
-				{"O", []float64{0.0000000000, 0.0000000000, -0.0657441568}},
-				{"H", []float64{0.0000000000, 0.7574590974, 0.5217905143}},
+				{"H", []float64{
+					0.0000000000,
+					-0.7574590974,
+					0.5217905143,
+				}},
+				{"O", []float64{
+					0.0000000000,
+					0.0000000000,
+					-0.0657441568,
+				}},
+				{"H", []float64{
+					0.0000000000,
+					0.7574590974,
+					0.5217905143,
+				}},
 			},
 		},
 	}
-
 	for i := range tests {
 		got := Reflect(atoms, tests[i].plane)
 		for j := range got {
@@ -143,12 +157,44 @@ H 0.0000000000 -0.7574590974 0.5217905143
 	}
 }
 
-// func TestRotaryReflect(t *testing.T) {
-
-// 	if got != want {
-// 		t.Errorf("got %v, wanted %v\n", got, want)
-// 	}
-// }
+func TestRotaryReflect(t *testing.T) {
+	tests := []struct {
+		atoms string
+		deg   float64
+		axis  axis
+	}{
+		{
+			atoms: "tests/ethane.xyz",
+			deg:   60.0,
+			axis:  Z,
+		},
+	}
+	tmp := eps
+	eps = 1e-11
+	defer func() {
+		eps = tmp
+	}()
+	var found bool
+	for _, test := range tests {
+		// want it to give itself back
+		wants := LoadXYZ(test.atoms)
+		gots := RotaryReflect(wants, test.deg, test.axis)
+		for _, got := range gots {
+			found = false
+			for _, want := range wants {
+				if got.Label == want.Label &&
+					approxEqual(got.Coord, want.Coord) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("got\n%v,\nwanted\n%v\n", gots, wants)
+				break
+			}
+		}
+	}
+}
 
 // func TestInvert(t *testing.T) {
 

@@ -2,127 +2,14 @@
 package symm
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"math"
-	"strconv"
-	"strings"
-)
-
-type axis int
-
-// Cartesian axes/indices
-const (
-	X axis = iota
-	Y
-	Z
-)
-
-// Cylindrical coordinate indices, use Z from Cartesians
-const (
-	R axis = iota
-	T
 )
 
 // Float comparison threshold
-const (
+var (
 	eps = 1e-15
 )
-
-// return the plane perpendicular to the axis
-func (a axis) not() plane {
-	switch a {
-	case X:
-		return plane{Y, Z}
-	case Y:
-		return plane{X, Z}
-	case Z:
-		return plane{X, Y}
-	default:
-		panic("axis.not: invalid axis")
-	}
-}
-
-func (a axis) String() string {
-	return []string{"X", "Y", "Z"}[int(a)]
-}
-
-type plane struct {
-	a, b axis
-}
-
-// return the axis perpindicular to the plane
-func (p plane) not() axis {
-	switch {
-	case p.a == Y && p.b == Z || p.a == Z && p.b == Y:
-		return X
-	case p.a == X && p.b == Z || p.a == Z && p.b == X:
-		return Y
-	case p.a == X && p.b == Y || p.a == Y && p.b == X:
-		return Z
-	default:
-		panic("plane.not: invalid axis")
-	}
-}
-
-func (p plane) String() string {
-	return fmt.Sprintf("{%s, %s}", p.a, p.b)
-}
-
-// Atom represents an atom, with atomic symbol and Cartesian coordinate
-type Atom struct {
-	Label string
-	Coord []float64
-}
-
-// Atomize takes a string line of a Cartesian geometry and returns an
-// Atom with that label and coordinate
-func Atomize(line string) (Atom, error) {
-	atom := new(Atom)
-	fields := strings.Fields(line)
-	if len(fields) != 4 {
-		return *atom, fmt.Errorf("atomize: input (%q) too short", line)
-	}
-	atom.Label = fields[0]
-	var (
-		err error
-		f   float64
-	)
-	for _, v := range fields[1:] {
-		f, err = strconv.ParseFloat(v, 64)
-		if err != nil {
-			return *atom, fmt.Errorf("atomize: %v", err)
-		}
-		atom.Coord = append(atom.Coord, f)
-	}
-	return *atom, nil
-}
-
-// ReadXYZ reads an .xyz geometry from r and returns a slice of Atoms.
-// If the first line looks like the number of atoms skip it and the
-// comment line. Otherwise start reading coordinates directly.
-func ReadXYZ(r io.Reader) []Atom {
-	scanner := bufio.NewScanner(r)
-	var (
-		line string
-		skip int
-	)
-	atoms := make([]Atom, 0)
-	for i := 1; scanner.Scan(); i++ {
-		line = scanner.Text()
-		switch {
-		case skip > 0:
-			skip--
-		case i == 1 && len(strings.Fields(line)) == 1:
-			skip = 1
-		default:
-			atom, _ := Atomize(line)
-			atoms = append(atoms, atom)
-		}
-	}
-	return atoms
-}
 
 // Rotate returns a copy of atoms, with its coordinates rotated by deg
 // degrees about axis
