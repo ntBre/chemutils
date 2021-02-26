@@ -1,6 +1,5 @@
-// Package atom provides the Atom type and associated functions for working
-// with atoms and their coordinates
-package atom
+// Package symm is for determining molecular point group symmetry
+package symm
 
 import (
 	"bufio"
@@ -11,6 +10,8 @@ import (
 	"strings"
 )
 
+type axis int
+
 // Cartesian axes/indices
 const (
 	X axis = iota
@@ -20,7 +21,7 @@ const (
 
 // Cylindrical coordinate indices, use Z from Cartesians
 const (
-	R = iota
+	R axis = iota
 	T
 )
 
@@ -28,8 +29,6 @@ const (
 const (
 	eps = 1e-15
 )
-
-type axis int
 
 // return the plane perpendicular to the axis
 func (a axis) not() plane {
@@ -77,24 +76,6 @@ type Atom struct {
 	Coord []float64
 }
 
-// ReadXYZ reads an .xyz geometry from r and returns a slice of Atoms.
-// If header is true, skip the number of atoms and comment
-// lines. Otherwise, assume coordinates start at the first line.
-func ReadXYZ(r io.Reader, header bool) []Atom {
-	scanner := bufio.NewScanner(r)
-	var line string
-	atoms := make([]Atom, 0)
-	for i := 1; scanner.Scan(); i++ {
-		if header && i < 3 {
-			continue
-		}
-		line = scanner.Text()
-		atom, _ := Atomize(line)
-		atoms = append(atoms, atom)
-	}
-	return atoms
-}
-
 // Atomize takes a string line of a Cartesian geometry and returns an
 // Atom with that label and coordinate
 func Atomize(line string) (Atom, error) {
@@ -118,16 +99,43 @@ func Atomize(line string) (Atom, error) {
 	return *atom, nil
 }
 
+// ReadXYZ reads an .xyz geometry from r and returns a slice of Atoms.
+// If the first line looks like the number of atoms skip it and the
+// comment line. Otherwise start reading coordinates directly.
+func ReadXYZ(r io.Reader) []Atom {
+	scanner := bufio.NewScanner(r)
+	var (
+		line string
+		skip int
+	)
+	atoms := make([]Atom, 0)
+	for i := 1; scanner.Scan(); i++ {
+		line = scanner.Text()
+		switch {
+		case skip > 0:
+			skip--
+		case i == 1 && len(strings.Fields(line)) == 1:
+			skip = 1
+		default:
+			atom, _ := Atomize(line)
+			atoms = append(atoms, atom)
+		}
+	}
+	return atoms
+}
+
 // Rotate returns a copy of atoms, with its coordinates rotated by deg
 // degrees about axis
 func Rotate(atoms []Atom, deg float64, axis axis) []Atom {
 	rad := deg * math.Pi / 180.0
-	new := make([]Atom, 0, len(atoms))
+	new := make([]Atom, len(atoms))
 	for i := range atoms {
 		cyl := ToCylinder(atoms[i].Coord, axis)
 		cyl[T] += rad
-		new = append(new, Atom{Label: atoms[i].Label,
-			Coord: ToCartesian(cyl, axis)})
+		new[i] = Atom{
+			Label: atoms[i].Label,
+			Coord: ToCartesian(cyl, axis),
+		}
 	}
 	return new
 }

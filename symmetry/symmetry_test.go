@@ -1,4 +1,4 @@
-package atom
+package symm
 
 import (
 	"math"
@@ -14,7 +14,7 @@ H 0.0000000000 0.7574590974 0.5217905143
 O 0.0000000000 0.0000000000 -0.0657441568
 H 0.0000000000 -0.7574590974 0.5217905143
 `
-	got := ReadXYZ(strings.NewReader(xyz), true)
+	got := ReadXYZ(strings.NewReader(xyz))
 	want := []Atom{
 		{"H", []float64{0.0000000000, 0.7574590974, 0.5217905143}},
 		{"O", []float64{0.0000000000, 0.0000000000, -0.0657441568}},
@@ -48,7 +48,7 @@ H 0.0000000000 0.7574590974 0.5217905143
 O 0.0000000000 0.0000000000 -0.0657441568
 H 0.0000000000 -0.7574590974 0.5217905143
 `
-	atoms := ReadXYZ(strings.NewReader(xyz), true)
+	atoms := ReadXYZ(strings.NewReader(xyz))
 	tests := []struct {
 		deg  float64
 		axis axis
@@ -83,15 +83,13 @@ H 0.0000000000 -0.7574590974 0.5217905143
 			},
 		},
 	}
-
-	for i := range tests {
-		got := Rotate(atoms, tests[i].deg, tests[i].axis)
+	for _, test := range tests {
+		got := Rotate(atoms, test.deg, test.axis)
 		for j := range got {
-			if got[j].Label != tests[i].want[j].Label ||
-				!approxEqual(got[j].Coord, tests[i].want[j].Coord) {
+			if got[j].Label != test.want[j].Label ||
+				!approxEqual(got[j].Coord, test.want[j].Coord) {
 				t.Errorf("Rotate(%f, %s): got %v, wanted %v\n",
-					tests[i].deg, tests[i].axis, got, tests[i].want)
-				break
+					test.deg, test.axis, got, test.want)
 			}
 		}
 	}
@@ -104,7 +102,7 @@ H 0.0000000000 0.7574590974 0.5217905143
 O 0.0000000000 0.0000000000 -0.0657441568
 H 0.0000000000 -0.7574590974 0.5217905143
 `
-	atoms := ReadXYZ(strings.NewReader(xyz), true)
+	atoms := ReadXYZ(strings.NewReader(xyz))
 	tests := []struct {
 		plane plane
 		want  []Atom
@@ -146,14 +144,14 @@ H 0.0000000000 -0.7574590974 0.5217905143
 }
 
 // func TestRotaryReflect(t *testing.T) {
-	
+
 // 	if got != want {
 // 		t.Errorf("got %v, wanted %v\n", got, want)
 // 	}
 // }
 
 // func TestInvert(t *testing.T) {
-	
+
 // 	if got != want {
 // 		t.Errorf("got %v, wanted %v\n", got, want)
 // 	}
