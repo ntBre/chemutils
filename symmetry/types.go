@@ -2,45 +2,52 @@ package symm
 
 import "fmt"
 
-type axis int
+type Axis int
 
-// Cartesian axes/indices
+// Cartesian axes
 const (
-	X axis = iota
+	X Axis = iota
 	Y
 	Z
 )
 
-// Cylindrical coordinate indices, use Z from Cartesians
+// Cylindrical axes
 const (
-	R axis = iota
+	R Axis = iota
 	T
 )
 
-// return the plane perpendicular to the axis
-func (a axis) not() plane {
+// Planes
+var (
+	XY = Plane{X, Y}
+	XZ = Plane{X, Z}
+	YZ = Plane{Y, Z}
+)
+
+// return the Plane perpendicular to the Axis
+func (a Axis) not() Plane {
 	switch a {
 	case X:
-		return plane{Y, Z}
+		return Plane{Y, Z}
 	case Y:
-		return plane{X, Z}
+		return Plane{X, Z}
 	case Z:
-		return plane{X, Y}
+		return Plane{X, Y}
 	default:
-		panic("axis.not: invalid axis")
+		panic("Axis.not: invalid Axis")
 	}
 }
 
-func (a axis) String() string {
+func (a Axis) String() string {
 	return []string{"X", "Y", "Z"}[int(a)]
 }
 
-type plane struct {
-	a, b axis
+type Plane struct {
+	a, b Axis
 }
 
-// return the axis perpindicular to the plane
-func (p plane) not() axis {
+// return the Axis perpindicular to the Plane
+func (p Plane) not() Axis {
 	switch {
 	case p.a == Y && p.b == Z || p.a == Z && p.b == Y:
 		return X
@@ -49,10 +56,16 @@ func (p plane) not() axis {
 	case p.a == X && p.b == Y || p.a == Y && p.b == X:
 		return Z
 	default:
-		panic("plane.not: invalid axis")
+		panic("Plane.not: invalid Axis")
 	}
 }
 
-func (p plane) String() string {
+func (p Plane) String() string {
 	return fmt.Sprintf("{%s, %s}", p.a, p.b)
+}
+
+type Molecule struct {
+	Atoms     []Atom
+	Principal Axis
+	Main      Plane
 }

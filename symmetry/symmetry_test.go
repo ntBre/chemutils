@@ -15,11 +15,28 @@ O 0.0000000000 0.0000000000 -0.0657441568
 H 0.0000000000 -0.7574590974 0.5217905143
 `
 	got := ReadXYZ(strings.NewReader(xyz))
-	want := []Atom{
-		{"H", []float64{0.0000000000, 0.7574590974, 0.5217905143}},
-		{"O", []float64{0.0000000000, 0.0000000000, -0.0657441568}},
-		{"H", []float64{0.0000000000, -0.7574590974, 0.5217905143}},
+	want := Molecule{
+		Atoms: []Atom{
+			{"H", []float64{
+				0.0000000000,
+				0.7574590974,
+				0.5217905143,
+			}},
+			{"O", []float64{
+				0.0000000000,
+				0.0000000000,
+				-0.0657441568,
+			}},
+			{"H", []float64{
+				0.0000000000,
+				-0.7574590974,
+				0.5217905143,
+			}},
+		},
+		Principal: Z,
+		Main:      Plane{Y, Z},
 	}
+
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, wanted %v\n", got, want)
 	}
@@ -42,16 +59,10 @@ func TestToCartesian(t *testing.T) {
 }
 
 func TestRotate(t *testing.T) {
-	xyz := `3
-water
-H 0.0000000000 0.7574590974 0.5217905143
-O 0.0000000000 0.0000000000 -0.0657441568
-H 0.0000000000 -0.7574590974 0.5217905143
-`
-	atoms := ReadXYZ(strings.NewReader(xyz))
+	mole := LoadXYZ("tests/h2o.xyz")
 	tests := []struct {
 		deg  float64
-		axis axis
+		axis Axis
 		want []Atom
 	}{
 		{180, Z,
@@ -84,7 +95,7 @@ H 0.0000000000 -0.7574590974 0.5217905143
 		},
 	}
 	for _, test := range tests {
-		got := Rotate(atoms, test.deg, test.axis)
+		got := Rotate(mole.Atoms, test.deg, test.axis)
 		for j := range got {
 			if got[j].Label != test.want[j].Label ||
 				!approxEqual(got[j].Coord, test.want[j].Coord) {
@@ -104,11 +115,11 @@ H 0.0000000000 -0.7574590974 0.5217905143
 `
 	atoms := ReadXYZ(strings.NewReader(xyz))
 	tests := []struct {
-		plane plane
+		plane Plane
 		want  []Atom
 	}{
 		{
-			plane{Y, Z},
+			Plane{Y, Z},
 			[]Atom{
 				{"H", []float64{0.0000000000, 0.7574590974, 0.5217905143}},
 				{"O", []float64{0.0000000000, 0.0000000000, -0.0657441568}},
@@ -116,7 +127,7 @@ H 0.0000000000 -0.7574590974 0.5217905143
 			},
 		},
 		{
-			plane{Y, X},
+			Plane{Y, X},
 			[]Atom{
 				{"H", []float64{0.0000000000, 0.7574590974, -0.5217905143}},
 				{"O", []float64{0.0000000000, 0.0000000000, 0.0657441568}},
@@ -124,7 +135,7 @@ H 0.0000000000 -0.7574590974 0.5217905143
 			},
 		},
 		{
-			plane{X, Z},
+			Plane{X, Z},
 			[]Atom{
 				{"H", []float64{
 					0.0000000000,
@@ -145,7 +156,7 @@ H 0.0000000000 -0.7574590974 0.5217905143
 		},
 	}
 	for i := range tests {
-		got := Reflect(atoms, tests[i].plane)
+		got := Reflect(atoms.Atoms, tests[i].plane)
 		for j := range got {
 			if got[j].Label != tests[i].want[j].Label ||
 				!approxEqual(got[j].Coord, tests[i].want[j].Coord) {
@@ -161,7 +172,7 @@ func TestRotaryReflect(t *testing.T) {
 	tests := []struct {
 		atoms string
 		deg   float64
-		axis  axis
+		axis  Axis
 	}{
 		{
 			atoms: "tests/ethane.xyz",
@@ -178,10 +189,10 @@ func TestRotaryReflect(t *testing.T) {
 	for _, test := range tests {
 		// want it to give itself back
 		wants := LoadXYZ(test.atoms)
-		gots := RotaryReflect(wants, test.deg, test.axis)
+		gots := RotaryReflect(wants.Atoms, test.deg, test.axis)
 		for _, got := range gots {
 			found = false
-			for _, want := range wants {
+			for _, want := range wants.Atoms {
 				if got.Label == want.Label &&
 					approxEqual(got.Coord, want.Coord) {
 					found = true
@@ -199,7 +210,7 @@ func TestRotaryReflect(t *testing.T) {
 func TestInvert(t *testing.T) {
 	tests := []struct {
 		atoms string
-		axis  axis
+		axis  Axis
 	}{
 		{
 			atoms: "tests/ethane.xyz",
@@ -215,10 +226,10 @@ func TestInvert(t *testing.T) {
 	for _, test := range tests {
 		// want it to give itself back
 		wants := LoadXYZ(test.atoms)
-		gots := Invert(wants, test.axis)
+		gots := Invert(wants.Atoms, test.axis)
 		for _, got := range gots {
 			found = false
-			for _, want := range wants {
+			for _, want := range wants.Atoms {
 				if got.Label == want.Label &&
 					approxEqual(got.Coord, want.Coord) {
 					found = true

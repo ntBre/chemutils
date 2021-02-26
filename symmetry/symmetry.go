@@ -13,7 +13,7 @@ var (
 
 // Rotate returns a copy of atoms, with its coordinates rotated by deg
 // degrees about axis
-func Rotate(atoms []Atom, deg float64, axis axis) []Atom {
+func Rotate(atoms []Atom, deg float64, axis Axis) []Atom {
 	rad := deg * math.Pi / 180.0
 	new := make([]Atom, len(atoms))
 	for i := range atoms {
@@ -29,7 +29,7 @@ func Rotate(atoms []Atom, deg float64, axis axis) []Atom {
 
 // Reflect returns a copy of atoms, with its coordinates mirrored
 // across plane
-func Reflect(atoms []Atom, plane plane) []Atom {
+func Reflect(atoms []Atom, plane Plane) []Atom {
 	ax := plane.not()
 	new := make([]Atom, len(atoms))
 	for i, atom := range atoms {
@@ -44,7 +44,7 @@ func Reflect(atoms []Atom, plane plane) []Atom {
 // RotaryReflect returns a copy of atoms, with its coordinates rotated
 // about axis and then mirrored through the plane perpendicular to
 // axis
-func RotaryReflect(atoms []Atom, deg float64, axis axis) []Atom {
+func RotaryReflect(atoms []Atom, deg float64, axis Axis) []Atom {
 	rot := Rotate(atoms, deg, axis)
 	pl := axis.not()
 	return Reflect(rot, pl)
@@ -53,8 +53,7 @@ func RotaryReflect(atoms []Atom, deg float64, axis axis) []Atom {
 // Invert uses the fact that S_2 = i to return a copy of atoms, with
 // its coordinates inverted or equivalently rotated 180 degrees about
 // ax and then mirrored through the plane perpendicular to ax
-// TODO: untested
-func Invert(atoms []Atom, ax axis) []Atom {
+func Invert(atoms []Atom, ax Axis) []Atom {
 	return RotaryReflect(atoms, 180.0, ax)
 }
 
@@ -73,7 +72,7 @@ func approxEqual(x, y []float64) bool {
 
 // ToCylinder transforms Cartesian coordinates to cylindrical
 // coordinates of the form (r, theta, z)
-func ToCylinder(coords []float64, axis axis) []float64 {
+func ToCylinder(coords []float64, axis Axis) []float64 {
 	var (
 		r, t, z float64
 	)
@@ -101,10 +100,11 @@ func ToCylinder(coords []float64, axis axis) []float64 {
 
 // ToCartesian transforms coordinates from cylindrical coordinates of
 // the form (r, t, z) to Cartesians of the form (x, y, z)
-func ToCartesian(coords []float64, axis axis) (res []float64) {
+func ToCartesian(coords []float64, axis Axis) (res []float64) {
 	var x, y, z float64
 	if len(coords) != 3 {
-		panic(fmt.Errorf("tocartesian: wrong number of coords (%d/3)", len(coords)))
+		panic(fmt.Errorf("tocartesian: wrong number of coords (%d/3)",
+			len(coords)))
 	}
 	x = coords[0] * math.Cos(coords[1])
 	y = coords[0] * math.Sin(coords[1])
@@ -124,3 +124,4 @@ func ToCartesian(coords []float64, axis axis) (res []float64) {
 	}
 	return res
 }
+
