@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"strings"
 )
 
 const (
@@ -24,13 +26,29 @@ var (
 	nohead  = flag.Bool("nohead", false, "disable printing of header info for TeX output")
 )
 
-func parseFlags() []string {
+func parseFlags() string {
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(),
 			"%s", help)
 		flag.PrintDefaults()
 	}
 	flag.Parse()
+	args := flag.Args()
+	if len(args) < 1 {
+		fmt.Fprintln(os.Stderr, "summarize: not enough arguments")
+		os.Exit(1)
+	}
+	filename := args[0]
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		fmt.Fprintf(os.Stderr, "summarize: %q is not a file\n",
+			filename)
+		os.Exit(1)
+	}
+	if strings.Contains(filename, "spectro") {
+		*spectro = true
+	} else if strings.Contains(filename, "intder") {
+		*intder = true
+	}
 	initConst()
-	return flag.Args()
+	return filename
 }

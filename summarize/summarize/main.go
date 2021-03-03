@@ -256,7 +256,7 @@ func makeSiIC(id *summarize.Intder) *Table {
 func Eqnify(str string, end bool) string {
 	split := strings.Split(str, "\t")
 	atom := regexp.MustCompile(`([A-Z][a-z]?)_`)
-	cord := regexp.MustCompile(`(r|<|t)`)
+	cord := regexp.MustCompile(`(r|<|t|LIN)`)
 	cords := cord.FindAllString(str, -1)
 	split[1] = strings.Replace(split[1], "<", `\angle`, -1)
 	split[1] = strings.Replace(split[1], "t", `\tau`, -1)
@@ -274,7 +274,7 @@ func Eqnify(str string, end bool) string {
 		return fmt.Sprintf(`S_{%s} &= &\frac{1}{\sqrt{2}}[%s]%s`,
 			split[0], split[1], term)
 	default:
-		fmt.Println(str, cords)
+		fmt.Printf("%q -> %v\n", str, cords)
 		panic("unrecognized number of SICs")
 	}
 }
@@ -327,27 +327,17 @@ func printIntder(out io.Writer, id *summarize.Intder) {
 }
 
 func main() {
-	args := parseFlags()
-	if len(args) < 1 {
-		fmt.Fprintln(os.Stderr, "summarize: not enough arguments")
-		os.Exit(1)
-	}
-	filename := args[0]
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "summarize: %q is not a file\n",
-			filename)
-		os.Exit(1)
-	}
+	filename := parseFlags()
 	if *tex && *spectro && !*nohead {
 		fmt.Print("\\documentclass{article}\n\\begin{document}\n\n")
 		defer func() {
 			fmt.Print("\\end{document}\n")
 		}()
 	}
-	if strings.Contains(filename, "spectro") || *spectro {
+	if *spectro {
 		res := summarize.Spectro(filename)
 		printAll(os.Stdout, res)
-	} else if strings.Contains(filename, "intder") || *intder {
+	} else if *intder {
 		id := summarize.ReadIntder(filename)
 		printIntder(os.Stdout, id)
 	}

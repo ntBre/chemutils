@@ -46,6 +46,7 @@ var ptable = map[string]string{
 	"1.007825":  "H",
 	"4.002600":  "He",
 	"12.000000": "C",
+	"19.992435": "Ne",
 }
 
 const (
@@ -74,7 +75,7 @@ func ReadIntder(filename string) *Intder {
 		fields []string
 	)
 	var str strings.Builder
-	contrib := regexp.MustCompile(`(-?)([0-9]+) \( *([0-9]{1,3}\.[0-9])\)`)
+	contrib := regexp.MustCompile(`(-?)([0-9]+) \([ -]*([0-9]{1,3}\.[0-9])\)`)
 	sint := regexp.MustCompile(`(L|S)\( ?([0-9]{1,2})\)=?`)
 	for scanner.Scan() {
 		line = scanner.Text()
