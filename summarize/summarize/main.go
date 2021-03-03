@@ -256,7 +256,7 @@ func makeSiIC(id *summarize.Intder) *Table {
 func Eqnify(str string, end bool) string {
 	split := strings.Split(str, "\t")
 	atom := regexp.MustCompile(`([A-Z][a-z]?)_`)
-	cord := regexp.MustCompile(`(r|<|t|LIN)`)
+	cord := regexp.MustCompile(`([^A-Z]r|<|t|LIN)`)
 	cords := cord.FindAllString(str, -1)
 	split[1] = strings.Replace(split[1], "<", `\angle`, -1)
 	split[1] = strings.Replace(split[1], "t", `\tau`, -1)
