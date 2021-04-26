@@ -24,8 +24,8 @@ var (
 		"AL": 13, "SI": 14, "P": 15,
 		"S": 16, "CL": 17, "AR": 18,
 	}
-	// SpectroCommand is the command used to run spectro
-	SpectroCommand string
+	// Command is the command used to run spectro
+	Command string
 )
 
 // Spectro holds the information for a spectro input file
@@ -441,7 +441,7 @@ func EqnSeparate(line string) (lhs []int, rhs int) {
 // RunSpectro runs SpectroCommand on filename
 func RunSpectro(filename string) (err error) {
 	file := path.Base(filename)
-	cmd := exec.Command(SpectroCommand)
+	cmd := exec.Command(Command)
 	cmd.Dir = path.Dir(filename)
 	cmd.Stdin, err = os.Open(filepath.Join(cmd.Dir, file+".in"))
 	if err != nil {

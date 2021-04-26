@@ -447,7 +447,7 @@ func TestResinLine(t *testing.T) {
 }
 
 func TestDoSpectro(t *testing.T) {
-	SpectroCommand = "/home/brent/Downloads/spec3jm/backup/spectro.x"
+	Command = "/home/brent/Downloads/spec3jm/backup/spectro.x"
 	tests := []struct {
 		load  string
 		forts []string
