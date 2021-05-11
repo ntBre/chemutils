@@ -17,7 +17,7 @@ var (
 	procs = flag.Int("t", 1, "dummy flag")
 )
 
-//go:embed test.json
+//go:embed new.json
 var js string
 
 func main() {
@@ -25,11 +25,11 @@ func main() {
 	f := strings.NewReader(js)
 	byts, err := io.ReadAll(f)
 	if err != nil {
-		panic(err)
+		os.Exit(1)
 	}
 	err = json.Unmarshal(byts, &geoms)
 	if err != nil {
-		panic(err)
+		os.Exit(2)
 	}
 	flag.Parse()
 	args := flag.Args()
@@ -39,13 +39,14 @@ func main() {
 	infile, err := os.Open(args[0])
 	defer infile.Close()
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "trouble opening %s\n", args[0])
+		os.Exit(3)
 	}
 	base := args[0][:len(args[0])-len(filepath.Ext(args[0]))]
 	outfile, err := os.Create(base + ".out")
 	defer outfile.Close()
 	if err != nil {
-		panic(err)
+		os.Exit(4)
 	}
 	// TODO include gradients
 	scanner := bufio.NewScanner(infile)
@@ -67,7 +68,7 @@ func main() {
 	}
 	val, ok := geoms[str.String()]
 	if !ok {
-		panic("geometry not found")
+		os.Exit(5)
 	}
 	fmt.Fprintf(outfile, "dummy output\nenergy= %20.12f\n", val)
 }
