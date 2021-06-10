@@ -19,6 +19,8 @@ Flags:
 )
 
 var (
+	freq    = flag.Bool("v", false, "only print vibrational frequencies and exit")
+	rot     = flag.Bool("r", false, "only print principal rotational constants and exit")
 	spectro = flag.Bool("s", false, "parse a spectro output file")
 	intder  = flag.Bool("i", false, "parse an intder output file")
 	tex     = flag.Bool("tex", false, "output summary in TeX table format")

@@ -15,6 +15,10 @@ import (
 	"github.com/ntBre/chemutils/summarize"
 )
 
+const (
+	toMHz = 29979.2458
+)
+
 var (
 	DeltaOrder []string
 	PhiOrder   []string
@@ -53,18 +57,18 @@ func makeFreqs(res *summarize.Result) *Table {
 func makeABC(res *summarize.Result) *Table {
 	var str strings.Builder
 	for a := range res.Rots {
-		fmt.Fprintf(&str, "%8s%10.6f\n",
-			fmt.Sprintf(ABC[0], a), res.Rots[a][2])
-		fmt.Fprintf(&str, "%8s%10.6f\n",
-			fmt.Sprintf(ABC[1], a), res.Rots[a][0])
-		fmt.Fprintf(&str, "%8s%10.6f",
-			fmt.Sprintf(ABC[2], a), res.Rots[a][1])
+		fmt.Fprintf(&str, "%8s%10.1f\n",
+			fmt.Sprintf(ABC[0], a), res.Rots[a][2]*toMHz)
+		fmt.Fprintf(&str, "%8s%10.1f\n",
+			fmt.Sprintf(ABC[1], a), res.Rots[a][0]*toMHz)
+		fmt.Fprintf(&str, "%8s%10.1f",
+			fmt.Sprintf(ABC[2], a), res.Rots[a][1]*toMHz)
 		if a != len(res.Rots)-1 {
 			fmt.Fprint(&str, "\n")
 		}
 	}
 	return &Table{
-		Caption:   "ABC (cm-1)",
+		Caption:   "ABC (MHz)",
 		Alignment: "cc",
 		Header:    fmt.Sprintf("%8s%10s", "Constant", "Value"),
 		Body:      str.String(),
@@ -184,12 +188,22 @@ func makeFermi(res *summarize.Result) *Table {
 }
 
 func printAll(out io.Writer, res *summarize.Result) {
-	t.Execute(out, makeFreqs(res))
-	t.Execute(out, makeABC(res))
-	t.Execute(out, makeDeltas(res))
-	t.Execute(out, makePhis(res))
-	t.Execute(out, makeGeom(res))
-	t.Execute(out, makeFermi(res))
+	switch {
+	case *freq && *rot:
+		t.Execute(out, makeFreqs(res))
+		t.Execute(out, makeABC(res))
+	case *freq:
+		t.Execute(out, makeFreqs(res))
+	case *rot:
+		t.Execute(out, makeABC(res))
+	default:
+		t.Execute(out, makeFreqs(res))
+		t.Execute(out, makeABC(res))
+		t.Execute(out, makeDeltas(res))
+		t.Execute(out, makePhis(res))
+		t.Execute(out, makeGeom(res))
+		t.Execute(out, makeFermi(res))
+	}
 }
 
 func printSiic(id *summarize.Intder, siic []int) string {
