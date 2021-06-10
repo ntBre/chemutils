@@ -101,4 +101,11 @@ func main() {
 		}
 		fmt.Print("\n")
 	}
+	for i, _ := range results[0].Val.Corr {
+		fmt.Printf("%8s", fmt.Sprintf("v_{%d}", i+1))
+		for _, r := range results {
+			fmt.Printf(floatfmt, r.Val.Corr[i])
+		}
+		fmt.Print("\n")
+	}
 }
