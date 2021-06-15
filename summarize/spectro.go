@@ -24,6 +24,7 @@ type Result struct {
 	Ralpha []float64
 	Requil []float64
 	Fermi  []string
+	Be     []float64
 }
 
 // FreqReport gathers harmonic, anharmonic, and resonance-corrected
@@ -240,6 +241,10 @@ func Spectro(filename string) *Result {
 			fermiMap[key] = append(fermiMap[key],
 				fmt.Sprintf("v_%s+v_%s", fields[1],
 					fields[2]))
+		case strings.Contains(line, "Be ="):
+			fields := strings.Fields(line)
+			v, _ := strconv.ParseFloat(fields[2], 64)
+			res.Be = append(res.Be, v)
 		}
 		// TODO option for BZA and/or BZS
 		// TODO option for D in addition to DELTA
