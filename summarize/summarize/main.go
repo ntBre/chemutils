@@ -15,10 +15,6 @@ import (
 	"github.com/ntBre/chemutils/summarize"
 )
 
-const (
-	toMHz = 29979.2458
-)
-
 var (
 	DeltaOrder []string
 	PhiOrder   []string
@@ -55,30 +51,45 @@ func makeFreqs(res *summarize.Result) *Table {
 }
 
 func makeABC(res *summarize.Result) *Table {
-	var str strings.Builder
+	toMHz := 29979.2458
+	strfmt := "%8s%10.1f"
+	cap := "ABC (MHz)"
+	if *cm {
+		toMHz = 1
+		strfmt = "%8s%10.5f"
+		cap = "ABC (cm-1)"
+	}
+	var (
+		str strings.Builder
+	)
+	// equilibrium
+	if !res.Lin {
+		fmt.Fprintf(&str, strfmt+"\n", "A_e", res.Be[0]*toMHz)
+		fmt.Fprintf(&str, strfmt+"\n", "B_e", res.Be[1]*toMHz)
+		fmt.Fprintf(&str, strfmt+"\n", "C_e", res.Be[2]*toMHz)
+	} else {
+		fmt.Fprintf(&str, strfmt+"\n", "B_e", res.Be[0]*toMHz)
+	}
+	// vibrationally averaged
 	for a := range res.Rots {
 		if !res.Lin {
-			fmt.Fprintf(&str, "%8s%10.1f\n",
+			fmt.Fprintf(&str, strfmt+"\n",
 				fmt.Sprintf(ABC[0], a), res.Rots[a][2]*toMHz)
-			fmt.Fprintf(&str, "%8s%10.1f\n",
+			fmt.Fprintf(&str, strfmt+"\n",
 				fmt.Sprintf(ABC[1], a), res.Rots[a][0]*toMHz)
-			fmt.Fprintf(&str, "%8s%10.1f",
+			fmt.Fprintf(&str, strfmt,
 				fmt.Sprintf(ABC[2], a), res.Rots[a][1]*toMHz)
 		} else {
-			// if linear, add Be to BZS
-			fmt.Fprintf(&str, "%8s%10.1f\n",
-				fmt.Sprintf(ABC[0], a), (res.Be[0]+res.Rots[a][2])*toMHz)
-			fmt.Fprintf(&str, "%8s%10.1f\n",
-				fmt.Sprintf(ABC[1], a), (res.Be[1]+res.Rots[a][0])*toMHz)
-			fmt.Fprintf(&str, "%8s%10.1f",
-				fmt.Sprintf(ABC[2], a), (res.Be[2]+res.Rots[a][1])*toMHz)
+			// if linear, add Be to BZS and only print B
+			fmt.Fprintf(&str, strfmt,
+				fmt.Sprintf(ABC[1], a), (res.Be[0]+res.Rots[a][0])*toMHz)
 		}
 		if a != len(res.Rots)-1 {
 			fmt.Fprint(&str, "\n")
 		}
 	}
 	return &Table{
-		Caption:   "ABC (MHz)",
+		Caption:   cap,
 		Alignment: "cc",
 		Header:    fmt.Sprintf("%8s%10s", "Constant", "Value"),
 		Body:      str.String(),
