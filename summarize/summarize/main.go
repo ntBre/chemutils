@@ -64,11 +64,11 @@ func makeABC(res *summarize.Result) *Table {
 	)
 	// equilibrium
 	if !res.Lin {
-		fmt.Fprintf(&str, strfmt+"\n", "A_e", res.Be[0]*toMHz)
-		fmt.Fprintf(&str, strfmt+"\n", "B_e", res.Be[1]*toMHz)
-		fmt.Fprintf(&str, strfmt+"\n", "C_e", res.Be[2]*toMHz)
+		fmt.Fprintf(&str, strfmt+"\n", ABC[3], res.Be[0]*toMHz)
+		fmt.Fprintf(&str, strfmt+"\n", ABC[4], res.Be[1]*toMHz)
+		fmt.Fprintf(&str, strfmt+"\n", ABC[5], res.Be[2]*toMHz)
 	} else {
-		fmt.Fprintf(&str, strfmt+"\n", "B_e", res.Be[0]*toMHz)
+		fmt.Fprintf(&str, strfmt+"\n", ABC[4], res.Be[0]*toMHz)
 	}
 	// vibrationally averaged
 	for a := range res.Rots {

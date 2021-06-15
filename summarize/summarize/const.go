@@ -48,7 +48,7 @@ func initConst() {
 			"$\\phi_{jk}$",
 			"$\\phi_{k}$",
 		}
-		ABC = []string{"$A_%d$", "$B_%d$", "$C_%d$"}
+		ABC = []string{"$A_%d$", "$B_%d$", "$C_%d$", "$A_e$", "$B_e$", "$C_e$"}
 	} else {
 		t = template.Must(template.New("p").Parse(plainTemplate))
 		var (
