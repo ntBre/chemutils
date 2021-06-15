@@ -25,6 +25,7 @@ type Result struct {
 	Requil []float64
 	Fermi  []string
 	Be     []float64
+	Lin    bool
 }
 
 // FreqReport gathers harmonic, anharmonic, and resonance-corrected
@@ -54,11 +55,11 @@ func Spectro(filename string) *Result {
 		geom     bool
 		fermi1   bool
 		fermi2   bool
-		nobza    bool = true
 		buf      bytes.Buffer
 		// this is cute
 		gparams = []string{"", "", "r", "<"}
 	)
+	res.Lin = true
 	freq := regexp.MustCompile(`[0-9]+`)
 	delta := regexp.MustCompile(`(?i)delta (J|(JK)|K)`)
 	phi := regexp.MustCompile(`(?i)phi (J|(JK)|(KJ)|K)`)
@@ -157,8 +158,8 @@ func Spectro(filename string) *Result {
 			}
 		case good && strings.Contains(line, "BZA"):
 			rot = true
-			nobza = false
-		case good && nobza && strings.Contains(line, "BZS"):
+			res.Lin = false
+		case good && res.Lin && strings.Contains(line, "BZS"):
 			rot = true
 		case rot && good:
 			state = nil
