@@ -57,12 +57,22 @@ func makeFreqs(res *summarize.Result) *Table {
 func makeABC(res *summarize.Result) *Table {
 	var str strings.Builder
 	for a := range res.Rots {
-		fmt.Fprintf(&str, "%8s%10.1f\n",
-			fmt.Sprintf(ABC[0], a), res.Rots[a][2]*toMHz)
-		fmt.Fprintf(&str, "%8s%10.1f\n",
-			fmt.Sprintf(ABC[1], a), res.Rots[a][0]*toMHz)
-		fmt.Fprintf(&str, "%8s%10.1f",
-			fmt.Sprintf(ABC[2], a), res.Rots[a][1]*toMHz)
+		if !res.Lin {
+			fmt.Fprintf(&str, "%8s%10.1f\n",
+				fmt.Sprintf(ABC[0], a), res.Rots[a][2]*toMHz)
+			fmt.Fprintf(&str, "%8s%10.1f\n",
+				fmt.Sprintf(ABC[1], a), res.Rots[a][0]*toMHz)
+			fmt.Fprintf(&str, "%8s%10.1f",
+				fmt.Sprintf(ABC[2], a), res.Rots[a][1]*toMHz)
+		} else {
+			// if linear, add Be to BZS
+			fmt.Fprintf(&str, "%8s%10.1f\n",
+				fmt.Sprintf(ABC[0], a), (res.Be[0]+res.Rots[a][2])*toMHz)
+			fmt.Fprintf(&str, "%8s%10.1f\n",
+				fmt.Sprintf(ABC[1], a), (res.Be[1]+res.Rots[a][0])*toMHz)
+			fmt.Fprintf(&str, "%8s%10.1f",
+				fmt.Sprintf(ABC[2], a), (res.Be[2]+res.Rots[a][1])*toMHz)
+		}
 		if a != len(res.Rots)-1 {
 			fmt.Fprint(&str, "\n")
 		}
