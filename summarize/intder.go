@@ -46,8 +46,10 @@ var ptable = map[string]string{
 	"1.007825":  "H",
 	"4.002600":  "He",
 	"12.000000": "C",
+	"14.003070": "N",
 	"19.992435": "Ne",
 	"21.991383": "Ne",
+	"31.972070": "S",
 	"35.967545": "Ar",
 	"37.962732": "Ar",
 	"39.962384": "Ar",
@@ -81,6 +83,7 @@ func ReadIntder(filename string) *Intder {
 	var str strings.Builder
 	contrib := regexp.MustCompile(`(-?)([0-9]+) \([ -]*([0-9]{1,3}\.[0-9])\)`)
 	sint := regexp.MustCompile(`(L|S)\( ?([0-9]{1,2})\)=?`)
+	syicpat := regexp.MustCompile(`^ SYMMETRY INTERNAL COORDINATES$`)
 	for scanner.Scan() {
 		line = scanner.Text()
 		fields = strings.Fields(line)
@@ -114,8 +117,10 @@ func ReadIntder(filename string) *Intder {
 			str.Reset()
 		case siic && len(fields) == 0:
 			siic = false
-			skip += 2
+		case syicpat.MatchString(line):
+			fmt.Println("this is the line", line)
 			syic = true
+			skip += 1
 		case syic && len(fields) == 0:
 			syic = false
 		case geom:

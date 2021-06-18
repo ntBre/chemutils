@@ -85,7 +85,7 @@ func makeABC(res *summarize.Result) *Table {
 	// vibrationally averaged
 	for a := range res.Rots {
 		switch len(res.Be) {
-		case 1: 
+		case 1:
 			// if linear, add Be to BZS and only print B
 			fmt.Fprintf(&str, strfmt,
 				fmt.Sprintf(ABC[1], a),
@@ -104,7 +104,7 @@ func makeABC(res *summarize.Result) *Table {
 				fmt.Sprintf(ABC[1], a), res.Rots[a][0]*toMHz)
 			fmt.Fprintf(&str, strfmt,
 				fmt.Sprintf(ABC[2], a), res.Rots[a][1]*toMHz)
-		} 
+		}
 		if a != len(res.Rots)-1 {
 			fmt.Fprint(&str, "\n")
 		}
@@ -302,7 +302,13 @@ func makeSiIC(id *summarize.Intder) *Table {
 	var str strings.Builder
 	tab.Caption = "Simple Internals"
 	for d, siic := range id.SiIC {
-		fmt.Fprintf(&str, "%2d\t%s\n", d+1, printSiic(id, siic))
+		s := fmt.Sprintf("%2d\t%s", d+1, printSiic(id, siic))
+		if *tex {
+			fmt.Fprint(&str, Eqnify(s, d == len(id.SiIC)-1))
+		} else {
+			fmt.Fprintf(&str, s)
+		}
+		fmt.Fprint(&str, "\n")
 	}
 	tab.Body = TrimNewline(str.String())
 	return tab
@@ -338,6 +344,9 @@ func Eqnify(str string, end bool) string {
 func makeSyIC(id *summarize.Intder) *Table {
 	tab := new(Table)
 	var str, line strings.Builder
+	if len(id.SyIC) == 0 {
+		return nil
+	}
 	tab.Caption = "Symmetry Internals"
 	for d, syic := range id.SyIC {
 		fmt.Fprintf(&line, "%2d\t", d+1)

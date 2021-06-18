@@ -3,3 +3,6 @@ test:
 
 help:
 	go run . -h
+
+install:
+	go install .

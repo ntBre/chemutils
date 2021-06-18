@@ -19,7 +19,7 @@ import (
 func TestColPrint(t *testing.T) {
 	datum0 := []float64{1, 2, 3}
 	datum1 := []float64{4, 5, 6}
-	got := colPrint("%4.1f", datum0, datum1)
+	got := colPrint("%4.1f", true, datum0, datum1)
 	want := "    1 1.0 4.0\n    2 2.0 5.0\n    3 3.0 6.0"
 	if got != want {
 		t.Errorf("got %v, wanted %v\n", got, want)
@@ -27,6 +27,11 @@ func TestColPrint(t *testing.T) {
 }
 
 func TestPrintResult(t *testing.T) {
+	tmp := *cm
+	*cm = true
+	defer func() {
+		*cm = tmp
+	}()
 	initConst()
 	res := summarize.Spectro("testfiles/spectro.out")
 	truefile := "testfiles/summary.txt"
