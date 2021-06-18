@@ -18,14 +18,16 @@ import (
 var (
 	DeltaOrder []string
 	PhiOrder   []string
-	ABC        = []string{"A_%d", "B_%d", "C_%d"}
+	ABC        = []string{"A_%d", "B_%d", "C_%d", "A_e", "B_e", "C_e"}
 	t          *template.Template
 )
 
-func colPrint(format string, cols ...[]float64) string {
+func colPrint(format string, count bool, cols ...[]float64) string {
 	var buf bytes.Buffer
 	for i := range cols[0] {
-		fmt.Fprintf(&buf, "%5d", i+1)
+		if count {
+			fmt.Fprintf(&buf, "%5d", i+1)
+		}
 		for j := range cols {
 			fmt.Fprintf(&buf, format, cols[j][i])
 		}
@@ -41,7 +43,16 @@ func makeFreqs(res *summarize.Result) *Table {
 	if lh := len(res.Harm); !(lh == len(res.Fund) && lh == len(res.Corr)) {
 		panic("dimension mismatch")
 	}
-	fmt.Fprint(&str, colPrint("%8.1f", res.Harm, res.Fund, res.Corr))
+	if *lfreq {
+		fmt.Fprint(&str, colPrint("%8.1f", false, res.Corr))
+		return &Table{
+			Caption:   fmt.Sprintf("Freqs, ZPT=%.1f (cm-1)", res.ZPT),
+			Alignment: "cr",
+			Header:    fmt.Sprintf("%8s", "CORR"),
+			Body:      str.String(),
+		}
+	}
+	fmt.Fprint(&str, colPrint("%8.1f", true, res.Harm, res.Fund, res.Corr))
 	return &Table{
 		Caption:   fmt.Sprintf("Freqs, ZPT=%.1f (cm-1)", res.ZPT),
 		Alignment: "crrr",
@@ -63,27 +74,37 @@ func makeABC(res *summarize.Result) *Table {
 		str strings.Builder
 	)
 	// equilibrium
-	if !res.Lin {
-		fmt.Fprintf(&str, strfmt+"\n", ABC[3], res.Be[0]*toMHz)
-		fmt.Fprintf(&str, strfmt+"\n", ABC[4], res.Be[1]*toMHz)
-		fmt.Fprintf(&str, strfmt+"\n", ABC[5], res.Be[2]*toMHz)
-	} else {
+	switch len(res.Be) {
+	case 1:
 		fmt.Fprintf(&str, strfmt+"\n", ABC[4], res.Be[0]*toMHz)
+	default:
+		for b := range res.Be {
+			fmt.Fprintf(&str, strfmt+"\n", ABC[b+3], res.Be[b]*toMHz)
+		}
 	}
 	// vibrationally averaged
 	for a := range res.Rots {
-		if !res.Lin {
+		switch len(res.Be) {
+		case 1: 
+			// if linear, add Be to BZS and only print B
+			fmt.Fprintf(&str, strfmt,
+				fmt.Sprintf(ABC[1], a),
+				(res.Be[0]+res.Rots[a][0])*toMHz)
+		case 2:
+			// if b and c degenerate, average and call c
+			fmt.Fprintf(&str, strfmt+"\n",
+				fmt.Sprintf(ABC[0], a), res.Rots[a][2]*toMHz)
+			fmt.Fprintf(&str, strfmt,
+				fmt.Sprintf(ABC[2], a),
+				(res.Rots[a][0]+res.Rots[a][1])*toMHz/2)
+		case 3:
 			fmt.Fprintf(&str, strfmt+"\n",
 				fmt.Sprintf(ABC[0], a), res.Rots[a][2]*toMHz)
 			fmt.Fprintf(&str, strfmt+"\n",
 				fmt.Sprintf(ABC[1], a), res.Rots[a][0]*toMHz)
 			fmt.Fprintf(&str, strfmt,
 				fmt.Sprintf(ABC[2], a), res.Rots[a][1]*toMHz)
-		} else {
-			// if linear, add Be to BZS and only print B
-			fmt.Fprintf(&str, strfmt,
-				fmt.Sprintf(ABC[1], a), (res.Be[0]+res.Rots[a][0])*toMHz)
-		}
+		} 
 		if a != len(res.Rots)-1 {
 			fmt.Fprint(&str, "\n")
 		}
@@ -210,10 +231,10 @@ func makeFermi(res *summarize.Result) *Table {
 
 func printAll(out io.Writer, res *summarize.Result) {
 	switch {
-	case *freq && *rot:
+	case (*freq || *lfreq) && *rot:
 		t.Execute(out, makeFreqs(res))
 		t.Execute(out, makeABC(res))
-	case *freq:
+	case *freq || *lfreq:
 		t.Execute(out, makeFreqs(res))
 	case *rot:
 		t.Execute(out, makeABC(res))
