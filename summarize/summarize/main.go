@@ -93,10 +93,11 @@ func makeABC(res *summarize.Result) *Table {
 		case 2:
 			// if b and c degenerate, average and call c
 			fmt.Fprintf(&str, strfmt+"\n",
-				fmt.Sprintf(ABC[0], a), res.Rots[a][2]*toMHz)
+				fmt.Sprintf(ABC[0], a),
+				(res.Rots[a][0]+res.Rots[a][1])*toMHz/2)
 			fmt.Fprintf(&str, strfmt,
 				fmt.Sprintf(ABC[2], a),
-				(res.Rots[a][0]+res.Rots[a][1])*toMHz/2)
+				res.Rots[a][2]*toMHz)
 		case 3:
 			fmt.Fprintf(&str, strfmt+"\n",
 				fmt.Sprintf(ABC[0], a), res.Rots[a][2]*toMHz)
