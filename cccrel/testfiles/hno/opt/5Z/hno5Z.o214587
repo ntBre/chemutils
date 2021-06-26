@@ -1,0 +1,62 @@
+Thu Jan 23 20:46:20 CST 2020
+cn054
+Job Id: 214587.maple
+    Job_Name = hno5Z
+    Job_Owner = r2666@maple.cm.cluster
+    resources_used.cpupercent = 0
+    resources_used.cput = 00:00:00
+    resources_used.mem = 12792kb
+    resources_used.ncpus = 4
+    resources_used.vmem = 70732kb
+    resources_used.walltime = 14:15:14
+    job_state = R
+    queue = workq
+    server = maple
+    Checkpoint = u
+    ctime = Thu Jan 23 20:46:20 2020
+    Error_Path = maple.cm.cluster:/ddn/home4/r2666/chem/rotation/hno/opt/5Z/hno
+	5Z.e214587
+    exec_host = cn054/0*4
+    exec_vnode = (cn054:mem=33554432kb:ncpus=4:ngpus=0)
+    Hold_Types = n
+    Join_Path = oe
+    Keep_Files = n
+    Mail_Points = a
+    mtime = Fri Jan 24 11:01:34 2020
+    Output_Path = maple.cm.cluster:/ddn/home4/r2666/chem/rotation/hno/opt/5Z/hn
+	o5Z.o214587
+    Priority = 0
+    qtime = Thu Jan 23 20:46:20 2020
+    Rerunable = False
+    Resource_List.cput = 26784:00:00
+    Resource_List.mem = 32gb
+    Resource_List.ncpus = 4
+    Resource_List.ngpus = 0
+    Resource_List.nodect = 1
+    Resource_List.place = pack
+    Resource_List.select = 1:mem=32gb:ncpus=4:ngpus=0
+    Resource_List.walltime = 96:00:00
+    stime = Thu Jan 23 20:46:20 2020
+    session_id = 8856
+    Shell_Path_List = /bin/bash
+    jobdir = /ddn/home4/r2666
+    substate = 42
+    Variable_List = PBS_O_HOME=/ddn/home4/r2666,PBS_O_LANG=en_US.UTF-8,
+	PBS_O_LOGNAME=r2666,
+	PBS_O_PATH=/cm/shared/apps/pbspro-ce/18.1.4.1/sbin:/cm/shared/apps/pbs
+	pro-ce/18.1.4.1/bin:/cm/local/apps/environment-modules/4.2.1//bin:/ddn/
+	home4/r2666/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games:/u
+	sr/lpp/mmfs/bin:/opt/ibutils/bin:/sbin:/usr/sbin:/cm/local/apps/environ
+	ment-modules/4.2.1/bin:/cm/shared/apps/pbspro-ce/current/bin:/usr/local
+	/apps/bin,PBS_O_MAIL=/var/mail/r2666,PBS_O_SHELL=/bin/bash,
+	PBS_O_WORKDIR=/ddn/home4/r2666/chem/rotation/hno/opt/5Z,
+	PBS_O_SYSTEM=Linux,PBS_O_QUEUE=res-gate,PBS_O_HOST=maple.cm.cluster
+    comment = Job run at Thu Jan 23 at 20:46 on (cn054:mem=33554432kb:ncpus=4:n
+	gpus=0)
+    etime = Thu Jan 23 20:46:20 2020
+    umask = 22
+    run_count = 1
+    Submit_arguments = mp.pbs
+    project = _pbs_project_default
+
+Fri Jan 24 11:02:22 CST 2020
