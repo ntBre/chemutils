@@ -1,0 +1,1281 @@
+<?xml version="1.0"?>
+<molpro xmlns="http://www.molpro.net/schema/molpro-output"
+  xmlns:xsd="http://www.w3.org/1999/XMLSchema"
+  xmlns:cml="http://www.xml-cml.org/schema"
+  xmlns:stm="http://www.xml-cml.org/schema"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+ <!--
+
+ Primary working directories    : /tmp/r2666/214589.maple
+ Secondary working directories  : /tmp/r2666/214589.maple
+ Wavefunction directory         : /ddn/home4/r2666/wfu/
+ Main file repository           : /tmp/r2666/214589.maple/
+
+ SHA1      : d5ffa45e93fdbca01ffc919aa182cfdae0147319
+ NAME      : 2015.1.35
+ ARCHNAME  : linux/x86_64
+ FC        : /opt/intel/composer_xe_2015.1.133/bin/intel64/ifort
+ BLASLIB   : -Wl,-_start-group /opt/intel/mkl/lib/intel64/libmkl_intel_ilp64.a /opt/intel/mkl/lib/intel64/libmkl_intel_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,-_end-group
+ id        : olemiss
+
+ Nodes     nprocs
+ cn041        1
+
+ Using customized tuning parameters: mindgm=1; mindgv=20; mindgc=4; mindgr=1; noblas=0; minvec=7
+ default implementation of scratch files=df  
+
+ --><job>
+  <!--
+ ***,AlONC, CCSD(T)/MT QFF
+ memory, 995, m;
+ gthresh,energy=1.d-12,zero=1.d-22,oneint=1.d-22,twoint=1.d-22;
+ gthresh,optgrad=1.d-8,optstep=1.d-8;
+ nocompress;
+ geometry={
+ N
+ O 1 no
+ H 1 nh 2 hno
+ }
+ 
+  no=1.2 ANG
+  nh=0.8 ANG
+  hno=105.0 DEG
+ 
+ basis={
+ default=aug-cc-pvtz
+ s,C,8236.0,1235.0,280.8, 79.27,25.59, 8.997,3.319
+ s,C,0.9059,0.3643,0.1285000
+ p,C,56.0,18.71,4.133,0.2827,0.3827,0.1209
+ d,C,30.0,10.0,3.3,1.097,0.318
+ f,C,7.0,2.3,0.7610
+ s,N,11420.0,1712.0,389.3,110.0,35.57,12.54,4.644
+ s,N,1.293,0.5118,0.1787
+ p,N,79.89,26.63,5.948,1.742,0.555,0.1725
+ d,N,45.0,15.0,5.0,1.654,0.469
+ f,N,9.9,3.3,1.093
+ s,O,15330.0,2299.0,522.4,147.3,47.55,16.76,6.207
+ s,O,1.752,0.6882,0.2384
+ p,O,103.5,34.46,7.749,2.28,0.7156,0.214
+ d,O,63.0,21.0,7.0,2.314,0.645
+ f,O,12.9,4.3,1.428
+ }
+   {hf,maxit=500;wf,charge=0,spin=0;accu,20;}
+   {ccsd(t),maxit=250;core;wf,charge=0,spin=0;orbital,IGNORE_ERROR;}
+  {optg,grms=1.d-8,srms=1.d-8}
+ 
+
+ Variables initialized (889), CPU time= 0.01 sec
+ Commands  initialized (702), CPU time= 0.00 sec, 572 directives.
+ Default parameters read. Elapsed time= 0.06 sec
+
+ Checking input...
+ Passed
+1
+
+
+                                         ***  PROGRAM SYSTEM MOLPRO  ***
+                                       Copyright, TTI GmbH Stuttgart, 2015
+                                    Version 2015.1 linked Jul  9 2018 13:16:40
+
+
+ **********************************************************************************************************************************
+ LABEL *   AlONC, CCSD(T)/MT QFF                                                         
+  (4 PROC) 64 bit serial version                                                         DATE: 23-Jan-20          TIME: 20:49:27  
+ **********************************************************************************************************************************
+
+ SHA1:             d5ffa45e93fdbca01ffc919aa182cfdae0147319
+ **********************************************************************************************************************************
+  -->
+  <!--
+
+ THRESHOLDS:
+
+ ZERO    =  1.00D-22  ONEINT  =  1.00D-22  TWOINT  =  1.00D-22  PREFAC  =  1.00D-14  LOCALI  =  1.00D-09  EORDER  =  1.00D-04
+ ENERGY  =  1.00D-12  ETEST   =  0.00D+00  EDENS   =  0.00D+00  THRDEDEF=  1.00D-06  GRADIENT=  1.00D-02  STEP    =  1.00D-03
+ ORBITAL =  1.00D-05  CIVEC   =  1.00D-05  COEFF   =  1.00D-04  PRINTCI =  5.00D-02  PUNCHCI =  9.90D+01  OPTGRAD =  3.00D-04
+ OPTENERG=  1.00D-06  OPTSTEP =  3.00D-04  THRGRAD =  1.00D-10  COMPRESS=  1.00D-11  VARMIN  =  1.00D-07  VARMAX  =  1.00D-03
+ THRDOUB =  0.00D+00  THRDIV  =  1.00D-05  THRRED  =  1.00D-07  THRPSP  =  1.00D+00  THRDC   =  1.00D-10  THRCS   =  1.00D-10
+ THRNRM  =  1.00D-08  THREQ   =  0.00D+00  THRDE   =  1.00D+00  THRREF  =  1.00D-05  SPARFAC =  1.00D+00  THRDLP  =  1.00D-07
+ THRDIA  =  1.00D-10  THRDLS  =  1.00D-07  THRGPS  =  0.00D+00  THRKEX  =  0.00D+00  THRDIS  =  2.00D-01  THRVAR  =  1.00D-10
+ THRLOC  =  1.00D-06  THRGAP  =  1.00D-06  THRLOCT = -1.00D+00  THRGAPT = -1.00D+00  THRORB  =  1.00D-06  THRMLTP =  0.00D+00
+ THRCPQCI=  1.00D-10  KEXTA   =  0.00D+00  THRCOARS=  0.00D+00  SYMTOL  =  1.00D-06  GRADTOL =  1.00D-06  THROVL  =  1.00D-08
+ THRORTH =  1.00D-08  GRID    =  1.00D-06  GRIDMAX =  1.00D-03  DTMAX   =  0.00D+00  THROCCDE=  1.00D-01  THROCCDE=  1.00D-01
+
+
+
+ THRESHOLDS:
+
+ ZERO    =  1.00D-22  ONEINT  =  1.00D-22  TWOINT  =  1.00D-22  PREFAC  =  1.00D-14  LOCALI  =  1.00D-09  EORDER  =  1.00D-04
+ ENERGY  =  1.00D-12  ETEST   =  0.00D+00  EDENS   =  0.00D+00  THRDEDEF=  1.00D-06  GRADIENT=  1.00D-02  STEP    =  1.00D-03
+ ORBITAL =  1.00D-05  CIVEC   =  1.00D-05  COEFF   =  1.00D-04  PRINTCI =  5.00D-02  PUNCHCI =  9.90D+01  OPTGRAD =  1.00D-08
+ OPTENERG=  1.00D-06  OPTSTEP =  1.00D-08  THRGRAD =  1.00D-10  COMPRESS=  1.00D-11  VARMIN  =  1.00D-07  VARMAX  =  1.00D-03
+ THRDOUB =  0.00D+00  THRDIV  =  1.00D-05  THRRED  =  1.00D-07  THRPSP  =  1.00D+00  THRDC   =  1.00D-10  THRCS   =  1.00D-10
+ THRNRM  =  1.00D-08  THREQ   =  0.00D+00  THRDE   =  1.00D+00  THRREF  =  1.00D-05  SPARFAC =  1.00D+00  THRDLP  =  1.00D-07
+ THRDIA  =  1.00D-10  THRDLS  =  1.00D-07  THRGPS  =  0.00D+00  THRKEX  =  0.00D+00  THRDIS  =  2.00D-01  THRVAR  =  1.00D-10
+ THRLOC  =  1.00D-06  THRGAP  =  1.00D-06  THRLOCT = -1.00D+00  THRGAPT = -1.00D+00  THRORB  =  1.00D-06  THRMLTP =  0.00D+00
+ THRCPQCI=  1.00D-10  KEXTA   =  0.00D+00  THRCOARS=  0.00D+00  SYMTOL  =  1.00D-06  GRADTOL =  1.00D-06  THROVL  =  1.00D-08
+ THRORTH =  1.00D-08  GRID    =  1.00D-06  GRIDMAX =  1.00D-03  DTMAX   =  0.00D+00  THROCCDE=  1.00D-01  THROCCDE=  1.00D-01
+
+
+
+ Input parameters for SORTINT:
+
+ COMPRESS =    0.000000
+ C_FINAL  =    1.000000
+ DEBUG    =   -1.000000
+ C_SORT1  =    0.000000
+ C_SEWARD =    0.000000
+ THRESH   =    0.000000
+ IO       =  molpro                                                          
+ SPRI     =    0.000000
+ SETTING NO             =         1.20000000  ANG                             
+ SETTING NH             =         0.80000000  ANG                             
+ SETTING HNO            =       105.00000000  DEG                             
+
+ Variable memory set to  995000000 words,  buffer space   230000 words
+
+ SETTING BASIS          =    USERDEF
+  --><jobstep command="HF-SCF" commandset="SCFPRO">
+   <!--
+
+
+ Recomputing integrals since basis changed
+
+
+ Using spherical harmonics
+
+ Library entry H      S aug-cc-pVTZ          selected for orbital group  3
+ Library entry H      P aug-cc-pVTZ          selected for orbital group  3
+ Library entry H      D aug-cc-pVTZ          selected for orbital group  3
+
+
+ PROGRAM * SEWARD (Integral evaluation for generally contracted gaussian basis sets)     Author: Roland Lindh, 1990
+
+ Geometry written to block  1 of record 700
+
+ Orientation using atomic masses  
+ Molecule type: Asymmetric top
+ Symmetry elements: X
+ Rotational constants:      41.9878831     43.9791483    927.3457377 GHz  (calculated with average atomic masses)
+
+ Point group  Cs  
+
+
+   --><cml:molecule>
+    <cml:symmetry pointGroup="Cs"/>
+    <cml:atomArray>
+     <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.608313769318987E-01"
+       z3="-0.609810249450901"/>
+     <cml:atom id="a2" elementType="O" x3="0.0" y3="0.925052054679993E-02"
+       z3="0.588141555775747"/>
+     <cml:atom id="a3" elementType="H" x3="0.0" y3="0.698497994757182" z3="-0.861641354142648"/>
+    </cml:atomArray>
+    <cml:bondArray>
+     <cml:bond atomRefs2="a1 a2"/>
+     <cml:bond atomRefs2="a1 a3"/>
+    </cml:bondArray>
+   </cml:molecule><!--
+
+ ATOMIC COORDINATES
+
+ NR  ATOM    CHARGE       X              Y              Z
+
+   1  N       7.00    0.000000000   -0.114954642   -1.152374359
+   2  O       8.00    0.000000000    0.017480950    1.111426463
+   3  H       1.00    0.000000000    1.319969909   -1.628266177
+
+ Bond lengths in Bohr (Angstrom)
+
+ 1-2  2.267671349  1-3  1.511780900
+     ( 1.200000000)     ( 0.800000000)
+
+ Bond angles
+
+  2-1-3  105.00000000
+
+ NUCLEAR CHARGE:                   16
+ NUMBER OF PRIMITIVE AOS:         203
+ NUMBER OF SYMMETRY AOS:          173
+ NUMBER OF CONTRACTIONS:          171   ( 114A'  +  57A"  )
+ NUMBER OF CORE ORBITALS:           2   (   2A'  +   0A"  )
+ NUMBER OF VALENCE ORBITALS:        9   (   7A'  +   2A"  )
+
+
+ NUCLEAR REPULSION ENERGY   31.96241601
+
+
+ Eigenvalues of metric
+
+         1 0.701E-03 0.217E-02 0.228E-02 0.309E-02 0.589E-02 0.978E-02 0.117E-01 0.142E-01
+         2 0.123E-01 0.448E-01 0.559E-01 0.922E-01 0.948E-01 0.128E+00 0.128E+00 0.140E+00
+
+
+ Contracted 2-electron integrals neglected if value below      1.0D-22
+
+       46209992. INTEGRALS WRITTEN OUT IN   11285 BLOCKS ON RECORD 1290 OF FILE 1
+
+
+ NUMBER OF SORTED TWO-ELECTRON INTEGRALS:   55360566.     BUFFER LENGTH:  32768
+ NUMBER OF SEGMENTS:   4  SEGMENT LENGTH:   15997996      RECORD LENGTH: 524288
+
+ Memory used in sort:      16.56 MW
+
+ SORT1 READ    46209992. AND WROTE    46648071. INTEGRALS IN    136 RECORDS. CPU TIME:     2.10 SEC, REAL TIME:     2.16 SEC
+ SORT2 READ    46648071. AND WROTE    55360566. INTEGRALS IN      4 RECORDS. CPU TIME:     0.97 SEC, REAL TIME:     1.38 SEC
+
+ FILE SIZES:   FILE 1:   760.3 MBYTE,  FILE 4:   570.5 MBYTE,   TOTAL:   1330.7 MBYTE
+
+ OPERATOR DM      FOR CENTER  0  COORDINATES:    0.000000    0.000000    0.000000
+
+
+ **********************************************************************************************************************************
+ DATASETS  * FILE   NREC   LENGTH (MB)   RECORD NAMES
+              1      19      421.64       500      610      700      900      950      970     1000      129      960     1100   
+                                          VAR    BASINP    GEOM    SYMINP    ZMAT    AOBASIS   BASIS     P2S    ABASIS      S 
+                                         1400     1410     1200     1210     1080     1600     1650     1300     1700   
+                                           T        V       H0       H01     AOSYM     SMH    MOLCAS    ERIS     OPER   
+
+ PROGRAMS   *        TOTAL       INT
+ CPU TIMES  *        23.68     23.57
+ REAL TIME  *        10.48 SEC
+ DISK USED  *         1.33 GB      
+ **********************************************************************************************************************************
+
+
+ PROGRAM * RHF-SCF (CLOSED SHELL)       Authors: W. Meyer, H.-J. Werner
+
+
+ NUMBER OF ELECTRONS:       8+    8-
+ CONVERGENCE THRESHOLDS:    1.00E-10 (Density)    1.00E-13 (Energy)
+ MAX. NUMBER OF ITERATIONS:      500
+ INTERPOLATION TYPE:            DIIS
+ INTERPOLATION STEPS:              2 (START)      1 (STEP)
+ LEVEL SHIFTS:                  0.00 (CLOSED)  0.00 (OPEN) 
+
+
+
+ Orbital guess generated from atomic densities. Full valence occupancy:    9   2
+
+ Molecular orbital dump at record        2100.2
+
+ Initial occupancy:   7   1
+
+ ITERATION    DDIFF          GRAD             ENERGY        2-EL.EN.            DIPOLE MOMENTS         DIIS   ORB.
+    1      0.000D+00      0.000D+00      -129.74303658    156.781380    0.00000    0.62434   -0.82417    0    start
+    2      0.000D+00      0.724D-02      -129.76769094    157.830846    0.00000    0.58230   -0.28852    1    diag
+    3      0.444D-02      0.429D-02      -129.77656797    157.889034    0.00000    0.57606   -0.55267    2    diag
+    4      0.102D-02      0.113D-02      -129.77738479    157.660677    0.00000    0.58410   -0.48520    3    diag
+    5      0.378D-03      0.302D-03      -129.77746453    157.731541    0.00000    0.58720   -0.48878    4    diag
+    6      0.152D-03      0.695D-04      -129.77747413    157.718471    0.00000    0.58756   -0.48570    5    diag
+    7      0.522D-04      0.358D-04      -129.77747700    157.719906    0.00000    0.58819   -0.48364    6    diag
+    8      0.330D-04      0.127D-04      -129.77747735    157.719340    0.00000    0.58821   -0.48289    7    diag
+    9      0.111D-04      0.231D-05      -129.77747736    157.719345    0.00000    0.58821   -0.48276    8    diag
+   10      0.256D-05      0.481D-06      -129.77747736    157.719356    0.00000    0.58820   -0.48275    9    orth
+   11      0.764D-06      0.959D-07      -129.77747736    157.719357    0.00000    0.58820   -0.48275    9    diag
+   12      0.173D-06      0.202D-07      -129.77747736    157.719358    0.00000    0.58820   -0.48275    9    diag
+   13      0.354D-07      0.441D-08      -129.77747736    157.719358    0.00000    0.58820   -0.48275    9    diag
+   14      0.571D-08      0.856D-09      -129.77747736    157.719358    0.00000    0.58820   -0.48275    9    diag
+   15      0.699D-09      0.248D-09      -129.77747736    157.719358    0.00000    0.58820   -0.48275    9    diag
+   16      0.273D-09      0.831D-10      -129.77747736    157.719358    0.00000    0.58820   -0.48275    9    diag
+   17      0.452D-10      0.196D-10      -129.77747736    157.719358    0.00000    0.58820   -0.48275    9    diag
+   18      0.159D-10      0.624D-11      -129.77747736    157.719358    0.00000    0.58820   -0.48275    0    orth
+
+ Final occupancy:   7   1
+
+ !RHF STATE 1.1 Energy               -129.777477360669
+   --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+     value="-129.777477360669"/><!--
+ Nuclear energy                        31.96241601
+ One-electron energy                 -240.59957229
+ Two-electron energy                   78.85967892
+ Virial quotient                       -0.99623912
+ !RHF STATE 1.1 Dipole moment           0.00000000     0.58819566    -0.48274856
+ Dipole moment /Debye                   0.00000000     1.49494634    -1.22694408
+   --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+     stateNumber="1" value="0.0 0.588195664269622 -0.482748557549908"/><!--
+
+ Orbital energies:
+
+         1.1          2.1          3.1          4.1          5.1          6.1          7.1          8.1          9.1
+    -20.650588   -15.675720    -1.550531    -1.078271    -0.771978    -0.669537    -0.444361     0.041690     0.205450
+
+         1.2          2.2          3.2
+     -0.599121     0.079540     0.238297
+
+ HOMO      7.1    -0.444361 =     -12.0917eV
+ LUMO      8.1     0.041690 =       1.1344eV
+ LUMO-HOMO         0.486051 =      13.2261eV
+
+
+ **********************************************************************************************************************************
+ DATASETS  * FILE   NREC   LENGTH (MB)   RECORD NAMES
+              1      19      421.64       500      610      700      900      950      970     1000      129      960     1100   
+                                          VAR    BASINP    GEOM    SYMINP    ZMAT    AOBASIS   BASIS     P2S    ABASIS      S 
+                                         1400     1410     1200     1210     1080     1600     1650     1300     1700   
+                                           T        V       H0       H01     AOSYM     SMH    MOLCAS    ERIS     OPER   
+
+              2       4        3.11       700     1000      520     2100   
+                                         GEOM     BASIS   MCVARS     RHF  
+
+ PROGRAMS   *        TOTAL        HF       INT
+ CPU TIMES  *        60.89     37.21     23.57
+ REAL TIME  *        20.72 SEC
+ DISK USED  *         1.33 GB      
+ **********************************************************************************************************************************
+   -->
+   <time start="20:49:27" end="20:49:48" cpu="60.89" system="7.38" real="20.72"/>
+   <storage units="megabyte" memory="7961.84" sf="0.0" df="1331.07" eaf="0.0"/>
+  </jobstep><!--
+  --><jobstep command="CCSD(T)" commandset="CCSD">
+   <!--
+
+
+ PROGRAM * CCSD (Closed-shell coupled cluster)     Authors: C. Hampel, H.-J. Werner, 1991, M. Deegan, P.J. Knowles, 1992
+
+
+ Convergence thresholds:  THRVAR = 1.00D-16  THRDEN = 1.00D-12
+
+ CCSD(T)     terms to be evaluated (factor= 1.000)
+
+
+ Number of closed-shell orbitals:   8 (   7   1 )
+ Number of external orbitals:     163 ( 107  56 )
+
+ Molecular orbitals read from record     2100.2  Type=RHF/CANONICAL (state 1.1)
+
+ Number of N-1 electron functions:               8
+ Number of N-2 electron functions:              36
+ Number of singly external CSFs:               805
+ Number of doubly external CSFs:            449165
+ Total number of CSFs:                      449971
+
+ Length of J-op  integral file:               0.00 MB
+ Length of K-op  integral file:               1.15 MB
+ Length of 3-ext integral record:             0.00 MB
+
+ Memory could be reduced to 24.90 Mwords without degradation in triples
+
+ Integral transformation finished. Total CPU:   6.53 sec, npass=  1  Memory used:   6.89 MW
+
+ Reference energy:                   -129.77747736
+
+ MP2 singlet pair energy:              -0.37424157
+ MP2 triplet pair energy:              -0.18439610
+ MP2 correlation energy:               -0.55863767
+ MP2 total energy:                   -130.33611503
+
+ SCS-MP2 correlation energy:           -0.56382524   (PS=  1.200000  PT=  0.333333)
+ SCS-MP2 total energy:               -130.34130260
+
+ ITER.      SQ.NORM     CORR.ENERGY   TOTAL ENERGY   ENERGY CHANGE        DEN1      VAR(S)    VAR(P)  DIIS     TIME  TIME/IT
+   1      1.11262873    -0.56413665  -130.34161401    -0.00549897     0.01031298  0.28D-02  0.26D-02  1  1    13.21     1.72
+   2      1.12226121    -0.56404225  -130.34151961     0.00009439    -0.01248489  0.76D-04  0.42D-03  2  2    20.24     1.80
+   3      1.12669916    -0.56427765  -130.34175501    -0.00023539    -0.00206053  0.35D-04  0.61D-04  3  3    27.51     1.84
+   4      1.12973657    -0.56428815  -130.34176551    -0.00001050    -0.00123020  0.22D-05  0.81D-05  4  4    35.61     1.93
+   5      1.13054939    -0.56430443  -130.34178179    -0.00001628    -0.00017521  0.60D-06  0.18D-05  5  5    43.96     1.98
+   6      1.13084492    -0.56430144  -130.34177880     0.00000299    -0.00002560  0.44D-07  0.47D-06  6  6    52.58     2.03
+   7      1.13091087    -0.56430376  -130.34178112    -0.00000231     0.00000051  0.47D-08  0.98D-07  6  1    61.12     2.07
+   8      1.13093973    -0.56430255  -130.34177991     0.00000121    -0.00000399  0.53D-08  0.93D-08  6  2    68.46     2.05
+   9      1.13094146    -0.56430298  -130.34178035    -0.00000043     0.00000109  0.13D-08  0.87D-09  6  3    75.49     2.03
+  10      1.13094232    -0.56430316  -130.34178052    -0.00000018    -0.00000016  0.29D-09  0.99D-10  6  4    82.44     2.02
+  11      1.13094088    -0.56430329  -130.34178065    -0.00000013     0.00000034  0.28D-10  0.13D-10  6  6    90.11     2.02
+  12      1.13094079    -0.56430333  -130.34178069    -0.00000004     0.00000008  0.17D-11  0.20D-11  6  5    97.47     2.01
+  13      1.13094082    -0.56430332  -130.34178068     0.00000001    -0.00000006  0.56D-12  0.31D-12  6  2   104.41     2.00
+  14      1.13094087    -0.56430332  -130.34178068    -0.00000000    -0.00000002  0.83D-13  0.30D-13  6  1   111.64     1.99
+  15      1.13094088    -0.56430332  -130.34178068     0.00000000    -0.00000001  0.28D-13  0.77D-14  6  3   119.13     1.99
+  16      1.13094089    -0.56430332  -130.34178068    -0.00000000    -0.00000000  0.39D-14  0.21D-14  6  4   126.91     2.00
+  17      1.13094088    -0.56430332  -130.34178068    -0.00000000     0.00000000  0.41D-15  0.46D-15  6  6   134.16     1.99
+  18      1.13094088    -0.56430332  -130.34178068    -0.00000000     0.00000000  0.36D-16  0.48D-16  6  5   141.30     1.99
+  19      1.13094088    -0.56430332  -130.34178068     0.00000000     0.00000000  0.29D-17  0.39D-17  6  2   148.50     1.98
+  20      1.13094088    -0.56430332  -130.34178068     0.00000000    -0.00000000  0.22D-18  0.37D-18  6  1   155.78     1.98
+  21      1.13094088    -0.56430332  -130.34178068    -0.00000000     0.00000000  0.52D-19  0.79D-19  6  3   162.84     1.98
+  22      1.13094088    -0.56430332  -130.34178068    -0.00000000     0.00000000  0.68D-20  0.91D-20  6  4   169.98     1.97
+  23      1.13094088    -0.56430332  -130.34178068    -0.00000000    -0.00000000  0.70D-21  0.12D-20  6  5   177.08     1.97
+
+ Norm of t1 vector:      0.06964679      S-energy:     0.00000000      T1 diagnostic:  0.01231193
+                                                                       D1 diagnostic:  0.04220668
+
+ Doubles amplitudes (print threshold =  0.500E-01):
+
+         I         J         SYM. A    SYM. B    A         B      T(IJ, AB)
+
+         8         8         2         2         1         1     -0.13548784
+
+
+ Total CPU time for triples:     44.73 sec
+
+
+ RESULTS
+ =======
+
+  Reference energy                   -129.777477360669
+
+  Correlated core orbitals:             1.1       2.1
+  Orbital energies:                   -20.6506  -15.6757
+ 
+  CCSD core-core energy                -0.079132399435
+  CCSD core-valence energy             -0.036902680778
+  CCSD valence correlation energy      -0.448268240790
+ 
+  CCSD singlet pair energy             -0.402056204001
+  CCSD triplet pair energy             -0.162247117001
+  CCSD correlation energy              -0.564303321002
+
+  Triples (T) contribution             -0.020822103952
+  Total correlation energy             -0.585125424955
+
+  CCSD total energy                  -130.341780681672
+  CCSD[T] energy                     -130.363561010497
+  CCSD-T energy                      -130.362237336265
+ !CCSD(T) total energy               -130.362602785624
+
+ Timing summary (sec):
+
+ STEP                 CPU(USER)    SYS     CPU(TOT)    WALL
+ Transformation          6.64      0.51      7.15      1.80
+ CCSD iterations       170.48     10.58    181.06     45.26
+ Triples                44.73      1.80     46.53     11.63
+
+ Program statistics:
+
+ Available memory in ccsd:               994999644
+ Min. memory needed in ccsd:               1368037
+ Max. memory used in ccsd:                 1750502
+ Max. memory used in cckext:               2014357 (23 integral passes)
+
+   --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+     value="-129.777477360669"/>
+      <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+     value="-0.791323994347996E-01"/>
+      <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+     value="-0.369026807776065E-01"/>
+      <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+     stateNumber="1" value="-0.448268240789906"/>
+      <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+     value="-0.402056204001306"/>
+      <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+     value="-0.162247117001334"/>
+      <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+     value="-0.564303321002312"/>
+      <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+     value="-0.208221039524683E-01"/>
+      <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+     value="-0.58512542495478"/>
+      <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+     value="-130.341780681672"/>
+      <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+     value="-130.363561010497"/>
+      <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+     value="-130.362237336265"/>
+      <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+     stateNumber="1" value="-130.362602785624"/><!--
+
+
+ **********************************************************************************************************************************
+ DATASETS  * FILE   NREC   LENGTH (MB)   RECORD NAMES
+              1      20      500.56       500      610      700      900      950      970     1000      129      960     1100   
+                                          VAR    BASINP    GEOM    SYMINP    ZMAT    AOBASIS   BASIS     P2S    ABASIS      S 
+                                         1400     1410     1200     1210     1080     1600     1650     1300     1700     1380   
+                                           T        V       H0       H01     AOSYM     SMH    MOLCAS    ERIS     OPER     JKOP   
+
+              2       4        3.11       700     1000      520     2100   
+                                         GEOM     BASIS   MCVARS     RHF  
+
+ PROGRAMS   *        TOTAL   CCSD(T)        HF       INT
+ CPU TIMES  *       282.91    221.98     37.21     23.57
+ REAL TIME  *        79.46 SEC
+ DISK USED  *         1.33 GB      
+ **********************************************************************************************************************************
+   -->
+   <time start="20:49:48" end="20:50:47" cpu="222.02" system="12.9" real="58.74"/>
+   <storage units="megabyte" memory="7961.84" sf="0.0" df="1331.07" eaf="0.0"/>
+  </jobstep><!--
+  --><jobstep command="OPTG" commandset="OPT">
+   <!--
+
+
+ PROGRAM * OPT (Geometry optimization)     Authors: F. Eckert and H.-J. Werner
+
+
+ BFGS update of hessian
+
+ *** Long output written to logfile /ddn/home4/r2666/chem/rotation/hno/opt/MTc/opt.log ***
+
+
+ Geometry optimization using default procedure for command CCSD(T)
+
+ Geometry written to block  1 of record 700
+
+ Making model hessian for Z-matrix coordinates
+
+ Entering Rational Function Geometry Optimization
+   --><opt energy="-130.36260279" type="CCSD(T)" line="0.0" convergence="0.3"
+     gradient="0.394512898958421"/><!--
+   --><jobstep command="HF-SCF" commandset="SCFPRO">
+    <!--
+    --><cml:molecule>
+     <cml:symmetry pointGroup="Cs"/>
+     <cml:atomArray>
+      <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.75305492419379E-01"
+        z3="-0.612316054617334"/>
+      <cml:atom id="a2" elementType="O" x3="0.0" y3="0.136416518873461E-01"
+        z3="0.594464013182546"/>
+      <cml:atom id="a3" elementType="H" x3="0.0" y3="0.829933523289194" z3="-0.927178453384338"/>
+     </cml:atomArray>
+     <cml:bondArray>
+      <cml:bond atomRefs2="a1 a2"/>
+      <cml:bond atomRefs2="a1 a3"/>
+     </cml:bondArray>
+    </cml:molecule><!--
+    --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+      value="-129.835993872333"/><!--
+    --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+      stateNumber="1" value="0.0 0.584465957983964 -0.500464366608875"/><!--
+    -->
+    <time start="20:57:17" end="20:57:36" cpu="50.28" system="5.14" real="18.27"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   --><jobstep command="CCSD(T)" commandset="CCSD">
+    <!--
+    --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+      value="-129.835993872333"/>
+       <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.792111243687227E-01"/>
+       <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.362869511752999E-01"/>
+       <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+      stateNumber="1" value="-0.452579512511678"/>
+       <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.405754674925533"/>
+       <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.162322913126272"/>
+       <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.568077588055701"/>
+       <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+      value="-0.217751341753886E-01"/>
+       <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+      value="-0.589852722231089"/>
+       <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-130.404071460389"/>
+       <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+      value="-130.42693048194"/>
+       <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+      value="-130.425438230593"/>
+       <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+      stateNumber="1" value="-130.425846594564"/><!--
+    -->
+    <time start="20:57:36" end="20:58:20" cpu="167.68" system="9.2" real="44.22"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+
+ ITER.   ENERGY(OLD)    ENERGY(NEW)      DE          GRADMAX     GRADNORM    GRADRMS     STEPMAX     STEPLEN     STEPRMS   CPU-time
+   1  -130.36260279  -130.42584659    -0.06324381  0.39223350  0.39451290  0.22777213  0.29939714  0.30000000  0.10000000   1572.42
+   --><opt energy="-130.42584659" type="CCSD(T)" line="0.0"
+     convergence="0.82759920249889E-01" gradient="0.81457033116514E-01"/><!--
+   --><jobstep command="HF-SCF" commandset="SCFPRO">
+    <!--
+    --><cml:molecule>
+     <cml:symmetry pointGroup="Cs"/>
+     <cml:atomArray>
+      <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.795166210131542E-01"
+        z3="-0.613136007918993"/>
+      <cml:atom id="a2" elementType="O" x3="0.0" y3="0.161276107753744E-01"
+        z3="0.598412394498581"/>
+      <cml:atom id="a3" elementType="H" x3="0.0" y3="0.848992360364131" z3="-0.978458184437215"/>
+     </cml:atomArray>
+     <cml:bondArray>
+      <cml:bond atomRefs2="a1 a2"/>
+      <cml:bond atomRefs2="a1 a3"/>
+     </cml:bondArray>
+    </cml:molecule><!--
+    --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+      value="-129.838764025692"/><!--
+    --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+      stateNumber="1" value="0.0 0.579250951433063 -0.520269547343401"/><!--
+    -->
+    <time start="21:04:47" end="21:05:05" cpu="56.52" system="5.98" real="18.37"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   --><jobstep command="CCSD(T)" commandset="CCSD">
+    <!--
+    --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+      value="-129.838764025692"/>
+       <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.792259972709096E-01"/>
+       <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.361513932525706E-01"/>
+       <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+      stateNumber="1" value="-0.454264158177689"/>
+       <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.407228141476125"/>
+       <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.162413407224922"/>
+       <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.569641548701169"/>
+       <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+      value="-0.221683918741837E-01"/>
+       <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+      value="-0.591809940575353"/>
+       <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-130.408405574393"/>
+       <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+      value="-130.431720397494"/>
+       <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+      value="-130.430145699854"/>
+       <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+      stateNumber="1" value="-130.430573966267"/><!--
+    -->
+    <time start="21:05:05" end="21:05:55" cpu="188.11" system="11.24" real="49.84"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   2  -130.42584659  -130.43057397    -0.00472737  0.07861287  0.08145703  0.04702924  0.07437590  0.08275992  0.02758664   3198.59
+   --><opt energy="-130.43057397" type="CCSD(T)" line="0.0"
+     convergence="0.74326635619173E-01" gradient="0.391641306767913E-01"/><!--
+   --><jobstep command="HF-SCF" commandset="SCFPRO">
+    <!--
+    --><cml:molecule>
+     <cml:symmetry pointGroup="Cs"/>
+     <cml:atomArray>
+      <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.835367585134948E-01"
+        z3="-0.61060468308124"/>
+      <cml:atom id="a2" elementType="O" x3="0.0" y3="0.18180924094083E-01"
+        z3="0.598218005468059"/>
+      <cml:atom id="a3" elementType="H" x3="0.0" y3="0.872264657142385" z3="-1.01054878482019"/>
+     </cml:atomArray>
+     <cml:bondArray>
+      <cml:bond atomRefs2="a1 a2"/>
+      <cml:bond atomRefs2="a1 a3"/>
+     </cml:bondArray>
+    </cml:molecule><!--
+    --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+      value="-129.839548235031"/><!--
+    --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+      stateNumber="1" value="0.0 0.569265558448345 -0.521936817808736"/><!--
+    -->
+    <time start="21:12:33" end="21:12:52" cpu="61.0" system="6.85" real="19.64"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   --><jobstep command="CCSD(T)" commandset="CCSD">
+    <!--
+    --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+      value="-129.839548235031"/>
+       <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.792328328090433E-01"/>
+       <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.360770672222752E-01"/>
+       <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+      stateNumber="1" value="-0.455137430594818"/>
+       <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.407975248449141"/>
+       <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.162472082177221"/>
+       <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.570447330626136"/>
+       <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+      value="-0.223390119820883E-01"/>
+       <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+      value="-0.592786342608225"/>
+       <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-130.409995565657"/>
+       <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+      value="-130.433511298829"/>
+       <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+      value="-130.431894544696"/>
+       <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+      stateNumber="1" value="-130.432334577639"/><!--
+    -->
+    <time start="21:12:52" end="21:13:43" cpu="193.26" system="11.47" real="51.19"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   3  -130.43057397  -130.43233458    -0.00176061  0.03887380  0.03916413  0.02261142  0.07239898  0.07432664  0.02477555   4877.85
+   --><opt energy="-130.43233458" type="CCSD(T)" line="0.0"
+     convergence="0.258745561523637E-01" gradient="0.105729699960244E-01"/><!--
+   --><jobstep command="HF-SCF" commandset="SCFPRO">
+    <!--
+    --><cml:molecule>
+     <cml:symmetry pointGroup="Cs"/>
+     <cml:atomArray>
+      <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.849495063122931E-01"
+        z3="-0.608708685615623"/>
+      <cml:atom id="a2" elementType="O" x3="0.0" y3="0.188263936859675E-01"
+        z3="0.596988725035105"/>
+      <cml:atom id="a3" elementType="H" x3="0.0" y3="0.881650938473647" z3="-1.01738343603222"/>
+     </cml:atomArray>
+     <cml:bondArray>
+      <cml:bond atomRefs2="a1 a2"/>
+      <cml:bond atomRefs2="a1 a3"/>
+     </cml:bondArray>
+    </cml:molecule><!--
+    --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+      value="-129.839652008193"/><!--
+    --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+      stateNumber="1" value="0.0 0.564289945589412 -0.517465050276575"/><!--
+    -->
+    <time start="21:20:18" end="21:20:37" cpu="57.52" system="5.67" real="18.54"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   --><jobstep command="CCSD(T)" commandset="CCSD">
+    <!--
+    --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+      value="-129.839652008193"/>
+       <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.792332786141969E-01"/>
+       <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.360670492388017E-01"/>
+       <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+      stateNumber="1" value="-0.45520530023081"/>
+       <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.408028134534716"/>
+       <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.162477493549576"/>
+       <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.570505628083808"/>
+       <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+      value="-0.223349902002849E-01"/>
+       <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+      value="-0.592840618284093"/>
+       <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-130.410157636277"/>
+       <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+      value="-130.433670278206"/>
+       <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+      value="-130.432050842844"/>
+       <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+      stateNumber="1" value="-130.432492626477"/><!--
+    -->
+    <time start="21:20:37" end="21:21:26" cpu="185.39" system="10.57" real="48.99"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   4  -130.43233458  -130.43249263    -0.00015805  0.00983393  0.01057297  0.00610431  0.02520771  0.02587456  0.00862485   6532.80
+   --><opt energy="-130.43249263" type="CCSD(T)" line="0.0"
+     convergence="0.60516777806416E-02" gradient="0.220925250778209E-02"/><!--
+   --><jobstep command="HF-SCF" commandset="SCFPRO">
+    <!--
+    --><cml:molecule>
+     <cml:symmetry pointGroup="Cs"/>
+     <cml:atomArray>
+      <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.852787718487492E-01"
+        z3="-0.608047294584266"/>
+      <cml:atom id="a2" elementType="O" x3="0.0" y3="0.189937215327099E-01"
+        z3="0.596516063021384"/>
+      <cml:atom id="a3" elementType="H" x3="0.0" y3="0.883570475785699" z3="-1.01907162891728"/>
+     </cml:atomArray>
+     <cml:bondArray>
+      <cml:bond atomRefs2="a1 a2"/>
+      <cml:bond atomRefs2="a1 a3"/>
+     </cml:bondArray>
+    </cml:molecule><!--
+    --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+      value="-129.839707283985"/><!--
+    --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+      stateNumber="1" value="0.0 0.562913888963011 -0.516024849234779"/><!--
+    -->
+    <time start="21:28:04" end="21:28:21" cpu="51.96" system="5.75" real="17.05"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   --><jobstep command="CCSD(T)" commandset="CCSD">
+    <!--
+    --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+      value="-129.839707283985"/>
+       <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.792331266418094E-01"/>
+       <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.360676827868482E-01"/>
+       <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+      stateNumber="1" value="-0.455169870560226"/>
+       <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.407996198536113"/>
+       <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.162474481453224"/>
+       <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.570470679988884"/>
+       <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+      value="-0.22321336815277E-01"/>
+       <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+      value="-0.592792016804161"/>
+       <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-130.410177963974"/>
+       <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+      value="-130.433675409177"/>
+       <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+      value="-130.432057582482"/>
+       <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+      stateNumber="1" value="-130.432499300789"/><!--
+    -->
+    <time start="21:28:21" end="21:29:11" cpu="189.36" system="11.74" real="50.28"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   5  -130.43249263  -130.43249930    -0.00000667  0.00170779  0.00220925  0.00127551  0.00564470  0.00605168  0.00201723   8207.84
+   --><opt energy="-130.4324993" type="CCSD(T)" line="0.0"
+     convergence="0.500036058284073E-03" gradient="0.287932286809912E-03"/><!--
+   --><jobstep command="HF-SCF" commandset="SCFPRO">
+    <!--
+    --><cml:molecule>
+     <cml:symmetry pointGroup="Cs"/>
+     <cml:atomArray>
+      <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.853007533222436E-01"
+        z3="-0.607943253290078"/>
+      <cml:atom id="a2" elementType="O" x3="0.0" y3="0.190111216246298E-01"
+        z3="0.59643735653021"/>
+      <cml:atom id="a3" elementType="H" x3="0.0" y3="0.88359974029959" z3="-1.0192680875958"/>
+     </cml:atomArray>
+     <cml:bondArray>
+      <cml:bond atomRefs2="a1 a2"/>
+      <cml:bond atomRefs2="a1 a3"/>
+     </cml:bondArray>
+    </cml:molecule><!--
+    --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+      value="-129.839727668845"/><!--
+    --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+      stateNumber="1" value="0.0 0.562781513954394 -0.515871240127404"/><!--
+    -->
+    <time start="21:36:04" end="21:36:22" cpu="56.95" system="6.18" real="18.36"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   --><jobstep command="CCSD(T)" commandset="CCSD">
+    <!--
+    --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+      value="-129.839727668845"/>
+       <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.792330625250158E-01"/>
+       <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.360684730155145E-01"/>
+       <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+      stateNumber="1" value="-0.455153249182107"/>
+       <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.40798179085671"/>
+       <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.162472993866392"/>
+       <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.570454784722638"/>
+       <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+      value="-0.223169217015005E-01"/>
+       <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+      value="-0.592771706424138"/>
+       <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-130.410182453567"/>
+       <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+      value="-130.433674904507"/>
+       <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+      value="-130.432057793145"/>
+       <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+      stateNumber="1" value="-130.432499375269"/><!--
+    -->
+    <time start="21:36:22" end="21:37:13" cpu="191.9" system="11.21" real="50.78"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   6  -130.43249930  -130.43249938    -0.00000007  0.00028052  0.00028793  0.00016624  0.00033764  0.00050004  0.00016668   9938.12
+   --><opt energy="-130.43249938" type="CCSD(T)" line="0.0"
+     convergence="0.10874014912394E-03" gradient="0.732370213641126E-04"/><!--
+   --><jobstep command="HF-SCF" commandset="SCFPRO">
+    <!--
+    --><cml:molecule>
+     <cml:symmetry pointGroup="Cs"/>
+     <cml:atomArray>
+      <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.853003314422948E-01"
+        z3="-0.607917860006552"/>
+      <cml:atom id="a2" elementType="O" x3="0.0" y3="0.190133760969887E-01"
+        z3="0.596416832647405"/>
+      <cml:atom id="a3" elementType="H" x3="0.0" y3="0.883558091639017" z3="-1.01929517878556"/>
+     </cml:atomArray>
+     <cml:bondArray>
+      <cml:bond atomRefs2="a1 a2"/>
+      <cml:bond atomRefs2="a1 a3"/>
+     </cml:bondArray>
+    </cml:molecule><!--
+    --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+      value="-129.839735158228"/><!--
+    --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+      stateNumber="1" value="0.0 0.562765903239141 -0.515843890742311"/><!--
+    -->
+    <time start="21:43:54" end="21:44:08" cpu="42.72" system="4.45" real="14.42"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   --><jobstep command="CCSD(T)" commandset="CCSD">
+    <!--
+    --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+      value="-129.839735158228"/>
+       <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.792330386507947E-01"/>
+       <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.360688004185386E-01"/>
+       <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+      stateNumber="1" value="-0.455147000844466"/>
+       <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.407976411431167"/>
+       <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.162472428482942"/>
+       <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.570448839913799"/>
+       <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+      value="-0.22315385235099E-01"/>
+       <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+      value="-0.592764225148898"/>
+       <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-130.410183998141"/>
+       <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+      value="-130.433674701485"/>
+       <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+      value="-130.432057860034"/>
+       <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+      stateNumber="1" value="-130.432499383377"/><!--
+    -->
+    <time start="21:44:08" end="21:44:59" cpu="190.62" system="10.81" real="50.37"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   7  -130.43249938  -130.43249938    -0.00000001  0.00006789  0.00007324  0.00004228  0.00008615  0.00010874  0.00003625  11615.22
+   --><opt energy="-130.43249938" type="CCSD(T)" line="0.0"
+     convergence="0.281374915003923E-04" gradient="0.120486481544473E-04"/><!--
+   --><jobstep command="HF-SCF" commandset="SCFPRO">
+    <!--
+    --><cml:molecule>
+     <cml:symmetry pointGroup="Cs"/>
+     <cml:atomArray>
+      <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.852991336762568E-01"
+        z3="-0.607915254958626"/>
+      <cml:atom id="a2" elementType="O" x3="0.0" y3="0.190131972764724E-01"
+        z3="0.59641444164522"/>
+      <cml:atom id="a3" elementType="H" x3="0.0" y3="0.883544285530917" z3="-1.01929342622533"/>
+     </cml:atomArray>
+     <cml:bondArray>
+      <cml:bond atomRefs2="a1 a2"/>
+      <cml:bond atomRefs2="a1 a3"/>
+     </cml:bondArray>
+    </cml:molecule><!--
+    --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+      value="-129.839736433019"/><!--
+    --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+      stateNumber="1" value="0.0 0.562767633844443 -0.515842891973566"/><!--
+    -->
+    <time start="21:51:47" end="21:52:01" cpu="42.97" system="4.45" real="14.38"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   --><jobstep command="CCSD(T)" commandset="CCSD">
+    <!--
+    --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+      value="-129.839736433019"/>
+       <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.792330345307524E-01"/>
+       <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.360688609132061E-01"/>
+       <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+      stateNumber="1" value="-0.455145920703917"/>
+       <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.407975486196144"/>
+       <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.162472329951531"/>
+       <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.570447816147875"/>
+       <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+      value="-0.223151352498968E-01"/>
+       <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+      value="-0.592762951397772"/>
+       <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-130.410184249167"/>
+       <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+      value="-130.433674666739"/>
+       <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+      value="-130.432057872246"/>
+       <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+      stateNumber="1" value="-130.432499384417"/><!--
+    -->
+    <time start="21:52:01" end="21:52:51" cpu="189.12" system="11.27" real="50.11"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   8  -130.43249938  -130.43249938    -0.00000000  0.00000923  0.00001205  0.00000696  0.00002547  0.00002814  0.00000938  13319.67
+   --><opt energy="-130.43249938" type="CCSD(T)" line="0.0"
+     convergence="0.245581685487504E-05" gradient="0.787945690307499E-06"/><!--
+   --><jobstep command="HF-SCF" commandset="SCFPRO">
+    <!--
+    --><cml:molecule>
+     <cml:symmetry pointGroup="Cs"/>
+     <cml:atomArray>
+      <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.852989989255187E-01"
+        z3="-0.607915441502447"/>
+      <cml:atom id="a2" elementType="O" x3="0.0" y3="0.190131355753521E-01"
+        z3="0.596414565481374"/>
+      <cml:atom id="a3" elementType="H" x3="0.0" y3="0.883543392390196" z3="-1.01929279964122"/>
+     </cml:atomArray>
+     <cml:bondArray>
+      <cml:bond atomRefs2="a1 a2"/>
+      <cml:bond atomRefs2="a1 a3"/>
+     </cml:bondArray>
+    </cml:molecule><!--
+    --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+      value="-129.839736437827"/><!--
+    --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+      stateNumber="1" value="0.0 0.562768148629447 -0.51584337708918"/><!--
+    -->
+    <time start="21:59:37" end="21:59:51" cpu="39.11" system="4.27" real="13.5"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   --><jobstep command="CCSD(T)" commandset="CCSD">
+    <!--
+    --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+      value="-129.839736437827"/>
+       <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.792330345174934E-01"/>
+       <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.360688616932819E-01"/>
+       <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+      stateNumber="1" value="-0.455145914675527"/>
+       <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.407975481598583"/>
+       <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.162472329290071"/>
+       <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.570447810886302"/>
+       <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+      value="-0.223151357286647E-01"/>
+       <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+      value="-0.592762946614967"/>
+       <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-130.410184248713"/>
+       <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+      value="-130.433674666683"/>
+       <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+      value="-130.43205787244"/>
+       <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+      stateNumber="1" value="-130.432499384442"/><!--
+    -->
+    <time start="21:59:51" end="22:00:41" cpu="190.47" system="11.16" real="50.41"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   9  -130.43249938  -130.43249938    -0.00000000  0.00000073  0.00000079  0.00000045  0.00000239  0.00000246  0.00000082  15010.85
+   --><opt energy="-130.43249938" type="CCSD(T)" line="0.0"
+     convergence="0.10306986956661E-06" gradient="0.480343743047373E-07"/><!--
+   --><jobstep command="HF-SCF" commandset="SCFPRO">
+    <!--
+    --><cml:molecule>
+     <cml:symmetry pointGroup="Cs"/>
+     <cml:atomArray>
+      <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.852989941596799E-01"
+        z3="-0.607915462343821"/>
+      <cml:atom id="a2" elementType="O" x3="0.0" y3="0.190131322475751E-01"
+        z3="0.596414581694553"/>
+      <cml:atom id="a3" elementType="H" x3="0.0" y3="0.883543378985393" z3="-1.01929276737964"/>
+     </cml:atomArray>
+     <cml:bondArray>
+      <cml:bond atomRefs2="a1 a2"/>
+      <cml:bond atomRefs2="a1 a3"/>
+     </cml:bondArray>
+    </cml:molecule><!--
+    --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+      value="-129.839736433865"/><!--
+    --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+      stateNumber="1" value="0.0 0.562768173840992 -0.515843414682784"/><!--
+    -->
+    <time start="22:07:25" end="22:07:38" cpu="31.97" system="3.58" real="13.02"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   --><jobstep command="CCSD(T)" commandset="CCSD">
+    <!--
+    --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+      value="-129.839736433865"/>
+       <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.792330345305283E-01"/>
+       <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.360688615409655E-01"/>
+       <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+      stateNumber="1" value="-0.455145917909123"/>
+       <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.407975484412382"/>
+       <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.162472329569544"/>
+       <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.570447813980617"/>
+       <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+      value="-0.223151366000343E-01"/>
+       <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+      value="-0.592762950580652"/>
+       <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-130.410184247846"/>
+       <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+      value="-130.43367466681"/>
+       <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+      value="-130.432057872411"/>
+       <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+      stateNumber="1" value="-130.432499384446"/><!--
+    -->
+    <time start="22:07:38" end="22:08:27" cpu="185.37" system="10.41" real="49.1"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+  10  -130.43249938  -130.43249938    -0.00000000  0.00000004  0.00000005  0.00000003  0.00000007  0.00000010  0.00000003  16683.21
+   --><opt energy="-130.43249938" type="CCSD(T)" line="0.0"
+     convergence="0.431136133373783E-08" gradient="0.151165632961537E-08"/><!--
+   --><jobstep command="HF-SCF" commandset="SCFPRO">
+    <!--
+    --><cml:molecule>
+     <cml:symmetry pointGroup="Cs"/>
+     <cml:atomArray>
+      <cml:atom id="a1" elementType="N" x3="0.0" y3="-0.852989940753299E-01"
+        z3="-0.607915463066976"/>
+      <cml:atom id="a2" elementType="O" x3="0.0" y3="0.190131320780137E-01"
+        z3="0.596414582122273"/>
+      <cml:atom id="a3" elementType="H" x3="0.0" y3="0.883543380504744" z3="-1.01929276411979"/>
+     </cml:atomArray>
+     <cml:bondArray>
+      <cml:bond atomRefs2="a1 a2"/>
+      <cml:bond atomRefs2="a1 a3"/>
+     </cml:bondArray>
+    </cml:molecule><!--
+    --><property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+      value="-129.839736433705"/><!--
+    --><property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+      stateNumber="1" value="0.0 0.562768176196739 -0.515843415793878"/><!--
+    -->
+    <time start="22:15:11" end="22:15:21" cpu="27.22" system="3.03" real="10.08"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+   --><jobstep command="CCSD(T)" commandset="CCSD">
+    <!--
+    --><property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+      value="-129.839736433705"/>
+       <property name="core-core energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.792330345308601E-01"/>
+       <property name="core-valence energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.36068861535274E-01"/>
+       <property name="valence correlation energy" method="CCSD" stateSymmetry="1"
+      stateNumber="1" value="-0.455145918040839"/>
+       <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.407975484512845"/>
+       <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.162472329583117"/>
+       <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-0.570447814106974"/>
+       <property name="contribution" method="Triples (T)" stateSymmetry="1" stateNumber="1"
+      value="-0.223151366325214E-01"/>
+       <property name="correlation energy" method="Total" stateSymmetry="1" stateNumber="1"
+      value="-0.592762950739495"/>
+       <property name="total energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+      value="-130.410184247812"/>
+       <property name="energy" method="CCSD[T]" stateSymmetry="1" stateNumber="1"
+      value="-130.433674666815"/>
+       <property name="energy" method="CCSD-T" stateSymmetry="1" stateNumber="1"
+      value="-130.432057872409"/>
+       <property name="total energy" method="CCSD(T)" principal="true" stateSymmetry="1"
+      stateNumber="1" value="-130.432499384445"/><!--
+    -->
+    <time start="22:15:21" end="22:16:11" cpu="189.63" system="11.08" real="50.18"/>
+    <storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/>
+   </jobstep><!--
+  11  -130.43249938  -130.43249938     0.00000000  0.00000000  0.00000000  0.00000000  0.00000000  0.00000000  0.00000000  18330.16
+
+ END OF GEOMETRY OPTIMIZATION.
+
+ Optimized variables
+ NO=                  1.20883906 ANG
+ NH=                  1.05256203 ANG
+ HNO=               108.05614358 DEG
+
+ **********************************************************************************************************************************
+
+ Current geometry (xyz format, in Angstrom)
+
+    3
+ CCSD(T)/USERDEF  ENERGY=-130.43249938
+ N          0.0000000000       -0.0852989941       -0.6079154631
+ O          0.0000000000        0.0190131321        0.5964145821
+ H          0.0000000000        0.8835433805       -1.0192927641
+
+ **********************************************************************************************************************************
+
+ Geometry written to block  1 of record 700
+
+
+ **********************************************************************************************************************************
+ DATASETS  * FILE   NREC   LENGTH (MB)   RECORD NAMES
+              1      20      500.16       500      610      700      900      950      970     1000      129      960     1100   
+                                          VAR    BASINP    GEOM    SYMINP    ZMAT    AOBASIS   BASIS     P2S    ABASIS      S 
+                                         1400     1410     1200     1210     1080     1600     1650     1300     1700     1380   
+                                           T        V       H0       H01     AOSYM     SMH    MOLCAS    ERIS     OPER     JKOP   
+
+              2       5        3.45       700     1000      520     2100     5600   
+                                         GEOM     BASIS   MCVARS     RHF     GINFO   
+
+ PROGRAMS   *        TOTAL      OPTG   CCSD(T)        HF       INT
+ CPU TIMES  *     18613.08  18330.17    221.98     37.21     23.57
+ REAL TIME  *      5203.82 SEC
+ DISK USED  *         1.34 GB      
+ **********************************************************************************************************************************
+   --><time start="20:50:47" end="22:16:11" cpu="18330.17" system="1244.32" real="5124.36"/><!--
+   --><storage units="megabyte" memory="7961.84" sf="0.0" df="1335.1" eaf="0.0"/><!--
+  --></jobstep><!--
+
+ CCSD(T)/USERDEF//CCSD(T)/USERDEF energy=   -130.432499384445
+
+   OPTG(CCSD(T))        CCSD(T)         HF-SCF  
+   -130.43249938   -130.36260279   -129.77747736
+ **********************************************************************************************************************************
+ Molpro calculation terminated
+ Variable memory released
+  --><stm:metadataList>
+   <stm:metadata name="dc:date" content="2020-01-23T22:16:11-06:00"/>
+   <stm:metadata name="dc:creator" content="r2666"/>
+   <stm:metadata name="dc:title" content="AlONC, CCSD(T)/MT QFF"/>
+   <stm:metadata name="cmlm:insilico" content="Molpro"/>
+  </stm:metadataList><!--
+  --><platform>
+   <version major="2015" minor="1" SHA="d5ffa45e93fdbca01ffc919aa182cfdae0147319"
+     integer_bits="64" parallelism="serial">
+    2015.1
+    <date year="2020" month="1" day="23" hour="20" minute="49" second="27">
+     2020-01-23T20:49:27
+    </date>
+   </version>
+   <licence id="olemiss"/>
+   <parallel processes="1" nodes="1" all_processes="1" openmp="4"/>
+   <machine hostname="" architecture="4 PROC">
+     (4 PROC) 64 bit serial version
+    <sysinfo name="cpu MHz" content="2095.139"/>
+    <sysinfo name="MemTotal" content="131919504 kB"/>
+    <sysinfo name="vendor_id" content="GenuineIntel"/>
+    <sysinfo name="cpu family" content="6"/>
+    <sysinfo name="model name" content="Intel(R) Xeon(R) CPU E5-2695 v4 @ 2.10GHz"/>
+    <sysinfo name="flags"
+      content="fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 cdp_l3 invpcid_single pti intel_ppin tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm rdt_a rdseed adx smap intel_pt xsaveopt cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local dtherm ida arat pln pts"/>
+    <sysinfo name="MemTotal" content="131919504 kB"/>
+    <sysinfo name="cache size" content="46080 KB"/>
+    <sysinfo name="ncpu" content="36"/>
+   </machine>
+  </platform><!--
+  -->
+  <input>
+   <p> ***,AlONC, CCSD(T)/MT QFF </p>
+   <p> memory, 995, m; </p>
+   <p> gthresh,energy=1.d-12,zero=1.d-22,oneint=1.d-22,twoint=1.d-22; </p>
+   <p> gthresh,optgrad=1.d-8,optstep=1.d-8; </p>
+   <p> nocompress; </p>
+   <p> geometry={ </p>
+   <p> N </p>
+   <p> O 1 no </p>
+   <p> H 1 nh 2 hno </p>
+   <p> } </p>
+   <p>  no=1.2 ANG </p>
+   <p>  nh=0.8 ANG </p>
+   <p>  hno=105.0 DEG </p>
+   <p> basis={ </p>
+   <p> default=aug-cc-pvtz </p>
+   <p> s,C,8236.0,1235.0,280.8, 79.27,25.59, 8.997,3.319 </p>
+   <p> s,C,0.9059,0.3643,0.1285000 </p>
+   <p> p,C,56.0,18.71,4.133,0.2827,0.3827,0.1209 </p>
+   <p> d,C,30.0,10.0,3.3,1.097,0.318 </p>
+   <p> f,C,7.0,2.3,0.7610 </p>
+   <p> s,N,11420.0,1712.0,389.3,110.0,35.57,12.54,4.644 </p>
+   <p> s,N,1.293,0.5118,0.1787 </p>
+   <p> p,N,79.89,26.63,5.948,1.742,0.555,0.1725 </p>
+   <p> d,N,45.0,15.0,5.0,1.654,0.469 </p>
+   <p> f,N,9.9,3.3,1.093 </p>
+   <p> s,O,15330.0,2299.0,522.4,147.3,47.55,16.76,6.207 </p>
+   <p> s,O,1.752,0.6882,0.2384 </p>
+   <p> p,O,103.5,34.46,7.749,2.28,0.7156,0.214 </p>
+   <p> d,O,63.0,21.0,7.0,2.314,0.645 </p>
+   <p> f,O,12.9,4.3,1.428 </p>
+   <p> } </p>
+   <p>   {hf,maxit=500;wf,charge=0,spin=0;accu,20;} </p>
+   <p>   {ccsd(t),maxit=250;core;wf,charge=0,spin=0;orbital,IGNORE_ERROR;} </p>
+   <p>  {optg,grms=1.d-8,srms=1.d-8} </p>
+  </input>
+  <!--
+ --></job><!--
+--></molpro>

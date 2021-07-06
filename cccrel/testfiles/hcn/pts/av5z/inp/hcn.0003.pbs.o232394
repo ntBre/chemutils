@@ -1,0 +1,5 @@
+Thu Feb  6 09:49:38 CST 2020
+0:Child process terminated prematurely, status=: 0
+(rank:0 hostname:cn052 pid:34859):ARMCI DASSERT fail. src/common/signaltrap.c:SigChldHandler():178 cond:0
+application called MPI_Abort(comm=0x84000001, -1) - process 0
+Thu Feb  6 09:49:38 CST 2020
