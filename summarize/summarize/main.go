@@ -110,6 +110,10 @@ func makeABC(res *summarize.Result) *Table {
 			fmt.Fprint(&str, "\n")
 		}
 	}
+	if len(res.Be) == 3 {
+		a, b, c := res.Rots[0][2], res.Rots[0][0], res.Rots[0][1]
+		fmt.Fprintf(&str, "\n"+strfmt, "K", (2*b-a-c)/(a-c))
+	}
 	return &Table{
 		Caption:   cap,
 		Alignment: "cc",
