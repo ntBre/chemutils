@@ -112,7 +112,7 @@ func makeABC(res *summarize.Result) *Table {
 	}
 	if len(res.Be) == 3 {
 		a, b, c := res.Rots[0][2], res.Rots[0][0], res.Rots[0][1]
-		fmt.Fprintf(&str, "\n"+strfmt, "K", (2*b-a-c)/(a-c))
+		fmt.Fprintf(&str, "\n%8s%10.5f", "K", (2*b-a-c)/(a-c))
 	}
 	return &Table{
 		Caption:   cap,
