@@ -23,6 +23,7 @@ import (
 // flags
 var (
 	noax = flag.Bool("noax", false, "turn off axes")
+	bond = flag.Float64("b", 1.0, "distance considered a bond")
 )
 
 const (
@@ -257,12 +258,12 @@ func ReadOut(filename string) (out Output) {
 			fields := strings.Fields(line)
 			// replace D scientific notation with E
 			fields[3] = strings.Replace(fields[3], "D", "E", -1)
-			switch fields[1] {
-			case "DIPX":
+			switch {
+			case strings.Contains(fields[1], "DIPX"):
 				out.Dipx, _ = strconv.ParseFloat(fields[3], 64)
-			case "DIPY":
+			case strings.Contains(fields[1], "DIPY"):
 				out.Dipy, _ = strconv.ParseFloat(fields[3], 64)
-			case "DIPZ":
+			case strings.Contains(fields[1], "DIPZ"):
 				out.Dipz, _ = strconv.ParseFloat(fields[3], 64)
 			}
 		case strings.Contains(line, "ATOMIC COORDINATES"):
@@ -317,6 +318,15 @@ func Abs(x int) int {
 
 // DrawLine draws a line from from to to
 func DrawLine(img *image.NRGBA, color color.NRGBA, from, to image.Point) int {
+	// if from/to.Y are negative, move them to zero
+	if from.Y < 0 {
+		to.Y -= from.Y
+		from.Y -= from.Y
+	}
+	if to.Y < 0 {
+		from.Y -= to.Y
+		to.Y -= to.Y
+	}
 	// // vertical line
 	if from.X == to.X {
 		if from.Y > to.Y {
@@ -516,6 +526,7 @@ func main() {
 		PlotAxes(img)
 	}
 	out := ReadOut(infile)
+	fmt.Println("dipole vector: ", out.Dips())
 	com := COM(out.Geom)
 	fmt.Println("Translated geometry:")
 	for i := range out.Geom {
@@ -532,7 +543,7 @@ func main() {
 		a := Cart2D(out.Geom[i].Coords())
 		for j := i + 1; j < len(out.Geom); j++ {
 			dist := out.Geom[i].Dist(out.Geom[j])
-			if dist < 1.0 {
+			if dist < *bond {
 				DrawLine(img, BLACK, a,
 					Cart2D(out.Geom[j].Coords()))
 			}
@@ -540,10 +551,9 @@ func main() {
 		element := ptable[out.Geom[i].Symbol]
 		DrawCircle(img, a, element.Size, element.Color)
 	}
-	// dipole vectors
-	DrawVec(img, BLACK, Origin.Add(com), Vec{out.Dipx, 0, 0}.Add(com))
-	DrawVec(img, BLACK, Origin.Add(com), Vec{0, out.Dipy, 0}.Add(com))
-	DrawVec(img, BLACK, Origin.Add(com), Vec{0, 0, out.Dipz}.Add(com))
+	// net dipole vector
+	DrawVec(img, ORANGE, Origin.Add(com),
+		Vec{out.Dipx, out.Dipy, out.Dipz}.Add(com))
 	null, _ := os.Open(os.DevNull)
 	fmt.Fprint(null, eva, evb, evc)
 	// moment of inertia axes

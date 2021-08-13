@@ -32,6 +32,7 @@ Constant     Value
      A_6   9.65606
      B_6   0.78615
      C_6   0.76075
+       K  -0.99395
 Deltas:
 Constant     Units     Value
     Δ_J        kHz   102.927
