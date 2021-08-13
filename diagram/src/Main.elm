@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Debug
+import String
 
 -- MAIN
 
@@ -59,14 +60,32 @@ update msg model =
 
 -- VIEW
 
+size : Int
+size = 50
+
 view : Model -> Html Msg
 view model =
   div []
     [ img [src model.image] []
-    , input [ placeholder "grid x", onInput ChangeX ] []
-    , input [ placeholder "grid y", onInput ChangeY ] []
-    , button [ onClick Grid ] [ text "grid" ]
-    , button [] [ text "add caption" ]
+    , div []
+        [ input [ placeholder "grid h"
+                , style "width" (String.fromInt (2*size) ++ "px"), onInput ChangeX ] []
+        , input [ placeholder "grid v"
+                , style "width" (String.fromInt (2*size) ++ "px"), onInput ChangeY ] []
+        , button [ onClick Grid ] [ text "grid" ]
+        ]
+    , div []
+        [ input [ placeholder "caption [Text Size x,y]"
+                , style "width" (String.fromInt (4*size) ++ "px") ] []
+        , button [] [ text "add caption" ]
+        ]
+    , div []
+        [ input [ placeholder "lx", style "width" (String.fromInt size ++ "px") ] []
+        , input [ placeholder "uy", style "width" (String.fromInt size ++ "px") ] []
+        , input [ placeholder "rx", style "width" (String.fromInt size ++ "px") ] []
+        , input [ placeholder "by", style "width" (String.fromInt size ++ "px") ] []
+        , button [] [ text "crop" ]
+        ]
     ]
 
 -- SUBSCRIPTIONS

@@ -6,6 +6,7 @@ run : main.js
 	go run . -web $(GOFLAGS) tests/c2h4.png
 
 main.js : src/Main.elm
+	sed -i 's/\t/        /g' src/Main.elm
 	elm make src/Main.elm --output=main.js
 
 test:
@@ -17,5 +18,8 @@ help:
 install:
 	go install .
 
-react:
-	elm reactor
+bench:
+	go test . -bench 'DrawGrid'
+
+benchprof:
+	go test . -bench 'DrawGrid' -cpuprofile profiles/grid.out

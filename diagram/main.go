@@ -95,12 +95,12 @@ func DrawGrid(img image.NRGBA, h, v int) image.NRGBA {
 	if h > 0 {
 		hsize = height / h
 	} else {
-		height = 0
+		hsize = height - 1
 	}
 	if v > 0 {
 		wsize = width / v
 	} else {
-		width = 0
+		wsize = width - 1
 	}
 	for h := hsize; h < height; h += hsize {
 		label = Label(fmt.Sprintf("%d", h), font)
@@ -200,8 +200,6 @@ type Index struct {
 	Img string
 }
 
-// need to send a request from elm, receive it here, and respond with
-// an updated image, probably a path to it in /tmp
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if *debug {
 		fmt.Printf("indexHandler url: %q\n", r.URL)
@@ -213,6 +211,25 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// TODO I'd like a crop function as well, should be very easy to
+// implement in the Go part. have to make sure it puts the captions
+// first though or it'll throw off their locations
+
+// TODO benchmark grid drawing, I think it can be faster and also work
+// when one of them is zero, as in the other TODO
+
+// TODO remove temp files we create, it makes a new one every time lol
+
+// TODO load caption file so you can resume working in here
+
+// TODO list of captions with del/edit buttons next to each
+
+// probably change this name to requestHandler or similar and take all
+// kinds of these requests, then use /req as the url for it
+
+// how am I going to handle captions AND grids? if captionHandler is
+// separate, I probably have to redo the grid each time too. how to
+// maintain state? do i need a global img to use everywhere?
 func gridHandler(w http.ResponseWriter, r *http.Request) {
 	g := r.URL.Query().Get("grid")
 	if *debug {
@@ -244,7 +261,7 @@ func fileHandler(filename string) func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-func init() {
+func initialize() {
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(),
 			"Usage: %s\n", help)
@@ -294,6 +311,7 @@ func dumpPic(pic image.NRGBA, filename string) {
 }
 
 func main() {
+	initialize()
 	switch {
 	case *web && len(ARGS) < 1:
 		log.Fatal("missing image for -web")

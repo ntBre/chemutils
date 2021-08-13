@@ -20,3 +20,10 @@ func TestParseCaptions(t *testing.T) {
 		t.Errorf("got %v, wanted %v\n", got, want)
 	}
 }
+
+func BenchmarkDrawGrid(b *testing.B) {
+	img := loadPic("tests/c2h4.png")
+	for i := 0; i < b.N; i++ {
+		DrawGrid(img, 16, 16)
+	}
+}
