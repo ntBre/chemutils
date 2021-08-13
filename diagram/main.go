@@ -216,8 +216,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 // implement in the Go part. have to make sure it puts the captions
 // first though or it'll throw off their locations
 
-// TODO remove temp files we create, it makes a new one every time lol
-
 // TODO load caption file so you can resume working in here
 
 // TODO list of captions with del/edit buttons next to each

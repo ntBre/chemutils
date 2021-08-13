@@ -8,6 +8,7 @@ import Http
 import Debug
 import String
 import List
+import List.Extra
 
 -- MAIN
 
@@ -27,14 +28,15 @@ type alias Caption =
     ,position: String
     }
 
-toRow: Caption -> Html Msg
-toRow cap =
+toRow: Int -> Caption -> Html Msg
+toRow id cap =
     tr []
         [ td [] [text cap.text]
-        , td [] [text  cap.size]
+        , td [] [text cap.size]
         , td [] [text cap.position]
+        , td [] [button [onClick (RemoveCap id)] [ text "del" ]]
         ]
-      
+
 type alias Model =
     {image : String
     ,gridx : String
@@ -62,6 +64,7 @@ init image =
 type Msg
     = Grid
     | AddCap
+    | RemoveCap Int
     | GotImg (Result Http.Error String)
     | ChangeX String
     | ChangeY String
@@ -72,6 +75,9 @@ type Msg
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
+        RemoveCap id ->
+            ( {model | captions = List.Extra.removeAt id model.captions },
+                  Cmd.none)
         AddCap ->
             if model.text == "" ||
                 model.size == "" ||
@@ -150,7 +156,7 @@ view model =
                , th [] [text "x,y"]
                ]
          ]
-             ++ List.map toRow model.captions
+             ++ List.indexedMap toRow model.captions
         )
     ]
       
