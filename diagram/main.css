@@ -1,0 +1,8 @@
+img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    height: 90%;
+    width: auto;
+    border: 3px solid #ccc;
+}

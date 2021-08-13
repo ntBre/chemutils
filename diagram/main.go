@@ -13,15 +13,18 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+	"text/template"
 )
 
 // Colors
 var (
 	Black = color.NRGBA{0, 0, 0, 255}
+	ARGS  []string
 )
 
 const (
@@ -41,6 +44,8 @@ var (
 			"vertical lines on the image")
 	outfile = flag.String("o", "",
 		"save the resulting image to file")
+	web = flag.Bool("web", false,
+		"run the program interactively in the browser")
 )
 
 // Display encodes img to a temporary file and displays it using the
@@ -189,7 +194,25 @@ func ParseGrid(str string) (h, v int) {
 	return
 }
 
-func main() {
+type Index struct {
+	Img string
+}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	index := template.Must(template.ParseFiles("index.template"))
+	err := index.ExecuteTemplate(w, "index", &Index{Img: ARGS[0]})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func fileHandler(filename string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filename)
+	}
+}
+
+func init() {
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(),
 			"Usage: %s\n", help)
@@ -198,13 +221,29 @@ func main() {
 	log.SetFlags(0)
 	log.SetPrefix("diagram: ")
 	flag.Parse()
-	args := flag.Args()
-	if len(args) < 2 {
+	ARGS = flag.Args()
+}
+
+func WebInterface() {
+	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/main.css", fileHandler("main.css"))
+	http.HandleFunc("/main.js", fileHandler("main.js"))
+	http.HandleFunc("/"+ARGS[0], fileHandler(ARGS[0]))
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func main() {
+	switch {
+	case *web && len(ARGS) < 1:
+		log.Fatal("missing image for -web")
+	case *web:
+		WebInterface()
+	case len(ARGS) < 2:
 		log.Fatal("not enough input arguments")
 	}
-	capfile := args[0]
+	capfile := ARGS[0]
 	captions := ParseCaptions(capfile)
-	inpic := args[1]
+	inpic := ARGS[1]
 	infile, _ := os.Open(inpic)
 	img, err := png.Decode(infile)
 	if err != nil {
