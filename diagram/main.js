@@ -5323,7 +5323,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (image) {
 	return _Utils_Tuple2(
-		{image: image},
+		{gridx: '0', gridy: '0', image: image},
 		$elm$core$Platform$Cmd$none);
 };
 var $elm$json$Json$Decode$string = _Json_decodeString;
@@ -6114,40 +6114,64 @@ var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
-var $author$project$Main$addGrid = $elm$http$Http$get(
-	{
-		expect: $elm$http$Http$expectString($author$project$Main$GotImg),
-		url: 'http://localhost:8080/grid/?grid=5,5'
-	});
+var $author$project$Main$addGrid = function (model) {
+	return $elm$http$Http$get(
+		{
+			expect: $elm$http$Http$expectString($author$project$Main$GotImg),
+			url: 'http://localhost:8080/grid/?grid=' + (model.gridx + (',' + model.gridy))
+		});
+};
 var $elm$core$Debug$log = _Debug_log;
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		if (msg.$ === 'Grid') {
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{image: model.image}),
-				$author$project$Main$addGrid);
-		} else {
-			var result = msg.a;
-			if (result.$ === 'Ok') {
-				var img = result.a;
-				var dum = $elm$core$Debug$log('received img');
+		switch (msg.$) {
+			case 'ChangeX':
+				var newX = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{image: img}),
+						{gridx: newX}),
 					$elm$core$Platform$Cmd$none);
-			} else {
-				var dum = $elm$core$Debug$log('did not receive img');
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-			}
+			case 'ChangeY':
+				var newY = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{gridy: newY}),
+					$elm$core$Platform$Cmd$none);
+			case 'Grid':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{image: model.image}),
+					$author$project$Main$addGrid(model));
+			default:
+				var result = msg.a;
+				if (result.$ === 'Ok') {
+					var img = result.a;
+					var dum = $elm$core$Debug$log('received img');
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{image: img}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var dum = $elm$core$Debug$log('did not receive img');
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 		}
 	});
+var $author$project$Main$ChangeX = function (a) {
+	return {$: 'ChangeX', a: a};
+};
+var $author$project$Main$ChangeY = function (a) {
+	return {$: 'ChangeY', a: a};
+};
 var $author$project$Main$Grid = {$: 'Grid'};
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$img = _VirtualDom_node('img');
+var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6165,6 +6189,38 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -6173,6 +6229,7 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			$elm$json$Json$Encode$string(string));
 	});
+var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
 var $elm$html$Html$Attributes$src = function (url) {
 	return A2(
 		$elm$html$Html$Attributes$stringProperty,
@@ -6192,6 +6249,22 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$src(model.image)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$placeholder('grid x'),
+						$elm$html$Html$Events$onInput($author$project$Main$ChangeX)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$placeholder('grid y'),
+						$elm$html$Html$Events$onInput($author$project$Main$ChangeY)
 					]),
 				_List_Nil),
 				A2(

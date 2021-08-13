@@ -1,5 +1,9 @@
+ifeq ($(DEBUG),1)
+	GOFLAGS = -debug
+endif
+
 run : main.js
-	go run . -web tests/c2h4.png
+	go run . -web $(GOFLAGS) tests/c2h4.png
 
 main.js : src/Main.elm
 	elm make src/Main.elm --output=main.js

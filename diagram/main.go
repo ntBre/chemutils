@@ -47,6 +47,7 @@ var (
 		"save the resulting image to file")
 	web = flag.Bool("web", false,
 		"run the program interactively in the browser")
+	debug = flag.Bool("debug", false, "toggle debug printing")
 )
 
 // Display encodes img to a temporary file and displays it using the
@@ -202,7 +203,9 @@ type Index struct {
 // need to send a request from elm, receive it here, and respond with
 // an updated image, probably a path to it in /tmp
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL)
+	if *debug {
+		fmt.Printf("indexHandler url: %q\n", r.URL)
+	}
 	index := template.Must(template.ParseFiles("index.template"))
 	err := index.ExecuteTemplate(w, "index", &Index{Img: ARGS[0]})
 	if err != nil {
@@ -211,9 +214,11 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func gridHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL)
 	g := r.URL.Query().Get("grid")
-	fmt.Println(g)
+	if *debug {
+		fmt.Printf("gridHandler url: %q\n", r.URL)
+		fmt.Printf("gridHandler GET grid: %q\n", g)
+	}
 	if g != "" {
 		h, v := ParseGrid(g)
 		img := loadPic(ARGS[0])
@@ -226,7 +231,9 @@ func gridHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(f.Name())
+		if *debug {
+			fmt.Printf("gridHandler generated file: %q\n", f.Name())
+		}
 		io.WriteString(w, f.Name())
 	}
 }
@@ -250,7 +257,9 @@ func init() {
 }
 
 func miscHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("requested url:", r.URL.Path)
+	if *debug {
+		fmt.Printf("miscHandler requested url: %q\n", r.URL.Path)
+	}
 	http.ServeFile(w, r, r.URL.Path)
 }
 
