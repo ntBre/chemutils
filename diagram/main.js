@@ -5323,7 +5323,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (image) {
 	return _Utils_Tuple2(
-		{captions: _List_Nil, gridx: '0', gridy: '0', image: image, position: '', size: '', text: ''},
+		{captions: _List_Nil, gridx: '', gridy: '', image: image, position: '', size: '', text: ''},
 		$elm$core$Platform$Cmd$none);
 };
 var $elm$json$Json$Decode$string = _Json_decodeString;
@@ -6132,7 +6132,10 @@ var $author$project$Main$update = F2(
 							captions: A2(
 								$elm$core$List$cons,
 								{position: model.position, size: model.size, text: model.text},
-								model.captions)
+								model.captions),
+							position: '',
+							size: '',
+							text: ''
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'ChangeText':
@@ -6174,7 +6177,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{image: model.image}),
+						{gridx: '', gridy: '', image: model.image}),
 					$author$project$Main$addGrid(model));
 			default:
 				var result = msg.a;
@@ -6314,6 +6317,7 @@ var $author$project$Main$toRow = function (cap) {
 					]))
 			]));
 };
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -6337,6 +6341,7 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$placeholder('grid h'),
+								$elm$html$Html$Attributes$value(model.gridx),
 								A2(
 								$elm$html$Html$Attributes$style,
 								'width',
@@ -6349,6 +6354,7 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$placeholder('grid v'),
+								$elm$html$Html$Attributes$value(model.gridy),
 								A2(
 								$elm$html$Html$Attributes$style,
 								'width',
@@ -6434,6 +6440,7 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$placeholder('Text'),
+								$elm$html$Html$Attributes$value(model.text),
 								A2(
 								$elm$html$Html$Attributes$style,
 								'width',
@@ -6446,6 +6453,7 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$placeholder('Size'),
+								$elm$html$Html$Attributes$value(model.size),
 								A2(
 								$elm$html$Html$Attributes$style,
 								'width',
@@ -6458,6 +6466,7 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$placeholder('Position'),
+								$elm$html$Html$Attributes$value(model.position),
 								A2(
 								$elm$html$Html$Attributes$style,
 								'width',

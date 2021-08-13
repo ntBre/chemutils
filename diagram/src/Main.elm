@@ -48,8 +48,8 @@ type alias Model =
 init : String -> (Model, Cmd Msg)
 init image =
     ( { image = image
-      , gridx = "0"
-      , gridy = "0"
+      , gridx = ""
+      , gridy = ""
       , text = ""
       , size = ""
       , position = ""
@@ -81,7 +81,8 @@ update msg model =
                         ( { model | captions =
                                 {text = model.text
                                 , size = model.size
-                                , position = model.position} :: model.captions },
+                                , position = model.position} :: model.captions,
+                        text = "", size = "", position = ""},
                               Cmd.none )
         ChangeText newText ->
             ( { model | text = newText }, Cmd.none )
@@ -94,7 +95,7 @@ update msg model =
         ChangeY newY ->
             ( { model | gridy = newY }, Cmd.none )
         Grid ->
-            ( { model | image = model.image }, addGrid model)
+            ( { model | image = model.image, gridx = "", gridy = "" }, addGrid model)
         GotImg result ->
             case result of
                 Ok img ->
@@ -113,8 +114,10 @@ view model =
     [ img [src model.image] []
     , div []
         [ input [ placeholder "grid h"
+                , value model.gridx
                 , style "width" (String.fromInt (2*size) ++ "px"), onInput ChangeX ] []
         , input [ placeholder "grid v"
+                , value model.gridy
                 , style "width" (String.fromInt (2*size) ++ "px"), onInput ChangeY ] []
         , button [ onClick Grid ] [ text "grid" ]
         ]
@@ -127,12 +130,15 @@ view model =
         ]
     , div []
         [ input [ placeholder "Text"
+                , value model.text
                 , style "width" (String.fromInt (4*size//3) ++ "px")
                 , onInput ChangeText ] []
         , input [ placeholder "Size"
+                , value model.size
                 , style "width" (String.fromInt (4*size//3) ++ "px")
                 , onInput ChangeSize ] []
         , input [ placeholder "Position"
+                , value model.position
                 , style "width" (String.fromInt (4*size//3 + 1) ++ "px")
                 , onInput ChangePosition ] []
         , button [onClick AddCap] [ text "add caption" ]
