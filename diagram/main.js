@@ -5323,7 +5323,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (image) {
 	return _Utils_Tuple2(
-		{gridx: '0', gridy: '0', image: image},
+		{captions: _List_Nil, gridx: '0', gridy: '0', image: image, position: '', size: '', text: ''},
 		$elm$core$Platform$Cmd$none);
 };
 var $elm$json$Json$Decode$string = _Json_decodeString;
@@ -6121,10 +6121,41 @@ var $author$project$Main$addGrid = function (model) {
 			url: 'http://localhost:8080/grid/?grid=' + (model.gridx + (',' + model.gridy))
 		});
 };
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
+			case 'AddCap':
+				return ((model.text === '') || ((model.size === '') || (model.position === ''))) ? _Utils_Tuple2(model, $elm$core$Platform$Cmd$none) : _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							captions: A2(
+								$elm$core$List$cons,
+								{position: model.position, size: model.size, text: model.text},
+								model.captions)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'ChangeText':
+				var newText = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{text: newText}),
+					$elm$core$Platform$Cmd$none);
+			case 'ChangeSize':
+				var newText = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{size: newText}),
+					$elm$core$Platform$Cmd$none);
+			case 'ChangePosition':
+				var newText = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{position: newText}),
+					$elm$core$Platform$Cmd$none);
 			case 'ChangeX':
 				var newX = msg.a;
 				return _Utils_Tuple2(
@@ -6149,18 +6180,26 @@ var $author$project$Main$update = F2(
 				var result = msg.a;
 				if (result.$ === 'Ok') {
 					var img = result.a;
-					var dum = $elm$core$Debug$log('received img');
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{image: img}),
 						$elm$core$Platform$Cmd$none);
 				} else {
-					var dum = $elm$core$Debug$log('did not receive img');
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 		}
 	});
+var $author$project$Main$AddCap = {$: 'AddCap'};
+var $author$project$Main$ChangePosition = function (a) {
+	return {$: 'ChangePosition', a: a};
+};
+var $author$project$Main$ChangeSize = function (a) {
+	return {$: 'ChangeSize', a: a};
+};
+var $author$project$Main$ChangeText = function (a) {
+	return {$: 'ChangeText', a: a};
+};
 var $author$project$Main$ChangeX = function (a) {
 	return {$: 'ChangeX', a: a};
 };
@@ -6239,8 +6278,42 @@ var $elm$html$Html$Attributes$src = function (url) {
 };
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$th = _VirtualDom_node('th');
+var $elm$html$Html$thead = _VirtualDom_node('thead');
+var $elm$html$Html$td = _VirtualDom_node('td');
+var $elm$html$Html$tr = _VirtualDom_node('tr');
+var $author$project$Main$toRow = function (cap) {
+	return A2(
+		$elm$html$Html$tr,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$td,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(cap.text)
+					])),
+				A2(
+				$elm$html$Html$td,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(cap.size)
+					])),
+				A2(
+				$elm$html$Html$td,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(cap.position)
+					]))
+			]));
+};
 var $author$project$Main$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -6303,30 +6376,6 @@ var $author$project$Main$view = function (model) {
 						$elm$html$Html$input,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$placeholder('caption [Text Size x,y]'),
-								A2(
-								$elm$html$Html$Attributes$style,
-								'width',
-								$elm$core$String$fromInt(4 * $author$project$Main$size) + 'px')
-							]),
-						_List_Nil),
-						A2(
-						$elm$html$Html$button,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('add caption')
-							]))
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$input,
-						_List_fromArray(
-							[
 								$elm$html$Html$Attributes$placeholder('lx'),
 								A2(
 								$elm$html$Html$Attributes$style,
@@ -6374,7 +6423,94 @@ var $author$project$Main$view = function (model) {
 							[
 								$elm$html$Html$text('crop')
 							]))
-					]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$placeholder('Text'),
+								A2(
+								$elm$html$Html$Attributes$style,
+								'width',
+								$elm$core$String$fromInt(((4 * $author$project$Main$size) / 3) | 0) + 'px'),
+								$elm$html$Html$Events$onInput($author$project$Main$ChangeText)
+							]),
+						_List_Nil),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$placeholder('Size'),
+								A2(
+								$elm$html$Html$Attributes$style,
+								'width',
+								$elm$core$String$fromInt(((4 * $author$project$Main$size) / 3) | 0) + 'px'),
+								$elm$html$Html$Events$onInput($author$project$Main$ChangeSize)
+							]),
+						_List_Nil),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$placeholder('Position'),
+								A2(
+								$elm$html$Html$Attributes$style,
+								'width',
+								$elm$core$String$fromInt((((4 * $author$project$Main$size) / 3) | 0) + 1) + 'px'),
+								$elm$html$Html$Events$onInput($author$project$Main$ChangePosition)
+							]),
+						_List_Nil),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Main$AddCap)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('add caption')
+							]))
+					])),
+				A2(
+				$elm$html$Html$table,
+				_List_Nil,
+				_Utils_ap(
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$thead,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$th,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Text')
+										])),
+									A2(
+									$elm$html$Html$th,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Size')
+										])),
+									A2(
+									$elm$html$Html$th,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text('x,y')
+										]))
+								]))
+						]),
+					A2($elm$core$List$map, $author$project$Main$toRow, model.captions)))
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(

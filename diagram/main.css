@@ -6,3 +6,12 @@ img {
     width: auto;
     border: 3px solid #ccc;
 }
+
+table {
+    border: 1px solid black;
+}
+
+th {
+    border-bottom: 1px solid black;
+    border-collapse: collapse;
+}
