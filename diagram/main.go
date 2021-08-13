@@ -215,9 +215,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 // implement in the Go part. have to make sure it puts the captions
 // first though or it'll throw off their locations
 
-// TODO benchmark grid drawing, I think it can be faster and also work
-// when one of them is zero, as in the other TODO
-
 // TODO remove temp files we create, it makes a new one every time lol
 
 // TODO load caption file so you can resume working in here
