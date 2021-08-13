@@ -10,6 +10,7 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+	"io"
 	"io/ioutil"
 	"log"
 	"math"
@@ -198,11 +199,35 @@ type Index struct {
 	Img string
 }
 
+// need to send a request from elm, receive it here, and respond with
+// an updated image, probably a path to it in /tmp
 func indexHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL)
 	index := template.Must(template.ParseFiles("index.template"))
 	err := index.ExecuteTemplate(w, "index", &Index{Img: ARGS[0]})
 	if err != nil {
 		panic(err)
+	}
+}
+
+func gridHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL)
+	g := r.URL.Query().Get("grid")
+	fmt.Println(g)
+	if g != "" {
+		h, v := ParseGrid(g)
+		img := loadPic(ARGS[0])
+		out := DrawGrid(img, h, v)
+		f, err := os.CreateTemp("", "diagram*.png")
+		if err != nil {
+			panic(err)
+		}
+		err = png.Encode(f, &out)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(f.Name())
+		io.WriteString(w, f.Name())
 	}
 }
 
@@ -224,12 +249,39 @@ func init() {
 	ARGS = flag.Args()
 }
 
-func WebInterface() {
+func miscHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("requested url:", r.URL.Path)
+	http.ServeFile(w, r, r.URL.Path)
+}
+
+func webInterface() {
 	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/grid/", gridHandler)
 	http.HandleFunc("/main.css", fileHandler("main.css"))
 	http.HandleFunc("/main.js", fileHandler("main.js"))
 	http.HandleFunc("/"+ARGS[0], fileHandler(ARGS[0]))
+	http.HandleFunc("/tmp/", miscHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func loadPic(filename string) image.NRGBA {
+	infile, _ := os.Open(filename)
+	img, err := png.Decode(infile)
+	if err != nil {
+		panic(err)
+	}
+	return NRGBA(img)
+}
+
+func dumpPic(pic image.NRGBA, filename string) {
+	f, err := os.Create(filename)
+	if err != nil {
+		panic(err)
+	}
+	err = png.Encode(f, &pic)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
@@ -237,19 +289,13 @@ func main() {
 	case *web && len(ARGS) < 1:
 		log.Fatal("missing image for -web")
 	case *web:
-		WebInterface()
+		webInterface()
 	case len(ARGS) < 2:
 		log.Fatal("not enough input arguments")
 	}
 	capfile := ARGS[0]
 	captions := ParseCaptions(capfile)
-	inpic := ARGS[1]
-	infile, _ := os.Open(inpic)
-	img, err := png.Decode(infile)
-	if err != nil {
-		panic(err)
-	}
-	pic := NRGBA(img)
+	pic := loadPic(ARGS[1])
 	if *grid != "" {
 		h, v := ParseGrid(*grid)
 		pic = DrawGrid(pic, h, v)
@@ -266,16 +312,9 @@ func main() {
 		), label, image.Point{0, 0}, draw.Over)
 	}
 	if *outfile != "" {
-		f, err := os.Create(*outfile)
-		if err != nil {
-			panic(err)
-		}
-		err = png.Encode(f, &pic)
-		if err != nil {
-			panic(err)
-		}
+		dumpPic(pic, *outfile)
 	} else {
-		err = Display(&pic)
+		err := Display(&pic)
 		if err != nil {
 			log.Fatalln(err)
 		}
