@@ -26,6 +26,7 @@ import (
 var (
 	Black = color.NRGBA{0, 0, 0, 255}
 	ARGS  []string
+	lastTemp string
 )
 
 const (
@@ -248,7 +249,11 @@ func gridHandler(w http.ResponseWriter, r *http.Request) {
 		if *debug {
 			fmt.Printf("gridHandler generated file: %q\n", f.Name())
 		}
-		io.WriteString(w, f.Name())
+		if lastTemp != "" {
+			os.Remove(lastTemp)
+		}
+		lastTemp = f.Name()
+		io.WriteString(w, lastTemp)
 	}
 }
 
