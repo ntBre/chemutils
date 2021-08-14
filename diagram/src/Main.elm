@@ -23,9 +23,9 @@ main =
 -- MODEL
 
 type alias Caption =
-    {text: String
-    ,size: String
-    ,position: String
+    { text: String
+    , size: String
+    , position: String
     }
 
 toRow: Int -> Caption -> Html Msg
@@ -38,13 +38,18 @@ toRow id cap =
         ]
 
 type alias Model =
-    {image : String
-    ,gridx : String
-    ,gridy : String
-    ,text : String
-    ,size : String
-    ,position: String
-    ,captions: List Caption
+    { image : String
+    , gridx : String
+    , gridy : String
+    , oldGridx : String
+    , oldGridy : String
+    , text : String
+    , size : String
+    , position: String
+    , oldText : String
+    , oldSize : String
+    , oldPosition: String
+    , captions: List Caption
     }
 
 init : String -> (Model, Cmd Msg)
@@ -52,10 +57,16 @@ init image =
     ( { image = image
       , gridx = ""
       , gridy = ""
+      , oldGridx = ""
+      , oldGridy = ""
       , text = ""
       , size = ""
       , position = ""
-      , captions = [] }
+      , oldText = ""
+      , oldSize = ""
+      , oldPosition = ""
+      , captions = []
+      }
     , Cmd.none
     )
 
@@ -63,6 +74,7 @@ init image =
 
 type Msg
     = Grid
+    | ClearGrid
     | AddCap
     | RemoveCap Int
     | GotImg (Result Http.Error String)
@@ -76,20 +88,33 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         RemoveCap id ->
-            ( {model | captions = List.Extra.removeAt id model.captions },
-                  Cmd.none)
+            let newMod = 
+                    {model | captions =
+                         List.Extra.removeAt id model.captions
+                    }
+            in ( newMod ,
+                  addCaption newMod )
         AddCap ->
             if model.text == "" ||
                 model.size == "" ||
-                    model.position == "" then
+                    model.position == ""
+            then
                 (model, Cmd.none )
-                    else
-                        ( { model | captions =
-                                {text = model.text
-                                , size = model.size
-                                , position = model.position} :: model.captions,
-                        text = "", size = "", position = ""},
-                              Cmd.none )
+            else
+                let newMod =
+                        { model | captions =
+                              { text = model.text
+                              , size = model.size
+                              , position = model.position
+                              } :: model.captions
+                        , oldText = model.text
+                        , oldSize = model.size
+                        , oldPosition = model.position
+                        , text = ""
+                        , size = ""
+                        , position = ""
+                        }
+                    in ( newMod , addCaption newMod )
         ChangeText newText ->
             ( { model | text = newText }, Cmd.none )
         ChangeSize newText ->
@@ -101,7 +126,28 @@ update msg model =
         ChangeY newY ->
             ( { model | gridy = newY }, Cmd.none )
         Grid ->
-            ( { model | image = model.image, gridx = "", gridy = "" }, addGrid model)
+            if model.gridx == "" ||
+                model.gridy == ""
+            then
+                (model, Cmd.none)
+            else
+                let newMod = 
+                        { model | image = model.image
+                        , oldGridx = model.gridx
+                        , oldGridy = model.gridy
+                        , gridx = ""
+                        , gridy = ""
+                        }
+                    in ( newMod, addGrid newMod)
+        ClearGrid ->
+                let newMod = 
+                        { model | image = model.image
+                        , oldGridx = ""
+                        , oldGridy = ""
+                        , gridx = ""
+                        , gridy = ""
+                        }
+                    in ( newMod, addGrid newMod)
         GotImg result ->
             case result of
                 Ok img ->
@@ -126,6 +172,7 @@ view model =
                 , value model.gridy
                 , style "width" (String.fromInt (2*size) ++ "px"), onInput ChangeY ] []
         , button [ onClick Grid ] [ text "grid" ]
+        , button [ onClick ClearGrid ] [ text "clear" ]
         ]
     , div []
         [ input [ placeholder "lx", style "width" (String.fromInt size ++ "px") ] []
@@ -167,11 +214,26 @@ subscriptions _ =
     Sub.none
 
 -- HTTP
+gridStr : Model -> String
+gridStr model =
+        "grid=" ++ model.oldGridx ++ "," ++ model.oldGridy
+
+capStr : Model -> String
+capStr model =
+    List.foldr
+    (\cap str -> str ++ cap.text ++ "," ++ cap.size ++ "," ++ cap.position ++ "&cap=")
+    "cap=" model.captions
+
 addGrid : Model -> Cmd Msg
 addGrid model =
     Http.get
-        { url = "http://localhost:8080/grid/?grid=" ++ model.gridx ++ "," ++ model.gridy
+        { url = "http://localhost:8080/req?" ++ (gridStr model) ++ "&" ++ (capStr model)
         , expect = Http.expectString GotImg
         }
 
--- addCaption : Model -> 
+addCaption : Model -> Cmd Msg
+addCaption model =
+    Http.get
+        { url = "http://localhost:8080/req?" ++ (gridStr model) ++ "&" ++ (capStr model)
+        , expect = Http.expectString GotImg
+        }

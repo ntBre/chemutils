@@ -4,6 +4,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"image"
@@ -24,8 +25,8 @@ import (
 
 // Colors
 var (
-	Black = color.NRGBA{0, 0, 0, 255}
-	ARGS  []string
+	Black    = color.NRGBA{0, 0, 0, 255}
+	ARGS     []string
 	lastTemp string
 )
 
@@ -150,6 +151,28 @@ type Caption struct {
 	Position image.Point
 }
 
+func parseCaption(fields []string) (Caption, error) {
+	size, err := strconv.Atoi(fields[1])
+	if err != nil {
+		log.Printf("error parsing caption size %q as an integer, skipping", fields[1])
+		return Caption{}, errors.New("malformed caption")
+	}
+	strpt := strings.Split(fields[2], ",")
+	ptx, err := strconv.Atoi(strpt[0])
+	if err != nil {
+		panic(err)
+	}
+	pty, err := strconv.Atoi(strpt[1])
+	if err != nil {
+		panic(err)
+	}
+	return Caption{
+		Text:     fields[0],
+		Size:     size,
+		Position: image.Point{ptx, pty},
+	}, nil
+}
+
 // ParseCaptions parses caption input from filename and returns a
 // slice of Captions
 func ParseCaptions(filename string) (ret []Caption) {
@@ -161,25 +184,10 @@ func ParseCaptions(filename string) (ret []Caption) {
 	for scanner.Scan() {
 		fields := strings.Fields(scanner.Text())
 		if len(fields) == 3 {
-			size, err := strconv.Atoi(fields[1])
-			if err != nil {
-				log.Fatalf("error parsing caption size %q", fields[1])
+			cap, err := parseCaption(fields)
+			if err == nil {
+				ret = append(ret, cap)
 			}
-			strpt := strings.Split(fields[2], ",")
-			ptx, err := strconv.Atoi(strpt[0])
-			if err != nil {
-				panic(err)
-			}
-			pty, err := strconv.Atoi(strpt[1])
-			if err != nil {
-				panic(err)
-			}
-			ret = append(ret,
-				Caption{
-					Text:     fields[0],
-					Size:     size,
-					Position: image.Point{ptx, pty},
-				})
 		}
 	}
 	return
@@ -226,33 +234,55 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 // how am I going to handle captions AND grids? if captionHandler is
 // separate, I probably have to redo the grid each time too. how to
 // maintain state? do i need a global img to use everywhere?
-func gridHandler(w http.ResponseWriter, r *http.Request) {
-	g := r.URL.Query().Get("grid")
+func reqHandler(w http.ResponseWriter, r *http.Request) {
+	reqs := r.URL.Query()
+	grid := reqs["grid"][0]
+	caps := reqs["cap"]
 	if *debug {
 		fmt.Printf("gridHandler url: %q\n", r.URL)
-		fmt.Printf("gridHandler GET grid: %q\n", g)
+		fmt.Printf("gridHandler GET grid: %q\n", grid)
+		fmt.Printf("gridHandler GET  cap: %q\n", caps)
 	}
-	if g != "" {
-		h, v := ParseGrid(g)
-		img := loadPic(ARGS[0])
-		out := DrawGrid(img, h, v)
-		f, err := os.CreateTemp("", "diagram*.png")
-		if err != nil {
-			panic(err)
-		}
-		err = png.Encode(f, &out)
-		if err != nil {
-			panic(err)
-		}
-		if *debug {
-			fmt.Printf("gridHandler generated file: %q\n", f.Name())
-		}
-		if lastTemp != "" {
-			os.Remove(lastTemp)
-		}
-		lastTemp = f.Name()
-		io.WriteString(w, lastTemp)
+	img := loadPic(ARGS[0])
+	f, err := os.CreateTemp("", "diagram*.png")
+	if err != nil {
+		panic(err)
 	}
+	out := img
+	if grid != "" && grid != "," {
+		h, v := ParseGrid(grid)
+		out = DrawGrid(img, h, v)
+	}
+	for _, c := range caps {
+		if c != "" {
+			fields := strings.Split(c, ",")
+			fmt.Printf("%q\n", fields)
+			if len(fields) == 4 {
+				fields[2] = strings.Join(
+					[]string{fields[2], fields[3]}, ",",
+				)
+				fields = fields[0:3]
+				cap, err := parseCaption(fields)
+				if err == nil {
+					drawCaption(&out, cap)
+				}
+			}
+			fmt.Printf("%q\n", fields)
+			fmt.Printf("%q\n", c)
+		}
+	}
+	err = png.Encode(f, &out)
+	if err != nil {
+		panic(err)
+	}
+	if *debug {
+		fmt.Printf("gridHandler generated file: %q\n", f.Name())
+	}
+	if lastTemp != "" {
+		os.Remove(lastTemp)
+	}
+	lastTemp = f.Name()
+	io.WriteString(w, lastTemp)
 }
 
 func fileHandler(filename string) func(http.ResponseWriter, *http.Request) {
@@ -282,7 +312,7 @@ func miscHandler(w http.ResponseWriter, r *http.Request) {
 
 func webInterface() {
 	http.HandleFunc("/", indexHandler)
-	http.HandleFunc("/grid/", gridHandler)
+	http.HandleFunc("/req", reqHandler)
 	http.HandleFunc("/main.css", fileHandler("main.css"))
 	http.HandleFunc("/main.js", fileHandler("main.js"))
 	http.HandleFunc("/"+ARGS[0], fileHandler(ARGS[0]))
@@ -310,6 +340,18 @@ func dumpPic(pic image.NRGBA, filename string) {
 	}
 }
 
+func drawCaption(pic draw.Image, caption Caption) {
+	label := Label(caption.Text, caption.Size)
+	lrect := label.Bounds()
+	lw, lh := lrect.Max.X, lrect.Max.Y
+	draw.Draw(pic, image.Rect(
+		caption.Position.X-lw/2,
+		caption.Position.Y-lh/2,
+		caption.Position.X+lw/2,
+		caption.Position.Y+lh/2,
+	), label, image.Point{0, 0}, draw.Over)
+}
+
 func main() {
 	initialize()
 	switch {
@@ -328,15 +370,7 @@ func main() {
 		pic = DrawGrid(pic, h, v)
 	}
 	for _, caption := range captions {
-		label := Label(caption.Text, caption.Size)
-		lrect := label.Bounds()
-		lw, lh := lrect.Max.X, lrect.Max.Y
-		draw.Draw(&pic, image.Rect(
-			caption.Position.X-lw/2,
-			caption.Position.Y-lh/2,
-			caption.Position.X+lw/2,
-			caption.Position.Y+lh/2,
-		), label, image.Point{0, 0}, draw.Over)
+		drawCaption(&pic, caption)
 	}
 	if *outfile != "" {
 		dumpPic(pic, *outfile)

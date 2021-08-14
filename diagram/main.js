@@ -5323,7 +5323,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (image) {
 	return _Utils_Tuple2(
-		{captions: _List_Nil, gridx: '', gridy: '', image: image, position: '', size: '', text: ''},
+		{captions: _List_Nil, gridx: '', gridy: '', image: image, oldGridx: '', oldGridy: '', oldPosition: '', oldSize: '', oldText: '', position: '', size: '', text: ''},
 		$elm$core$Platform$Cmd$none);
 };
 var $elm$json$Json$Decode$string = _Json_decodeString;
@@ -5334,6 +5334,16 @@ var $author$project$Main$subscriptions = function (_v0) {
 };
 var $author$project$Main$GotImg = function (a) {
 	return {$: 'GotImg', a: a};
+};
+var $author$project$Main$capStr = function (model) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (cap, str) {
+				return str + (cap.text + (',' + (cap.size + (',' + (cap.position + '&cap=')))));
+			}),
+		'cap=',
+		model.captions);
 };
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
@@ -6114,11 +6124,21 @@ var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
+var $author$project$Main$gridStr = function (model) {
+	return 'grid=' + (model.oldGridx + (',' + model.oldGridy));
+};
+var $author$project$Main$addCaption = function (model) {
+	return $elm$http$Http$get(
+		{
+			expect: $elm$http$Http$expectString($author$project$Main$GotImg),
+			url: 'http://localhost:8080/req?' + ($author$project$Main$gridStr(model) + ('&' + $author$project$Main$capStr(model)))
+		});
+};
 var $author$project$Main$addGrid = function (model) {
 	return $elm$http$Http$get(
 		{
 			expect: $elm$http$Http$expectString($author$project$Main$GotImg),
-			url: 'http://localhost:8080/grid/?grid=' + (model.gridx + (',' + model.gridy))
+			url: 'http://localhost:8080/req?' + ($author$project$Main$gridStr(model) + ('&' + $author$project$Main$capStr(model)))
 		});
 };
 var $elm$core$List$drop = F2(
@@ -6289,27 +6309,36 @@ var $author$project$Main$update = F2(
 		switch (msg.$) {
 			case 'RemoveCap':
 				var id = msg.a;
+				var newMod = _Utils_update(
+					model,
+					{
+						captions: A2($elm_community$list_extra$List$Extra$removeAt, id, model.captions)
+					});
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							captions: A2($elm_community$list_extra$List$Extra$removeAt, id, model.captions)
-						}),
-					$elm$core$Platform$Cmd$none);
+					newMod,
+					$author$project$Main$addCaption(newMod));
 			case 'AddCap':
-				return ((model.text === '') || ((model.size === '') || (model.position === ''))) ? _Utils_Tuple2(model, $elm$core$Platform$Cmd$none) : _Utils_Tuple2(
-					_Utils_update(
+				if ((model.text === '') || ((model.size === '') || (model.position === ''))) {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				} else {
+					var newMod = _Utils_update(
 						model,
 						{
 							captions: A2(
 								$elm$core$List$cons,
 								{position: model.position, size: model.size, text: model.text},
 								model.captions),
+							oldPosition: model.position,
+							oldSize: model.size,
+							oldText: model.text,
 							position: '',
 							size: '',
 							text: ''
-						}),
-					$elm$core$Platform$Cmd$none);
+						});
+					return _Utils_Tuple2(
+						newMod,
+						$author$project$Main$addCaption(newMod));
+				}
 			case 'ChangeText':
 				var newText = msg.a;
 				return _Utils_Tuple2(
@@ -6346,11 +6375,23 @@ var $author$project$Main$update = F2(
 						{gridy: newY}),
 					$elm$core$Platform$Cmd$none);
 			case 'Grid':
-				return _Utils_Tuple2(
-					_Utils_update(
+				if ((model.gridx === '') || (model.gridy === '')) {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				} else {
+					var newMod = _Utils_update(
 						model,
-						{gridx: '', gridy: '', image: model.image}),
-					$author$project$Main$addGrid(model));
+						{gridx: '', gridy: '', image: model.image, oldGridx: model.gridx, oldGridy: model.gridy});
+					return _Utils_Tuple2(
+						newMod,
+						$author$project$Main$addGrid(newMod));
+				}
+			case 'ClearGrid':
+				var newMod = _Utils_update(
+					model,
+					{gridx: '', gridy: '', image: model.image, oldGridx: '', oldGridy: ''});
+				return _Utils_Tuple2(
+					newMod,
+					$author$project$Main$addGrid(newMod));
 			default:
 				var result = msg.a;
 				if (result.$ === 'Ok') {
@@ -6381,6 +6422,7 @@ var $author$project$Main$ChangeX = function (a) {
 var $author$project$Main$ChangeY = function (a) {
 	return {$: 'ChangeY', a: a};
 };
+var $author$project$Main$ClearGrid = {$: 'ClearGrid'};
 var $author$project$Main$Grid = {$: 'Grid'};
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
@@ -6564,6 +6606,16 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$text('grid')
+							])),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Main$ClearGrid)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('clear')
 							]))
 					])),
 				A2(
