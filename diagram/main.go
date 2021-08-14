@@ -237,10 +237,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// TODO I'd like a crop function as well, should be very easy to
-// implement in the Go part. have to make sure it puts the captions
-// first though or it'll throw off their locations
-
 func reqHandler(w http.ResponseWriter, r *http.Request) {
 	reqs := r.URL.Query()
 	grid := reqs["grid"][0]
