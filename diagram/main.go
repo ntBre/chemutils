@@ -52,6 +52,7 @@ var (
 	web     = flag.Bool("web", false,
 		"run the program interactively in the browser")
 	debug = flag.Bool("debug", false, "toggle debug printing")
+	crop  = flag.String("crop", "", "crop image to left-x,upper-y,right-x,bottom-y")
 )
 
 // Display encodes img to a temporary file and displays it using the
@@ -208,8 +209,8 @@ func ParseGrid(str string) (h, v int) {
 }
 
 type Index struct {
-	Img  string
-	Caps []Caption
+	Img     string
+	Caps    []Caption
 	Capfile string
 }
 
@@ -227,8 +228,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = index.ExecuteTemplate(w, "index",
 		&Index{
-			Img:  ARGS[0],
-			Caps: captions,
+			Img:     ARGS[0],
+			Caps:    captions,
 			Capfile: *capfile,
 		})
 	if err != nil {
@@ -367,6 +368,25 @@ func drawCaption(pic draw.Image, caption Caption) {
 	), label, image.Point{0, 0}, draw.Over)
 }
 
+func cropImage(pic *image.NRGBA, crop string) image.NRGBA {
+	coords := strings.Split(crop, ",")
+	if len(coords) != 4 {
+		panic("bad argument to crop")
+	}
+	icoords := make([]int, len(coords))
+	for i, c := range coords {
+		icoords[i], _ = strconv.Atoi(c)
+	}
+	return NRGBA(
+		pic.SubImage(
+			image.Rect(
+				icoords[0],
+				icoords[1],
+				icoords[2],
+				icoords[3],
+			)))
+}
+
 func main() {
 	initialize()
 	if len(ARGS) < 1 {
@@ -386,6 +406,9 @@ func main() {
 	}
 	for _, caption := range captions {
 		drawCaption(&pic, caption)
+	}
+	if *crop != "" {
+		pic = cropImage(&pic, *crop)
 	}
 	if *outfile != "" {
 		dumpPic(pic, *outfile)
