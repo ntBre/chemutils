@@ -55,6 +55,14 @@ type alias Model =
     , captions: List Caption
     , holdCapfile : String
     , capfile : String
+    , lx : String
+    , uy : String
+    , rx : String
+    , by : String
+    , olx : String
+    , ouy : String
+    , orx : String
+    , oby : String
     }
 
 type alias Flags =
@@ -80,6 +88,14 @@ init flags =
             , captions = flags.caps
             , holdCapfile = flags.capfile
             , capfile = ""
+            , lx = ""
+            , uy = ""
+            , rx = ""
+            , by = ""
+            , olx = ""
+            , ouy = ""
+            , orx = ""
+            , oby = ""
             }
     in if List.length mod.captions > 0
        then (mod, addCaption mod)
@@ -97,6 +113,11 @@ type Msg
     | DumpCaps
     | RemoveCap Int
     | GotImg (Result Http.Error String)
+    | Changelx String
+    | Changeuy String
+    | Changerx String
+    | Changeby String
+    | DoCrop
     | ChangeX String
     | ChangeY String
     | ChangeText String
@@ -120,6 +141,29 @@ popCap model id =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
+        Changelx s -> ({model | lx = s}, Cmd.none)
+        Changeuy s -> ({model | uy = s}, Cmd.none)
+        Changerx s -> ({model | rx = s}, Cmd.none)
+        Changeby s -> ({model | by = s}, Cmd.none)
+        DoCrop ->
+            if model.lx == "" ||
+                model.uy == "" ||
+                    model.rx == "" ||
+                        model.by == ""
+            then (model, Cmd.none)
+            else let newMod = 
+                        { model
+                            | olx = model.lx
+                            , ouy = model.uy
+                            , orx = model.rx
+                            , oby = model.by
+                              -- uncomment to keep old values out of boxes
+                            -- , lx = ""
+                            -- , uy = ""
+                            -- , rx = ""
+                            -- , by = ""
+                        }
+                    in ( newMod, doCrop newMod)
         Success _ -> (model, Cmd.none)
         DumpCaps -> (model, dumpCaps {model | capfile = model.holdCapfile})
         ChangeCapfile file ->
@@ -229,11 +273,19 @@ view model =
         , button [ onClick ClearGrid ] [ text "clear" ]
         ]
     , div []
-        [ input [ placeholder "lx", style "width" (String.fromInt size ++ "px") ] []
-        , input [ placeholder "uy", style "width" (String.fromInt size ++ "px") ] []
-        , input [ placeholder "rx", style "width" (String.fromInt size ++ "px") ] []
-        , input [ placeholder "by", style "width" (String.fromInt size ++ "px") ] []
-        , button [] [ text "crop" ]
+        [ input [ placeholder "lx", style "width" (String.fromInt size ++ "px")
+                , value model.lx
+                , onInput Changelx ] []
+        , input [ placeholder "uy", style "width" (String.fromInt size ++ "px")
+                , value model.uy
+                , onInput Changeuy ] []
+        , input [ placeholder "rx", style "width" (String.fromInt size ++ "px")
+                , value model.rx
+                , onInput Changerx ] []
+        , input [ placeholder "by", style "width" (String.fromInt size ++ "px")
+                , value model.by
+                , onInput Changeby ] []
+        , button [onClick DoCrop] [ text "crop" ]
         ]
     , div []
         [ input [ placeholder "Text"
@@ -278,7 +330,12 @@ subscriptions _ =
 reqURL : Model -> String
 reqURL model =
     "http://localhost:8080/req?" ++ (gridStr model)
-        ++ "&" ++ (capStr model) ++ "&" ++ "dump=" ++ model.capfile
+        ++ "&" ++ (capStr model) ++ "&dump=" ++ model.capfile
+        ++ "&crop=" ++ (cropStr model)
+
+cropStr : Model -> String
+cropStr model =
+    model.olx ++ "," ++ model.ouy ++ "," ++ model.orx ++ "," ++ model.oby
 
 gridStr : Model -> String
 gridStr model =
@@ -309,4 +366,11 @@ dumpCaps model =
     Http.get
         { url = reqURL model
         , expect = Http.expectWhatever Success
+        }
+
+doCrop : Model -> Cmd Msg
+doCrop model =
+    Http.get
+        { url = reqURL model
+        , expect = Http.expectString GotImg
         }

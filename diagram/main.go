@@ -246,11 +246,13 @@ func reqHandler(w http.ResponseWriter, r *http.Request) {
 	grid := reqs["grid"][0]
 	caps := reqs["cap"]
 	capfile := reqs["dump"][0]
+	crop := reqs["crop"][0]
 	if *debug {
 		fmt.Printf("gridHandler url: %q\n", r.URL)
 		fmt.Printf("gridHandler GET    grid: %q\n", grid)
 		fmt.Printf("gridHandler GET     cap: %q\n", caps)
 		fmt.Printf("gridHandler GET capfile: %q\n", capfile)
+		fmt.Printf("gridHandler GET    crop: %q\n", crop)
 	}
 	img := loadPic(ARGS[0])
 	f, err := os.CreateTemp("", "diagram*.png")
@@ -286,6 +288,9 @@ func reqHandler(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprintln(outfile, strings.Join(fields, " "))
 			}
 		}
+	}
+	if crop != ",,," {
+		out = cropImage(&out, crop)
 	}
 	err = png.Encode(f, &out)
 	if err != nil {
@@ -369,6 +374,9 @@ func drawCaption(pic draw.Image, caption Caption) {
 }
 
 func cropImage(pic *image.NRGBA, crop string) image.NRGBA {
+	if *debug {
+		fmt.Printf("cropImage crop: %s\n", crop)
+	}
 	coords := strings.Split(crop, ",")
 	if len(coords) != 4 {
 		panic("bad argument to crop")

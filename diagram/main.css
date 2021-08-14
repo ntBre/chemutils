@@ -2,8 +2,10 @@ img {
     display: block;
     margin-left: auto;
     margin-right: auto;
-    height: 85%;
+    max-height: 85%;
+    max-width: 95%;
     width: auto;
+    height: auto;
     border: 3px solid #ccc;
 }
 
