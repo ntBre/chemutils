@@ -9,6 +9,7 @@ import Debug
 import String
 import List
 import List.Extra
+import Array
 
 -- MAIN
 
@@ -34,6 +35,8 @@ toRow id cap =
         [ td [] [text cap.text]
         , td [] [text cap.size]
         , td [] [text cap.position]
+        , td [] [button [onClick (EditCap id)] [ text "edit" ]]
+        , td [] [button [onClick (CopyCap id)] [ text "copy" ]]
         , td [] [button [onClick (RemoveCap id)] [ text "del" ]]
         ]
 
@@ -76,6 +79,8 @@ type Msg
     = Grid
     | ClearGrid
     | AddCap
+    | EditCap Int
+    | CopyCap Int
     | RemoveCap Int
     | GotImg (Result Http.Error String)
     | ChangeX String
@@ -84,13 +89,43 @@ type Msg
     | ChangeSize String
     | ChangePosition String
 
+popCap : Model -> Int -> Maybe Model
+popCap model id =
+    let myCap = Array.get id (Array.fromList model.captions)
+    in case myCap of
+            Nothing -> Nothing
+            Just cap ->
+                    Just {model
+                        | captions = List.Extra.removeAt id model.captions
+                        , text = cap.text
+                        , size = cap.size
+                        , position = cap.position
+                    }
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
+        CopyCap id ->
+            let myCap = Array.get id (Array.fromList model.captions)
+            in case myCap of
+                    Nothing ->
+                        (model, Cmd.none)
+                    Just cap ->
+                        let mod = {model
+                                      | text = cap.text
+                                      , size = cap.size
+                                      , position = cap.position
+                                  }
+                        in (mod, addCaption mod)
+        EditCap id ->
+            let newMod = popCap model id
+            in case newMod of
+                   Nothing -> (model, Cmd.none)
+                   Just mod -> ( mod, addCaption mod )
         RemoveCap id ->
             let newMod = 
                     {model | captions =
-                         List.Extra.removeAt id model.captions
+                        List.Extra.removeAt id model.captions
                     }
             in ( newMod ,
                   addCaption newMod )
