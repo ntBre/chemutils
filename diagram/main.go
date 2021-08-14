@@ -28,6 +28,7 @@ var (
 	Black    = color.NRGBA{0, 0, 0, 255}
 	ARGS     []string
 	lastTemp string
+	captions []Caption
 )
 
 const (
@@ -47,7 +48,8 @@ var (
 			"vertical lines on the image")
 	outfile = flag.String("o", "",
 		"save the resulting image to file")
-	web = flag.Bool("web", false,
+	capfile = flag.String("cap", "", "file to read captions from")
+	web     = flag.Bool("web", false,
 		"run the program interactively in the browser")
 	debug = flag.Bool("debug", false, "toggle debug printing")
 )
@@ -206,15 +208,29 @@ func ParseGrid(str string) (h, v int) {
 }
 
 type Index struct {
-	Img string
+	Img  string
+	Caps []Caption
+	Capfile string
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if *debug {
 		fmt.Printf("indexHandler url: %q\n", r.URL)
 	}
-	index := template.Must(template.ParseFiles("index.template"))
-	err := index.ExecuteTemplate(w, "index", &Index{Img: ARGS[0]})
+	index, err := template.New("index").Funcs(template.FuncMap{
+		"stringify": func(pt image.Point) string {
+			return fmt.Sprintf("%d,%d", pt.X, pt.Y)
+		},
+	}).ParseFiles("index.template")
+	if err != nil {
+		panic(err)
+	}
+	err = index.ExecuteTemplate(w, "index",
+		&Index{
+			Img:  ARGS[0],
+			Caps: captions,
+			Capfile: *capfile,
+		})
 	if err != nil {
 		panic(err)
 	}
@@ -224,24 +240,16 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 // implement in the Go part. have to make sure it puts the captions
 // first though or it'll throw off their locations
 
-// TODO load caption file so you can resume working in here
-
-// TODO list of captions with del/edit buttons next to each
-
-// probably change this name to requestHandler or similar and take all
-// kinds of these requests, then use /req as the url for it
-
-// how am I going to handle captions AND grids? if captionHandler is
-// separate, I probably have to redo the grid each time too. how to
-// maintain state? do i need a global img to use everywhere?
 func reqHandler(w http.ResponseWriter, r *http.Request) {
 	reqs := r.URL.Query()
 	grid := reqs["grid"][0]
 	caps := reqs["cap"]
+	capfile := reqs["dump"][0]
 	if *debug {
 		fmt.Printf("gridHandler url: %q\n", r.URL)
-		fmt.Printf("gridHandler GET grid: %q\n", grid)
-		fmt.Printf("gridHandler GET  cap: %q\n", caps)
+		fmt.Printf("gridHandler GET    grid: %q\n", grid)
+		fmt.Printf("gridHandler GET     cap: %q\n", caps)
+		fmt.Printf("gridHandler GET capfile: %q\n", capfile)
 	}
 	img := loadPic(ARGS[0])
 	f, err := os.CreateTemp("", "diagram*.png")
@@ -253,10 +261,16 @@ func reqHandler(w http.ResponseWriter, r *http.Request) {
 		h, v := ParseGrid(grid)
 		out = DrawGrid(img, h, v)
 	}
+	var outfile *os.File
+	if capfile != "" {
+		outfile, err = os.Create(capfile)
+		if err != nil {
+			log.Printf("error opening caption file %q for writing\n", capfile)
+		}
+	}
 	for _, c := range caps {
 		if c != "" {
 			fields := strings.Split(c, ",")
-			fmt.Printf("%q\n", fields)
 			if len(fields) == 4 {
 				fields[2] = strings.Join(
 					[]string{fields[2], fields[3]}, ",",
@@ -267,8 +281,9 @@ func reqHandler(w http.ResponseWriter, r *http.Request) {
 					drawCaption(&out, cap)
 				}
 			}
-			fmt.Printf("%q\n", fields)
-			fmt.Printf("%q\n", c)
+			if outfile != nil {
+				fmt.Fprintln(outfile, strings.Join(fields, " "))
+			}
 		}
 	}
 	err = png.Encode(f, &out)
@@ -354,17 +369,17 @@ func drawCaption(pic draw.Image, caption Caption) {
 
 func main() {
 	initialize()
-	switch {
-	case *web && len(ARGS) < 1:
-		log.Fatal("missing image for -web")
-	case *web:
-		webInterface()
-	case len(ARGS) < 2:
+	if len(ARGS) < 1 {
 		log.Fatal("not enough input arguments")
 	}
-	capfile := ARGS[0]
-	captions := ParseCaptions(capfile)
-	pic := loadPic(ARGS[1])
+	pic := loadPic(ARGS[0])
+	if *capfile != "" {
+		captions = ParseCaptions(*capfile)
+	}
+	if *web {
+		webInterface()
+		return
+	}
 	if *grid != "" {
 		h, v := ParseGrid(*grid)
 		pic = DrawGrid(pic, h, v)

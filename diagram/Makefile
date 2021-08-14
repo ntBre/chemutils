@@ -5,12 +5,15 @@ endif
 run : main.js
 	go run . -web $(GOFLAGS) tests/c2h4.png
 
+runcap : main.js
+	go run . -web $(GOFLAGS) -cap tests/c2h4.cap tests/c2h4.png
+
 main.js : src/Main.elm
 	sed -i 's/\t/        /g' src/Main.elm
 	elm make src/Main.elm --output=main.js
 
 test:
-	go run . -grid 16,16 tests/c2h4.cap tests/c2h4.png
+	go run . -grid 16,16 -cap tests/c2h4.cap tests/c2h4.png
 
 help:
 	go run . -h

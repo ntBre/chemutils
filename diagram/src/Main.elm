@@ -53,25 +53,37 @@ type alias Model =
     , oldSize : String
     , oldPosition: String
     , captions: List Caption
+    , holdCapfile : String
+    , capfile : String
     }
 
-init : String -> (Model, Cmd Msg)
-init image =
-    ( { image = image
-      , gridx = ""
-      , gridy = ""
-      , oldGridx = ""
-      , oldGridy = ""
-      , text = ""
-      , size = ""
-      , position = ""
-      , oldText = ""
-      , oldSize = ""
-      , oldPosition = ""
-      , captions = []
-      }
-    , Cmd.none
-    )
+type alias Flags =
+    { img: String
+    , caps: List Caption
+    , capfile: String
+    }
+
+init : Flags -> (Model, Cmd Msg)
+init flags =
+    let mod =
+            { image = flags.img
+            , gridx = ""
+            , gridy = ""
+            , oldGridx = ""
+            , oldGridy = ""
+            , text = ""
+            , size = ""
+            , position = ""
+            , oldText = ""
+            , oldSize = ""
+            , oldPosition = ""
+            , captions = flags.caps
+            , holdCapfile = flags.capfile
+            , capfile = ""
+            }
+    in if List.length mod.captions > 0
+       then (mod, addCaption mod)
+       else (mod, Cmd.none)
 
 -- UPDATE
 
@@ -81,6 +93,8 @@ type Msg
     | AddCap
     | EditCap Int
     | CopyCap Int
+    | ChangeCapfile String
+    | DumpCaps
     | RemoveCap Int
     | GotImg (Result Http.Error String)
     | ChangeX String
@@ -88,6 +102,7 @@ type Msg
     | ChangeText String
     | ChangeSize String
     | ChangePosition String
+    | Success (Result Http.Error ())
 
 popCap : Model -> Int -> Maybe Model
 popCap model id =
@@ -105,6 +120,10 @@ popCap model id =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
+        Success _ -> (model, Cmd.none)
+        DumpCaps -> (model, dumpCaps {model | capfile = model.holdCapfile})
+        ChangeCapfile file ->
+            ({ model | holdCapfile = file }, Cmd.none)
         CopyCap id ->
             let myCap = Array.get id (Array.fromList model.captions)
             in case myCap of
@@ -240,6 +259,13 @@ view model =
          ]
              ++ List.indexedMap toRow model.captions
         )
+    , div []
+        [ input [ placeholder "caption file"
+                , value model.holdCapfile
+                , style "width" (String.fromInt (4*size) ++ "px")
+                , onInput ChangeCapfile ] []
+        , button [onClick DumpCaps] [ text "save caption file" ]
+        ]
     ]
       
 -- SUBSCRIPTIONS
@@ -249,6 +275,11 @@ subscriptions _ =
     Sub.none
 
 -- HTTP
+reqURL : Model -> String
+reqURL model =
+    "http://localhost:8080/req?" ++ (gridStr model)
+        ++ "&" ++ (capStr model) ++ "&" ++ "dump=" ++ model.capfile
+
 gridStr : Model -> String
 gridStr model =
         "grid=" ++ model.oldGridx ++ "," ++ model.oldGridy
@@ -262,13 +293,20 @@ capStr model =
 addGrid : Model -> Cmd Msg
 addGrid model =
     Http.get
-        { url = "http://localhost:8080/req?" ++ (gridStr model) ++ "&" ++ (capStr model)
+        { url = reqURL model
         , expect = Http.expectString GotImg
         }
 
 addCaption : Model -> Cmd Msg
 addCaption model =
     Http.get
-        { url = "http://localhost:8080/req?" ++ (gridStr model) ++ "&" ++ (capStr model)
+        { url = reqURL model
         , expect = Http.expectString GotImg
+        }
+
+dumpCaps : Model -> Cmd Msg
+dumpCaps model =
+    Http.get
+        { url = reqURL model
+        , expect = Http.expectWhatever Success
         }
