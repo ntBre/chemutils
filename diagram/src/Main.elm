@@ -261,62 +261,64 @@ size = 50
 view : Model -> Html Msg
 view model =
   div []
-    [ img [src model.image] []
-    , div []
-        [ input [ placeholder "grid h"
-                , value model.gridx
-                , style "width" (String.fromInt (2*size) ++ "px"), onInput ChangeX ] []
-        , input [ placeholder "grid v"
-                , value model.gridy
-                , style "width" (String.fromInt (2*size) ++ "px"), onInput ChangeY ] []
-        , button [ onClick Grid ] [ text "grid" ]
-        , button [ onClick ClearGrid ] [ text "clear" ]
-        ]
-    , div []
-        [ input [ placeholder "lx", style "width" (String.fromInt size ++ "px")
-                , value model.lx
-                , onInput Changelx ] []
-        , input [ placeholder "uy", style "width" (String.fromInt size ++ "px")
-                , value model.uy
-                , onInput Changeuy ] []
-        , input [ placeholder "rx", style "width" (String.fromInt size ++ "px")
-                , value model.rx
-                , onInput Changerx ] []
-        , input [ placeholder "by", style "width" (String.fromInt size ++ "px")
-                , value model.by
-                , onInput Changeby ] []
-        , button [onClick DoCrop] [ text "crop" ]
-        ]
-    , div []
-        [ input [ placeholder "Text"
-                , value model.text
-                , style "width" (String.fromInt (4*size//3) ++ "px")
-                , onInput ChangeText ] []
-        , input [ placeholder "Size"
-                , value model.size
-                , style "width" (String.fromInt (4*size//3) ++ "px")
-                , onInput ChangeSize ] []
-        , input [ placeholder "Position"
-                , value model.position
-                , style "width" (String.fromInt (4*size//3 + 1) ++ "px")
+    [ div [style "float" "left"] [ img [src model.image] [] ]
+    , div [style "float" "left"]
+        [ div []
+              [ input [ placeholder "grid h"
+                      , value model.gridx
+                      , style "width" (String.fromInt (2*size) ++ "px"), onInput ChangeX ] []
+              , input [ placeholder "grid v"
+                      , value model.gridy
+                      , style "width" (String.fromInt (2*size) ++ "px"), onInput ChangeY ] []
+              , button [ onClick Grid ] [ text "grid" ]
+              , button [ onClick ClearGrid ] [ text "clear" ]
+              ]
+        , div []
+            [ input [ placeholder "lx", style "width" (String.fromInt size ++ "px")
+                    , value model.lx
+                    , onInput Changelx ] []
+            , input [ placeholder "uy", style "width" (String.fromInt size ++ "px")
+                    , value model.uy
+                    , onInput Changeuy ] []
+            , input [ placeholder "rx", style "width" (String.fromInt size ++ "px")
+                    , value model.rx
+                    , onInput Changerx ] []
+            , input [ placeholder "by", style "width" (String.fromInt size ++ "px")
+                    , value model.by
+                    , onInput Changeby ] []
+            , button [onClick DoCrop] [ text "crop" ]
+            ]
+        , div []
+            [ input [ placeholder "Text"
+                    , value model.text
+                    , style "width" (String.fromInt (4*size//3) ++ "px")
+                    , onInput ChangeText ] []
+            , input [ placeholder "Size"
+                    , value model.size
+                    , style "width" (String.fromInt (4*size//3) ++ "px")
+                    , onInput ChangeSize ] []
+            , input [ placeholder "Position"
+                    , value model.position
+                    , style "width" (String.fromInt (4*size//3 + 1) ++ "px")
                 , onInput ChangePosition ] []
         , button [onClick AddCap] [ text "add caption" ]
         ]
-    , table []
-        ([ thead []
-               [ th [] [text "Text"]
-               , th [] [text "Size"]
-               , th [] [text "x,y"]
-               ]
-         ]
-             ++ List.indexedMap toRow model.captions
-        )
-    , div []
-        [ input [ placeholder "caption file"
-                , value model.holdCapfile
-                , style "width" (String.fromInt (4*size) ++ "px")
-                , onInput ChangeCapfile ] []
-        , button [onClick DumpCaps] [ text "save caption file" ]
+        , table []
+            ([ thead []
+                   [ th [] [text "Text"]
+                   , th [] [text "Size"]
+                   , th [] [text "x,y"]
+                   ]
+             ]
+                 ++ List.indexedMap toRow model.captions
+            )
+        , div []
+            [ input [ placeholder "caption file"
+                    , value model.holdCapfile
+                    , style "width" (String.fromInt (4*size) ++ "px")
+                    , onInput ChangeCapfile ] []
+            , button [onClick DumpCaps] [ text "save caption file" ]
+        ]
         ]
     ]
       
