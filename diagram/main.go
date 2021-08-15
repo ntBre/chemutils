@@ -18,6 +18,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
@@ -49,10 +50,10 @@ var (
 	outfile = flag.String("o", "",
 		"save the resulting image to file")
 	capfile = flag.String("cap", "", "file to read captions from")
-	web     = flag.Bool("web", false,
-		"run the program interactively in the browser")
-	debug = flag.Bool("debug", false, "toggle debug printing")
-	crop  = flag.String("crop", "", "crop image to left-x,upper-y,right-x,bottom-y")
+	web     = flag.Bool("web", false, "run the program interactively in the browser")
+	debug   = flag.Bool("debug", false, "toggle debug printing")
+	crop    = flag.String("crop", "", "crop image to left-x,upper-y,right-x,bottom-y")
+	port    = flag.String("port", ":8080", "port to run the web server on")
 )
 
 // Display encodes img to a temporary file and displays it using the
@@ -169,8 +170,10 @@ func parseCaption(fields []string) (Caption, error) {
 	if err != nil {
 		panic(err)
 	}
+	// allow LaTeX-style input for subscripts
+	texsub := regexp.MustCompile(`_(\d+)`)
 	return Caption{
-		Text:     fields[0],
+		Text:     texsub.ReplaceAllString(fields[0], `<sub>$1</sub>`),
 		Size:     size,
 		Position: image.Point{ptx, pty},
 	}, nil
@@ -334,7 +337,7 @@ func webInterface() {
 	http.HandleFunc("/main.js", fileHandler("main.js"))
 	http.HandleFunc("/"+ARGS[0], fileHandler(ARGS[0]))
 	http.HandleFunc("/tmp/", miscHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(*port, nil))
 }
 
 func loadPic(filename string) image.NRGBA {
@@ -401,6 +404,7 @@ func main() {
 		captions = ParseCaptions(*capfile)
 	}
 	if *web {
+		fmt.Println("running at http://localhost:8080")
 		webInterface()
 		return
 	}
