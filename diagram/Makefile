@@ -5,6 +5,9 @@ endif
 run : main.js
 	go run . -web $(GOFLAGS) tests/c2h4.png
 
+install : main.js
+	go install .
+
 runcap : main.js
 	go run . -web $(GOFLAGS) -cap tests/c2h4.cap tests/c2h4.png
 
@@ -17,9 +20,6 @@ test:
 
 help:
 	go run . -h
-
-install:
-	go install .
 
 bench:
 	go test . -bench 'DrawGrid'
