@@ -23,31 +23,6 @@ use the `-help` flag to see how to direct it to the right input files.
 * Implement -mono flag for reading component energies from a single
   file
 
-## diagram
-
-diagram is a tool for adding labels to images using imagemagick
-
-### Usage
-
-Obviously it requires imagemagick to be installed with pango support.
-
-```
-$ diagram [-grid h,v] captions image
-```
-
-Will put the captions in the `captions` file onto the PNG image
-`image`. The format of the caption file is
-
-```
-Text Size  xpos,ypos
-```
-
-Where `Text` is a single "word" (no spaces allowed), `Size` is an
-integer points for the font size, and `xpos,ypos` is a comma-separated
-pair denoting the x- and y-position of the label. The `-grid` flag
-takes a comma-separated pair of integers denoting the number of
-`h`orizontal and `v`ertical gridlines to draw.
-
 ## polecat
 
 polecat is a tool for drawing simple images of molecules with their
