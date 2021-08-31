@@ -400,6 +400,35 @@ func TestSpectro(t *testing.T) {
 				},
 			},
 		},
+		{
+			file: "testfiles/michael.out",
+			res: Result{
+				ZPT: 0.0,
+				Harm: []float64{
+					3943.98, 3833.99, 1651.33,
+				},
+				Fund: nil,
+				Corr: nil,
+				Rots: [][]float64{},
+				Requil: []float64{
+					0.9585819,
+					0.9585819,
+					104.3994718,
+				},
+				Ralpha: []float64{
+					0.9585819,
+					0.9585819,
+					104.3994718,
+				},
+				Rhead: []string{
+					"r(H1-O2)", "r(O2-H3)", "<(O2-H1-H3)",
+				},
+				Deltas: []float64{
+					34.9622618689, 760.9583606507, -149.4610972728,
+					13.9804157475, 10.9698964297,
+				},
+			},
+		},
 	}
 	for _, test := range tests {
 		file, err := os.Open(test.file)
@@ -414,13 +443,13 @@ func TestSpectro(t *testing.T) {
 					test.file, got.ZPT, test.res.ZPT)
 			}
 			if !reflect.DeepEqual(got.Harm, test.res.Harm) {
-				t.Errorf("got %v, wanted %v\n", got.Harm, test.res.Harm)
+				t.Errorf("Harm: got %v, wanted %v\n", got.Harm, test.res.Harm)
 			}
 			if !reflect.DeepEqual(got.Fund, test.res.Fund) {
 				t.Error("fund")
 			}
 			if !reflect.DeepEqual(got.Corr, test.res.Corr) {
-				t.Errorf("got %v, wanted %v\n", got.Corr, test.res.Corr)
+				t.Errorf("Corr: got %v, wanted %v\n", got.Corr, test.res.Corr)
 			}
 			if !reflect.DeepEqual(got.Rots, test.res.Rots) {
 				// check manually to handle NaN
@@ -443,12 +472,13 @@ func TestSpectro(t *testing.T) {
 				}
 			}
 			if !reflect.DeepEqual(got.Deltas, test.res.Deltas) {
-				t.Error("deltas")
+				t.Errorf("got %v, wanted %v\n", got.Deltas, test.res.Deltas)
 			}
 			if !reflect.DeepEqual(got.Phis, test.res.Phis) {
 				t.Error("phis")
 			}
 			if !reflect.DeepEqual(got.Rhead, test.res.Rhead) {
+				t.Errorf("Rhead: got %v, wanted %v\n", got.Rhead, test.res.Rhead)
 				t.Error("rhead")
 			}
 			if !reflect.DeepEqual(got.Ralpha, test.res.Ralpha) {
