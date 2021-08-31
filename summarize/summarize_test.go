@@ -421,11 +421,48 @@ func TestSpectro(t *testing.T) {
 					104.3994718,
 				},
 				Rhead: []string{
-					"r(H1-O2)", "r(O2-H3)", "<(O2-H1-H3)",
+					"r(H1-O2)",
+					"r(O2-H3)",
+					"<(O2-H1-H3)",
 				},
 				Deltas: []float64{
-					34.9622618689, 760.9583606507, -149.4610972728,
+					34.9622618689, 760.9583606507,
+					-149.4610972728,
 					13.9804157475, 10.9698964297,
+				},
+			},
+		},
+		{
+			file: "testfiles/michael_multi.out",
+			res: Result{
+				ZPT: 0.0,
+				Harm: []float64{
+					820.24, 804.08, 737.75,
+					580.87, 573.06, 525.60,
+					363.23, 274.64, 194.26,
+					170.33, 170.26,
+				},
+				Fund: nil,
+				Corr: nil,
+				Rots: [][]float64{},
+				Requil: []float64{
+					1.8445326, 2.9535248, 3.6630303,
+					2.9376495, 1.8445326, 36.8110298,
+					66.8110298, 36.8110298, 66.8110298,
+				},
+				Ralpha: []float64{
+					1.8445326, 2.9535248, 3.6630303,
+					2.9376495, 1.8445326, 36.8110298,
+					66.8110298, 36.8110298, 66.8110298,
+				},
+				Rhead: []string{
+					"r(Mg4-O3)", "r(Mg4-Mg2)", "r(Mg4-O1)",
+					"r(Mg4-Mg6)", "r(Mg4-O5)", "<(Mg4-O3-Mg2)",
+					"<(Mg4-O3-O1)", "<(Mg4-O5-Mg6)", "<(Mg4-O5-O1)",
+				},
+				Deltas: []float64{
+					39.6030781118, -237.7978970624, 278.9193068011,
+					19.8014011121, 199.3898070834,
 				},
 			},
 		},
@@ -443,22 +480,27 @@ func TestSpectro(t *testing.T) {
 					test.file, got.ZPT, test.res.ZPT)
 			}
 			if !reflect.DeepEqual(got.Harm, test.res.Harm) {
-				t.Errorf("Harm: got %v, wanted %v\n", got.Harm, test.res.Harm)
+				t.Errorf("Harm: got %v, wanted %v\n",
+					got.Harm, test.res.Harm)
 			}
 			if !reflect.DeepEqual(got.Fund, test.res.Fund) {
 				t.Error("fund")
 			}
 			if !reflect.DeepEqual(got.Corr, test.res.Corr) {
-				t.Errorf("Corr: got %v, wanted %v\n", got.Corr, test.res.Corr)
+				t.Errorf("Corr: got %v, wanted %v\n",
+					got.Corr, test.res.Corr)
 			}
 			if !reflect.DeepEqual(got.Rots, test.res.Rots) {
 				// check manually to handle NaN
 				if len(got.Rots) != len(test.res.Rots) {
-					t.Errorf("got %v, wanted %v\n", got.Rots, test.res.Rots)
+					t.Errorf("got %v, wanted %v\n",
+						got.Rots, test.res.Rots)
 				} else {
 					for i := range got.Rots {
 						for j := range got.Rots[i] {
-							// not equal and both are non-NaN
+							// not equal
+							// and both
+							// are non-NaN
 							if got.Rots[i][j] !=
 								test.res.Rots[i][j] &&
 								!(math.IsNaN(got.Rots[i][j]) &&

@@ -61,6 +61,7 @@ func Spectro(r io.Reader) *Result {
 	phi := regexp.MustCompile(`(?i)phi (J|(JK)|(KJ)|K)`)
 	icn := regexp.MustCompile(`\([ 0-9]+\)\s+(BOND|ANGLE)`)
 	atom := regexp.MustCompile(`([0-9]+)\(([A-Za-z ]+)\)`)
+	lxmRE := regexp.MustCompile(`^(\s+[0-9]+\.[0-9]+)+$`)
 	for scanner.Scan() {
 		line = scanner.Text()
 		fields = strings.Fields(line)
@@ -244,11 +245,9 @@ func Spectro(r io.Reader) *Result {
 		case strings.Contains(line, "LX MATRIX"):
 			lxm = true
 			skip += 2
-		case lxm && strings.Contains(line, "-------"):
+		case lxm && strings.Contains(line, "*******"):
 			lxm = false
-		case lxm:
-			// TODO this doesn't handle more than 10
-			// frequencies in the LX matrix
+		case lxm && lxmRE.MatchString(line):
 			for _, f := range fields {
 				v, _ := strconv.ParseFloat(f, 64)
 				// arbitrary cutoff to avoid
