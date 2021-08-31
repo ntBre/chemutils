@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"math"
-	"os"
 	"regexp"
 	"sort"
 	"strconv"
@@ -30,15 +30,10 @@ type Result struct {
 
 // FreqReport gathers harmonic, anharmonic, and resonance-corrected
 // frequencies from a spectro  output file for reporting
-func Spectro(filename string) *Result {
+func Spectro(r io.Reader) *Result {
 	res := new(Result)
 	fermiMap := make(map[string][]string)
-	f, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	scanner := bufio.NewScanner(f)
+	scanner := bufio.NewScanner(r)
 	var (
 		line     string
 		fields   []string
@@ -123,9 +118,6 @@ func Spectro(filename string) *Result {
 			}
 		case corr && good && strings.Contains(line, "DEGEN   (Vl)"):
 		case corr && good && len(fields) > 0:
-			if filename == "testfiles/degen.out" {
-				fmt.Println(good, holdFreq, line)
-			}
 			for _, f := range fields {
 				if f == "2" || (one && f == "1") {
 					good = false

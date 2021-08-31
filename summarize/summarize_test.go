@@ -2,6 +2,7 @@ package summarize
 
 import (
 	"math"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -401,7 +402,12 @@ func TestSpectro(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		got := *Spectro(test.file)
+		file, err := os.Open(test.file)
+		defer file.Close()
+		if err != nil {
+			panic(err)
+		}
+		got := *Spectro(file)
 		if !reflect.DeepEqual(got, test.res) {
 			if !reflect.DeepEqual(got.ZPT, test.res.ZPT) {
 				t.Errorf("Spectro(%s): got %v, wanted %v\n",
