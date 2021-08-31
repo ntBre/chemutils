@@ -123,7 +123,6 @@ func ReadIntder(filename string) *Intder {
 		case siic && len(fields) == 0:
 			siic = false
 		case syicpat.MatchString(line):
-			fmt.Println("this is the line", line)
 			syic = true
 			skip += 1
 		case syic && len(fields) == 0:
