@@ -152,6 +152,9 @@ func Spectro(r io.Reader) *Result {
 				}
 				state = append(state, f)
 			}
+		case strings.Contains(line, "ROTATIONAL ENERGY LEVEL ANALYSIS"):
+			rot = true
+			good = true
 		case good && strings.Contains(line, "BZA"):
 			rot = true
 			res.Lin = false
@@ -161,6 +164,13 @@ func Spectro(r io.Reader) *Result {
 			state = nil
 			rot = false
 			one = false
+			// sad hack, but I think the whole parser
+			// needs to be reworked to fix it. I can't
+			// remember how it all works together well
+			// enough
+			if len(fields) != 3 {
+				break
+			}
 			tmp := make([]float64, 0, 3)
 			for f := range fields {
 				v, err := strconv.ParseFloat(fields[f], 64)
