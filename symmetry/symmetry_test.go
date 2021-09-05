@@ -35,6 +35,7 @@ H 0.0000000000 -0.7574590974 0.5217905143
 		},
 		Principal: Z,
 		Main:      Plane{Y, Z},
+		Group:     C2v,
 	}
 
 	if !reflect.DeepEqual(got, want) {
@@ -180,10 +181,10 @@ func TestRotaryReflect(t *testing.T) {
 			axis:  Z,
 		},
 	}
-	tmp := eps
-	eps = 1e-11
+	tmp := EPS
+	EPS = 1e-11
 	defer func() {
-		eps = tmp
+		EPS = tmp
 	}()
 	var found bool
 	for _, test := range tests {
@@ -217,10 +218,10 @@ func TestInvert(t *testing.T) {
 			axis:  Z,
 		},
 	}
-	tmp := eps
-	eps = 1e-11
+	tmp := EPS
+	EPS = 1e-11
 	defer func() {
-		eps = tmp
+		EPS = tmp
 	}()
 	var found bool
 	for _, test := range tests {

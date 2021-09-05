@@ -8,7 +8,7 @@ import (
 
 // Float comparison threshold
 var (
-	eps = 1e-15
+	EPS = 1e-15
 )
 
 // Rotate returns a copy of atoms, with its coordinates rotated by deg
@@ -30,7 +30,7 @@ func Rotate(atoms []Atom, deg float64, axis Axis) []Atom {
 // Reflect returns a copy of atoms, with its coordinates mirrored
 // across plane
 func Reflect(atoms []Atom, plane Plane) []Atom {
-	ax := plane.not()
+	ax := plane.Not()
 	new := make([]Atom, len(atoms))
 	for i, atom := range atoms {
 		new[i] = atom
@@ -46,7 +46,7 @@ func Reflect(atoms []Atom, plane Plane) []Atom {
 // axis
 func RotaryReflect(atoms []Atom, deg float64, axis Axis) []Atom {
 	rot := Rotate(atoms, deg, axis)
-	pl := axis.not()
+	pl := axis.Not()
 	return Reflect(rot, pl)
 }
 
@@ -55,19 +55,6 @@ func RotaryReflect(atoms []Atom, deg float64, axis Axis) []Atom {
 // ax and then mirrored through the plane perpendicular to ax
 func Invert(atoms []Atom, ax Axis) []Atom {
 	return RotaryReflect(atoms, 180.0, ax)
-}
-
-// approxEqual checks approximate equality between float slices
-func approxEqual(x, y []float64) bool {
-	if len(x) != len(y) {
-		panic("approxEqual: dimension mismatch")
-	}
-	for i := range x {
-		if math.Abs(x[i]-y[i]) > eps {
-			return false
-		}
-	}
-	return true
 }
 
 // ToCylinder transforms Cartesian coordinates to cylindrical
@@ -98,6 +85,19 @@ func ToCylinder(coords []float64, axis Axis) []float64 {
 	return []float64{r, t, z}
 }
 
+// approxEqual checks approximate equality between float slices
+func approxEqual(x, y []float64) bool {
+	if len(x) != len(y) {
+		panic("approxEqual: dimension mismatch")
+	}
+	for i := range x {
+		if math.Abs(x[i]-y[i]) > EPS {
+			return false
+		}
+	}
+	return true
+}
+
 // ToCartesian transforms coordinates from cylindrical coordinates of
 // the form (r, t, z) to Cartesians of the form (x, y, z)
 func ToCartesian(coords []float64, axis Axis) (res []float64) {
@@ -118,10 +118,9 @@ func ToCartesian(coords []float64, axis Axis) (res []float64) {
 		res = []float64{x, y, z}
 	}
 	for i := range res {
-		if math.Abs(res[i]) < eps {
+		if math.Abs(res[i]) < EPS {
 			res[i] = 0
 		}
 	}
 	return res
 }
-

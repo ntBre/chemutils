@@ -25,7 +25,7 @@ var (
 )
 
 // return the Plane perpendicular to the Axis
-func (a Axis) not() Plane {
+func (a Axis) Not() Plane {
 	switch a {
 	case X:
 		return Plane{Y, Z}
@@ -39,7 +39,7 @@ func (a Axis) not() Plane {
 }
 
 func (a Axis) String() string {
-	return []string{"X", "Y", "Z"}[int(a)]
+	return []string{"X", "Y", "Z"}[a]
 }
 
 type Plane struct {
@@ -47,7 +47,7 @@ type Plane struct {
 }
 
 // return the Axis perpindicular to the Plane
-func (p Plane) not() Axis {
+func (p Plane) Not() Axis {
 	switch {
 	case p.a == Y && p.b == Z || p.a == Z && p.b == Y:
 		return X
@@ -68,4 +68,23 @@ type Molecule struct {
 	Atoms     []Atom
 	Principal Axis
 	Main      Plane
+	Group     Group
 }
+
+type Group int
+
+func (g Group) String() string {
+	return []string{
+		"C1",
+		"Cs",
+		"C2",
+		"C2v",
+	}[g]
+}
+
+const (
+	C1 Group = iota
+	Cs
+	C2
+	C2v
+)
