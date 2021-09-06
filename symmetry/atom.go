@@ -29,31 +29,18 @@ func Coords(atoms []Atom) (ret []float64) {
 	return
 }
 
-// IsRefPlane returns whether or not plane is a reflection plane for
-// atoms
-func IsRefPlane(atoms []Atom, plane Plane) bool {
-	// TODO make this handle different atoms in same places
-	ref := Coords(Reflect(atoms, plane))
-	if approxEqual(ref, Coords(atoms)) {
-		return true
-	}
-	return false
-}
-
-// IsRotAxis returns whether or not axis is a C_{360/deg} rotation
-// axis for atoms
-func IsRotAxis(atoms []Atom, deg float64, axis Axis) bool {
-	rots := Rotate(atoms, deg, axis)
+func IsSame(atoms, btoms []Atom) bool {
+	// resume testing here
 	for _, atom := range atoms {
 		found := false
-		for r, rot := range rots {
-			if approxEqual(atom.Coord, rot.Coord) ||
-				atom.Label == rot.Label {
+		for b, btom := range btoms {
+			if approxEqual(atom.Coord, btom.Coord) &&
+				atom.Label == btom.Label {
 				found = true
-				// pop rots[r] out of rots
-				lr := len(rots) - 1
-				rots[r], rots[lr] = rots[lr], rots[r]
-				rots = rots[:lr]
+				// pop btoms[b] out of btoms
+				lr := len(btoms) - 1
+				btoms[b], btoms[lr] = btoms[lr], btoms[b]
+				btoms = btoms[:lr]
 				break
 			}
 		}
@@ -62,6 +49,76 @@ func IsRotAxis(atoms []Atom, deg float64, axis Axis) bool {
 		}
 	}
 	return true
+}
+
+// IsRotAxis returns whether or not axis is a C_{360/deg} rotation
+// axis for atoms
+func IsRotAxis(atoms []Atom, deg float64, axis Axis) bool {
+	return IsSame(atoms, Rotate(atoms, deg, axis))
+}
+
+// IsRefPlane returns whether or not plane is a reflection plane for
+// atoms
+func IsRefPlane(atoms []Atom, plane Plane) bool {
+	return IsSame(atoms, Reflect(atoms, plane))
+}
+
+// Contains returns the two planes containing ax
+func Contains(ax Axis) (sxz, syz Plane) {
+	not := ax.Not()
+	if ax < not.a {
+		sxz = Plane{ax, not.a}
+	} else {
+		sxz = Plane{not.a, ax}
+	}
+	if ax < not.b {
+		syz = Plane{ax, not.b}
+	} else {
+		syz = Plane{not.b, ax}
+	}
+	return
+}
+
+// Symmetry returns the Irrep corresponding to atoms within the point
+// group, principal axis, and major plane defined by m
+func (m Molecule) Symmetry(atoms []Atom) Irrep {
+	// Assuming C2v for now, later switch on m.Group
+	sxz, syz := Contains(m.Principal)
+	if IsRotAxis(atoms, 180.0, m.Principal) {
+		// A something
+		if IsRefPlane(atoms, sxz) {
+			if IsRefPlane(atoms, syz) {
+				return A1
+			} else {
+				panic("impossible irrep")
+			}
+		} else {
+			return A2
+		}
+	} else {
+		// B something
+		if IsRefPlane(atoms, sxz) && !IsRefPlane(atoms, syz) {
+			return B1
+		} else if IsRefPlane(atoms, syz) && !IsRefPlane(atoms, sxz) {
+			return B2
+		}
+	}
+	return A1
+}
+
+func Negate(atoms []Atom) []Atom {
+	ret := make([]Atom, 0, len(atoms))
+	for _, atom := range atoms {
+		coords := make([]float64, 0, 3)
+		for _, c := range atom.Coord {
+			coords = append(coords, -1*c)
+		}
+		ret = append(ret, Atom{
+			Label: atom.Label,
+			Coord: coords,
+		})
+	}
+	return ret
 }
 
 // PointGroup determines the point group of mol

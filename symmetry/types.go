@@ -88,3 +88,22 @@ const (
 	C2
 	C2v
 )
+
+type Irrep int
+
+// C2v symmetry elements
+const (
+	A1 Irrep = iota
+	B2
+	B1
+	A2
+)
+
+func (i Irrep) String() string {
+	return []string{
+		"A1",
+		"B2",
+		"B1",
+		"A2",
+	}[i]
+}
