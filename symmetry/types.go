@@ -91,12 +91,15 @@ const (
 
 type Irrep int
 
-// C2v symmetry elements
 const (
+	// C2v
 	A1 Irrep = iota
 	B2
 	B1
 	A2
+	// Cs
+	Ap // p == prime
+	App
 )
 
 func (i Irrep) String() string {

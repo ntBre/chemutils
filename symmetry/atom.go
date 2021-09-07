@@ -82,28 +82,39 @@ func Contains(ax Axis) (sxz, syz Plane) {
 // Symmetry returns the Irrep corresponding to atoms within the point
 // group, principal axis, and major plane defined by m
 func (m Molecule) Symmetry(atoms []Atom) Irrep {
-	// Assuming C2v for now, later switch on m.Group
-	sxz, syz := Contains(m.Principal)
-	if IsRotAxis(atoms, 180.0, m.Principal) {
-		// A something
-		if IsRefPlane(atoms, sxz) {
-			if IsRefPlane(atoms, syz) {
-				return A1
+	// can I make this more generic? some kind of data structure
+	// holding functions to loop over
+	switch m.Group {
+	case Cs:
+		if IsRefPlane(atoms, m.Main) {
+			return Ap
+		}
+		return App
+	case C2v:
+		sxz, syz := Contains(m.Principal)
+		if IsRotAxis(atoms, 180.0, m.Principal) {
+			// A something
+			if IsRefPlane(atoms, sxz) {
+				if IsRefPlane(atoms, syz) {
+					return A1
+				} else {
+					panic("impossible irrep")
+				}
 			} else {
-				panic("impossible irrep")
+				return A2
 			}
 		} else {
-			return A2
+			// B something
+			if IsRefPlane(atoms, sxz) && !IsRefPlane(atoms, syz) {
+				return B1
+			} else if IsRefPlane(atoms, syz) && !IsRefPlane(atoms, sxz) {
+				return B2
+			}
 		}
-	} else {
-		// B something
-		if IsRefPlane(atoms, sxz) && !IsRefPlane(atoms, syz) {
-			return B1
-		} else if IsRefPlane(atoms, syz) && !IsRefPlane(atoms, sxz) {
-			return B2
-		}
+		return A1
+	default:
+		panic("Unrecognized point group")
 	}
-	return A1
 }
 
 func Negate(atoms []Atom) []Atom {
