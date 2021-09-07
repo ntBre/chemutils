@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"os"
 	"regexp"
 	"sort"
 	"strconv"
@@ -26,6 +27,15 @@ type Result struct {
 	Fermi  []string
 	Be     []float64
 	Lin    bool
+}
+
+// SpectroFile is a wrapper for calling Spectro on a filename
+func SpectroFile(filename string) *Result {
+	f, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	return Spectro(f)
 }
 
 // FreqReport gathers harmonic, anharmonic, and resonance-corrected
