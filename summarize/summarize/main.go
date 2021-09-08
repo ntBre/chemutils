@@ -405,7 +405,7 @@ func main() {
 		}()
 	}
 	if *spectro {
-		res := summarize.Spectro(filename)
+		res := summarize.SpectroFile(filename)
 		printAll(os.Stdout, res)
 	} else if *intder {
 		id := summarize.ReadIntder(filename)
