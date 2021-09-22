@@ -397,7 +397,7 @@ func printIntder(out io.Writer, id *summarize.Intder) {
 }
 
 func main() {
-	filename := parseFlags()
+	filenames := parseFlags()
 	if *tex && *spectro && !*nohead {
 		fmt.Print("\\documentclass{article}\n\\begin{document}\n\n")
 		defer func() {
@@ -405,10 +405,10 @@ func main() {
 		}()
 	}
 	if *spectro {
-		res := summarize.SpectroFile(filename)
+		res := summarize.SpectroFile(filenames[0])
 		printAll(os.Stdout, res)
 	} else if *intder {
-		id := summarize.ReadIntder(filename)
+		id := summarize.ReadIntder(filenames[0])
 		printIntder(os.Stdout, id)
 	}
 }

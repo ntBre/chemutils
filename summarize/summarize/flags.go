@@ -31,7 +31,7 @@ var (
 	cm      = flag.Bool("cm", false, "print principal rotational constants in cm-1")
 )
 
-func parseFlags() string {
+func parseFlags() []string {
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(),
 			"%s", help)
@@ -43,17 +43,18 @@ func parseFlags() string {
 		fmt.Fprintln(os.Stderr, "summarize: not enough arguments")
 		os.Exit(1)
 	}
-	filename := args[0]
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "summarize: %q is not a file\n",
-			filename)
-		os.Exit(1)
-	}
-	if strings.Contains(filename, "spectro") {
-		*spectro = true
-	} else if strings.Contains(filename, "intder") {
-		*intder = true
+	for _, filename := range args {
+		if _, err := os.Stat(filename); os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "summarize: %q is not a file\n",
+				filename)
+			os.Exit(1)
+		}
+		if strings.Contains(filename, "spectro") {
+			*spectro = true
+		} else if strings.Contains(filename, "intder") {
+			*intder = true
+		}
 	}
 	initConst()
-	return filename
+	return args
 }
