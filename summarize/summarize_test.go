@@ -433,6 +433,38 @@ func TestSpectro(t *testing.T) {
 			},
 		},
 		{
+			file: "testfiles/imag.out",
+			res: Result{
+				ZPT: 0.0,
+				Harm: []float64{
+					3943.98, 3833.98, 1651.33,
+				},
+				Fund: nil,
+				Corr: nil,
+				Rots: [][]float64{},
+				Requil: []float64{
+					0.9585819,
+					0.9585819,
+					104.3994718,
+				},
+				Ralpha: []float64{
+					0.9585819,
+					0.9585819,
+					104.3994718,
+				},
+				Rhead: []string{
+					"r(H1-O2)",
+					"r(O2-H3)",
+					"<(O2-H1-H3)",
+				},
+				Deltas: []float64{
+					8.9652900880, 92.6936862675, 159.0504533293,
+					1.5378278133, 60.8542469540,
+				},
+				Imag: true,
+			},
+		},
+		{
 			file: "testfiles/michael_multi.out",
 			res: Result{
 				ZPT: 0.0,
@@ -468,7 +500,6 @@ func TestSpectro(t *testing.T) {
 		},
 		{
 			file: "testfiles/no_rots.out",
-
 			res: Result{
 				ZPT:  0,
 				Harm: []float64{3943.16, 3832.87, 1649.09},
@@ -545,7 +576,8 @@ func TestSpectro(t *testing.T) {
 				}
 			}
 			if !reflect.DeepEqual(got.Deltas, test.res.Deltas) {
-				t.Errorf("got %v, wanted %v\n", got.Deltas, test.res.Deltas)
+				t.Errorf("%q: got %v, wanted %v\n",
+					test.file, got.Deltas, test.res.Deltas)
 			}
 			if !reflect.DeepEqual(got.Phis, test.res.Phis) {
 				t.Error("phis")

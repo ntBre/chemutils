@@ -27,6 +27,7 @@ type Result struct {
 	Fermi  []string
 	Be     []float64
 	Lin    bool
+	Imag   bool
 }
 
 // SpectroFile is a wrapper for calling Spectro on a filename
@@ -277,6 +278,8 @@ func Spectro(r io.Reader) *Result {
 					res.Harm = append(res.Harm, v)
 				}
 			}
+		case strings.Contains(line, "IMAGINARY FREQUENCY FOUND"):
+			res.Imag = true
 		}
 		// TODO option for BZA and/or BZS
 		// TODO option for D in addition to DELTA
