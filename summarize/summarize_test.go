@@ -526,6 +526,7 @@ func TestSpectro(t *testing.T) {
 				Fermi:  nil,
 				Be:     []float64{27.28186, 14.57812, 9.50115},
 				Lin:    true,
+				Imag:   true,
 			},
 		},
 	}
@@ -595,6 +596,10 @@ func TestSpectro(t *testing.T) {
 			if !reflect.DeepEqual(got.Fermi, test.res.Fermi) {
 				t.Errorf("fermi:\ngot %v, wanted %v\n",
 					got.Fermi, test.res.Fermi)
+			}
+			if got.Imag != test.res.Imag {
+				t.Errorf("%q: got %v, wanted %v\n",
+					test.file, got.Imag, test.res.Imag)
 			}
 		}
 	}
