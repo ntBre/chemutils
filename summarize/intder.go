@@ -45,6 +45,7 @@ type Intder struct {
 var ptable = map[string]string{
 	"1.007825":  "H",
 	"4.002600":  "He",
+	"11.009310": "B",
 	"12.000000": "C",
 	"14.003070": "N",
 	"15.994910": "O",
