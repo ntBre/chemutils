@@ -66,6 +66,7 @@ const (
 	BEND
 	TORS
 	LIN1
+	OUT
 )
 
 func ReadIntder(filename string) *Intder {
@@ -188,6 +189,8 @@ func ReadIntder(filename string) *Intder {
 				ids = append(ids, TORS)
 			case "LIN1":
 				ids = append(ids, LIN1)
+			case "OUT":
+				ids = append(ids, OUT)
 			default:
 				panic("this type of coordinate not implemented")
 			}

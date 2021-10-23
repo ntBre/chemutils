@@ -3,4 +3,4 @@ install:
 
 deploy:
 	go build .
-	scp summarize 'woods:Programs/summarize/.'
+	scp -C summarize 'woods:Programs/summarize/.'

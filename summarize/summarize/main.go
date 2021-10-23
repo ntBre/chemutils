@@ -283,6 +283,13 @@ func printSiic(id *summarize.Intder, siic []int) string {
 			geom[siic[2]].Sym, siic[2]+1,
 			geom[siic[3]].Sym, siic[3]+1,
 		)
+	case summarize.OUT:
+		fmt.Fprintf(&str, "OUT(%s_%d - %s_%d - %s_%d - %s_%d)",
+			id.Geom[siic[0]].Sym, siic[0]+1,
+			id.Geom[siic[1]].Sym, siic[1]+1,
+			id.Geom[siic[2]].Sym, siic[2]+1,
+			id.Geom[siic[3]].Sym, siic[3]+1,
+		)
 	}
 	return str.String()
 }
@@ -319,11 +326,11 @@ func makeSiIC(id *summarize.Intder) *Table {
 	return tab
 }
 
-// eqnify converts SICs to the format needed for a LaTeX eqnarray
+// Eqnify converts SICs to the format needed for a LaTeX eqnarray
 func Eqnify(str string, end bool) string {
 	split := strings.Split(str, "\t")
 	atom := regexp.MustCompile(`([A-Z][a-z]?)_`)
-	cord := regexp.MustCompile(`([^A-Z]r|<|t|LIN)`)
+	cord := regexp.MustCompile(`([^A-Z]r|<|t|LIN|OUT)`)
 	cords := cord.FindAllString(str, -1)
 	split[1] = strings.Replace(split[1], "<", `\angle`, -1)
 	split[1] = strings.Replace(split[1], "t", `\tau`, -1)
