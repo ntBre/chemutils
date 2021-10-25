@@ -1,5 +1,3 @@
-// (setq compile-command "go build . && scp spectro woods:Programs/gspectro/gspectro")
-// (recompile)
 package main
 
 import (
@@ -18,7 +16,7 @@ var (
 
 func ParseFlags() []string {
 	flag.Parse()
-	spectro.SpectroCommand = *cmd
+	spectro.Command = *cmd
 	return flag.Args()
 }
 
