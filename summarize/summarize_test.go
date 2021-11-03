@@ -71,7 +71,16 @@ func TestSpectro(t *testing.T) {
 				Fermi: []string{
 					"2v_5=v_7+v_5=v_3",
 					"v_6+v_5=v_4",
-					"2v_12=v_5"},
+					"2v_12=v_5",
+				},
+				LX: []float64{
+					3248.35, 3222.48, 3155.97,
+					3140.98, 1672.17, 1476.48,
+					1368.47, 1247.68, 1049.89,
+					963.53, 950.66, 824.89,
+					13.42, 8.07, 3.83,
+					3.00, 3.71, 9.62,
+				},
 			},
 		},
 		{
@@ -126,6 +135,12 @@ func TestSpectro(t *testing.T) {
 				Fermi: []string{
 					"2v_4=v_4+v_3=v_2",
 					"2v_5=v_4",
+				},
+				LX: []float64{
+					3811.36, 2337.70, 1267.58,
+					1086.35, 496.79, 437.76,
+					0.03, 0.01, 0.01,
+					0.00, 0.01, 0.01,
 				},
 			},
 		},
@@ -230,6 +245,16 @@ func TestSpectro(t *testing.T) {
 					"v_15+v_14=v_16+v_13=v_17+v_14=v_8",
 					"2v_15=2v_16=2v_17=v_9",
 				},
+				LX: []float64{
+					3589.68, 3589.54, 3474.13,
+					2503.15, 2503.06, 2445.41,
+					1678.23, 1678.00, 1339.90,
+					1200.97, 1200.89, 1199.25,
+					1075.61, 1075.59, 678.49,
+					647.26, 647.22, 259.36,
+					8.50, 4.11, 1.02,
+					1.03, 1.28, 7.36,
+				},
 			},
 		},
 		{
@@ -295,6 +320,13 @@ func TestSpectro(t *testing.T) {
 					"v_5+v_3=v_2",
 					"2v_5=v_5+v_4=v_3",
 					"2v_6=2v_7=v_5",
+				},
+				LX: []float64{
+					3819.71, 3478.91, 2243.28,
+					1272.58, 1069.50, 622.75,
+					537.80, 401.61, 368.27,
+					0.03, 0.01, 0.00,
+					0.01, 0.01, 0.01,
 				},
 			},
 		},
@@ -363,6 +395,13 @@ func TestSpectro(t *testing.T) {
 					"2v_3=v_1",
 					"2v_7=2v_8=2v_9=v_3",
 				},
+				LX: []float64{
+					3281.24, 3247.54, 1623.32,
+					1307.60, 1090.69, 992.98,
+					908.49, 901.53, 785.38,
+					15.38, 2.81, 0.67,
+					0.89, 4.05, 7.10,
+				},
 			},
 		},
 		{
@@ -398,15 +437,19 @@ func TestSpectro(t *testing.T) {
 				Rhead: []string{
 					"r(H1-C2)", "r(C2-C3)", "r(C3-H4)",
 				},
+				LX: []float64{
+					3503.37, 3411.18, 2008.49,
+					749.02, 749.02, 616.38,
+					616.38, 0.03, 0.02,
+					0.01, 0.01, 0.01,
+				},
 			},
 		},
 		{
 			file: "testfiles/michael.out",
 			res: Result{
-				ZPT: 0.0,
-				Harm: []float64{
-					3943.98, 3833.99, 1651.33,
-				},
+				ZPT:  0.0,
+				Harm: nil,
 				Fund: nil,
 				Corr: nil,
 				Rots: [][]float64{},
@@ -430,15 +473,18 @@ func TestSpectro(t *testing.T) {
 					-149.4610972728,
 					13.9804157475, 10.9698964297,
 				},
+				LX: []float64{
+					3943.98, 3833.99, 1651.33,
+					0.02, 0.00, 0.00,
+					0.00, 0.00, 0.00,
+				},
 			},
 		},
 		{
 			file: "testfiles/imag.out",
 			res: Result{
-				ZPT: 0.0,
-				Harm: []float64{
-					3943.98, 3833.98, 1651.33,
-				},
+				ZPT:  0.0,
+				Harm: nil,
 				Fund: nil,
 				Corr: nil,
 				Rots: [][]float64{},
@@ -462,18 +508,18 @@ func TestSpectro(t *testing.T) {
 					1.5378278133, 60.8542469540,
 				},
 				Imag: true,
+				LX: []float64{
+					3943.98, 3833.98, 1651.33,
+					0.00, 0.00, 0.00,
+					0.00, 0.59, 0.00,
+				},
 			},
 		},
 		{
 			file: "testfiles/michael_multi.out",
 			res: Result{
-				ZPT: 0.0,
-				Harm: []float64{
-					820.24, 804.08, 737.75,
-					580.87, 573.06, 525.60,
-					363.23, 274.64, 194.26,
-					170.33, 170.26,
-				},
+				ZPT:  0.0,
+				Harm: nil,
 				Fund: nil,
 				Corr: nil,
 				Rots: [][]float64{},
@@ -496,13 +542,21 @@ func TestSpectro(t *testing.T) {
 					39.6030781118, -237.7978970624, 278.9193068011,
 					19.8014011121, 199.3898070834,
 				},
+				LX: []float64{
+					820.24, 804.08, 737.75,
+					580.87, 573.06, 525.60,
+					363.23, 274.64, 194.26,
+					170.33, 170.26, 0.34,
+					0.00, 0.00, 0.00,
+					0.00, 0.00, 0.00,
+				},
 			},
 		},
 		{
 			file: "testfiles/no_rots.out",
 			res: Result{
 				ZPT:  0,
-				Harm: []float64{3943.16, 3832.87, 1649.09},
+				Harm: nil,
 				Fund: nil,
 				Corr: nil,
 				Rots: [][]float64{
@@ -527,6 +581,11 @@ func TestSpectro(t *testing.T) {
 				Be:     []float64{27.28186, 14.57812, 9.50115},
 				Lin:    true,
 				Imag:   true,
+				LX: []float64{
+					3943.16, 3832.87, 1649.09,
+					0.00, 0.00, 0.00,
+					0.00, 0.00, 0.00,
+				},
 			},
 		},
 		{
@@ -579,6 +638,12 @@ func TestSpectro(t *testing.T) {
 				Be:    []float64{9.50786, 1.29674, 1.14111},
 				Lin:   false,
 				Imag:  true,
+				LX: []float64{
+					9434.29, 8871.85, 7405.76,
+					3774.08, 3266.12, 10922.83,
+					1124.13, 1617.90, 3660.09,
+					6819.56, 7228.27, 1728.38,
+				},
 			},
 		},
 	}
@@ -595,8 +660,8 @@ func TestSpectro(t *testing.T) {
 					test.file, got.ZPT, test.res.ZPT)
 			}
 			if !reflect.DeepEqual(got.Harm, test.res.Harm) {
-				t.Errorf("Harm: got %v, wanted %v\n",
-					got.Harm, test.res.Harm)
+				t.Errorf("%q: Harm: got %v, wanted %v\n",
+					test.file, got.Harm, test.res.Harm)
 			}
 			if !reflect.DeepEqual(got.Fund, test.res.Fund) {
 				t.Error("fund")
@@ -636,7 +701,8 @@ func TestSpectro(t *testing.T) {
 				t.Error("phis")
 			}
 			if !reflect.DeepEqual(got.Rhead, test.res.Rhead) {
-				t.Errorf("Rhead: got %v, wanted %v\n", got.Rhead, test.res.Rhead)
+				t.Errorf("%q: Rhead: got %v, wanted %v\n",
+					test.file, got.Rhead, test.res.Rhead)
 				t.Error("rhead")
 			}
 			if !reflect.DeepEqual(got.Ralpha, test.res.Ralpha) {
@@ -652,6 +718,10 @@ func TestSpectro(t *testing.T) {
 			if got.Imag != test.res.Imag {
 				t.Errorf("%q: got %v, wanted %v\n",
 					test.file, got.Imag, test.res.Imag)
+			}
+			if !reflect.DeepEqual(got.LX, test.res.LX) {
+				t.Errorf("%q: LX: got %v, wanted %v\n",
+					test.file, got.LX, test.res.LX)
 			}
 		}
 	}

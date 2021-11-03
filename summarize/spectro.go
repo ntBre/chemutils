@@ -28,6 +28,7 @@ type Result struct {
 	Be     []float64
 	Lin    bool
 	Imag   bool
+	LX     []float64 // frequencies from the LX matrix
 }
 
 // SpectroFile is a wrapper for calling Spectro on a filename
@@ -263,7 +264,10 @@ func Spectro(r io.Reader) *Result {
 			fields := strings.Fields(line)
 			v, _ := strconv.ParseFloat(fields[2], 64)
 			res.Be = append(res.Be, v)
-		case strings.Contains(line, "LX MATRIX"):
+			// if it's not nil, we've encountered an LX
+			// Matrix before, this can happen when there
+			// are degeneracies
+		case strings.Contains(line, "LX MATRIX") && res.LX == nil:
 			lxm = true
 			skip += 2
 		case lxm && strings.Contains(line, "*******"):
@@ -271,12 +275,7 @@ func Spectro(r io.Reader) *Result {
 		case lxm && lxmRE.MatchString(line):
 			for _, f := range fields {
 				v, _ := strconv.ParseFloat(f, 64)
-				// arbitrary cutoff to avoid
-				// rotations/translations instead of
-				// counting how many freqs to expect
-				if math.Abs(v) > 1.0 {
-					res.Harm = append(res.Harm, v)
-				}
+				res.LX = append(res.LX, v)
 			}
 		case strings.Contains(line, "IMAGINARY FREQUENCY FOUND"):
 			res.Imag = true
