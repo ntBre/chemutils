@@ -171,7 +171,7 @@ func ReadXYZ(r io.Reader) (ret Molecule) {
 			atom := new(Atom)
 			fields := strings.Fields(line)
 			if len(fields) != 4 {
-				log.Fatalf("atomize: input (%q) too short", line)
+				continue
 			}
 			atom.Label = fields[0]
 			var (
