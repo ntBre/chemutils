@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -85,6 +86,13 @@ func (m Molecule) Symmetry(atoms []Atom) Irrep {
 	// can I make this more generic? some kind of data structure
 	// holding functions to loop over
 	switch m.Group {
+	case C1:
+		return E
+	case C2:
+		if IsRotAxis(atoms, 180.0, m.Axes[0]) {
+			return A
+		}
+		return B
 	case Cs:
 		if IsRefPlane(atoms, m.Planes[0]) {
 			return Ap
@@ -135,16 +143,15 @@ func Negate(atoms []Atom) []Atom {
 // PointGroup determines the point group of mol
 func PointGroup(mol Molecule) (ret Group) {
 	// check for rotation axis first
-	if IsRotAxis(mol.Atoms, 180.0, mol.Axes[0]) {
+	if len(mol.Axes) > 0 && IsRotAxis(mol.Atoms, 180.0, mol.Axes[0]) {
 		ret = C2
-		if IsRefPlane(mol.Atoms, mol.Planes[0]) {
-			if mol.Planes[0].a == mol.Axes[0] ||
-				mol.Planes[0].b == mol.Axes[0] {
-				// => sigma_v
-				ret = C2v
-			}
+		if len(mol.Planes) > 0 && IsRefPlane(mol.Atoms, mol.Planes[0]) &&
+			(mol.Planes[0].a == mol.Axes[0] ||
+				mol.Planes[0].b == mol.Axes[0]) {
+			// => sigma_v
+			ret = C2v
 		}
-	} else if IsRefPlane(mol.Atoms, mol.Planes[0]) {
+	} else if len(mol.Planes) > 0 && IsRefPlane(mol.Atoms, mol.Planes[0]) {
 		ret = Cs
 	}
 	return
@@ -190,17 +197,21 @@ func ReadXYZ(r io.Reader) (ret Molecule) {
 			ret.Atoms = append(ret.Atoms, *atom)
 		}
 	}
-	fst := sums[0]
-	var a, b Axis
-	for i, v := range sums {
-		switch {
-		case v > fst:
-			fst = v
-			a, b = Axis(i), a
+	// Find all C2 axes and mirror planes
+	for _, a := range []Axis{X, Y, Z} {
+		if IsRotAxis(ret.Atoms, 180.0, a) {
+			ret.Axes = append(ret.Axes, a)
 		}
 	}
-	ret.Axes = append(ret.Axes, a)
-	ret.Planes = append(ret.Planes, Plane{b, a})
+	var planes ByMass
+	for _, p := range []Plane{XY, XZ, YZ} {
+		if IsRefPlane(ret.Atoms, p) {
+			planes = append(planes, bm{p, sums})
+		}
+	}
+	// Sort the axes and mirror planes by mass involved
+	sort.Sort(sort.Reverse(planes))
+	ret.Planes = planes.Planes()
 	ret.Group = PointGroup(ret)
 	return
 }
