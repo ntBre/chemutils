@@ -35,7 +35,7 @@ H 0.0000000000 -0.7574590974 0.5217905143
 		},
 		Axes: []Axis{Z},
 		Planes: []Plane{
-			{Y, Z},
+			YZ, XZ,
 		},
 		Group: C2v,
 	}

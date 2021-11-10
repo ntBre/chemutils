@@ -37,8 +37,7 @@ func TestSymmetry(t *testing.T) {
 		},
 	}
 	mol := LoadXYZ("tests/intder_h2o.xyz")
-	// TODO uncomment for full range
-	for _, test := range tests[1:2] {
+	for _, test := range tests {
 		got := mol.Symmetry(test.atoms)
 		if got != test.want {
 			t.Errorf("%s: got %v, wanted %v\n",
