@@ -66,9 +66,14 @@ const (
 	B2
 	B1
 	A2
-	// Cs
-	Ap // p == prime
+	// Cs, p == prime
+	Ap
 	App
+	// C1
+	E
+	// C2
+	A
+	B
 )
 
 func (i Irrep) String() string {
