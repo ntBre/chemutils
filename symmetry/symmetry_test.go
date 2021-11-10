@@ -33,9 +33,11 @@ H 0.0000000000 -0.7574590974 0.5217905143
 				0.5217905143,
 			}},
 		},
-		Principal: Z,
-		Main:      Plane{Y, Z},
-		Group:     C2v,
+		Axes: []Axis{Z},
+		Planes: []Plane{
+			{Y, Z},
+		},
+		Group: C2v,
 	}
 
 	if !reflect.DeepEqual(got, want) {

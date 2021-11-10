@@ -65,10 +65,10 @@ func (p Plane) String() string {
 }
 
 type Molecule struct {
-	Atoms     []Atom
-	Principal Axis
-	Main      Plane
-	Group     Group
+	Atoms  []Atom
+	Axes   []Axis
+	Planes []Plane
+	Group  Group
 }
 
 type Group int

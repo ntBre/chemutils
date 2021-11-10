@@ -86,13 +86,13 @@ func (m Molecule) Symmetry(atoms []Atom) Irrep {
 	// holding functions to loop over
 	switch m.Group {
 	case Cs:
-		if IsRefPlane(atoms, m.Main) {
+		if IsRefPlane(atoms, m.Planes[0]) {
 			return Ap
 		}
 		return App
 	case C2v:
-		sxz, syz := Contains(m.Principal)
-		if IsRotAxis(atoms, 180.0, m.Principal) {
+		sxz, syz := Contains(m.Axes[0])
+		if IsRotAxis(atoms, 180.0, m.Axes[0]) {
 			// A something
 			if IsRefPlane(atoms, sxz) {
 				if IsRefPlane(atoms, syz) {
@@ -135,16 +135,16 @@ func Negate(atoms []Atom) []Atom {
 // PointGroup determines the point group of mol
 func PointGroup(mol Molecule) (ret Group) {
 	// check for rotation axis first
-	if IsRotAxis(mol.Atoms, 180.0, mol.Principal) {
+	if IsRotAxis(mol.Atoms, 180.0, mol.Axes[0]) {
 		ret = C2
-		if IsRefPlane(mol.Atoms, mol.Main) {
-			if mol.Main.a == mol.Principal ||
-				mol.Main.b == mol.Principal {
+		if IsRefPlane(mol.Atoms, mol.Planes[0]) {
+			if mol.Planes[0].a == mol.Axes[0] ||
+				mol.Planes[0].b == mol.Axes[0] {
 				// => sigma_v
 				ret = C2v
 			}
 		}
-	} else if IsRefPlane(mol.Atoms, mol.Main) {
+	} else if IsRefPlane(mol.Atoms, mol.Planes[0]) {
 		ret = Cs
 	}
 	return
@@ -199,8 +199,8 @@ func ReadXYZ(r io.Reader) (ret Molecule) {
 			a, b = Axis(i), a
 		}
 	}
-	ret.Principal = a
-	ret.Main = Plane{b, a}
+	ret.Axes = append(ret.Axes, a)
+	ret.Planes = append(ret.Planes, Plane{b, a})
 	ret.Group = PointGroup(ret)
 	return
 }
