@@ -198,9 +198,10 @@ func ReadXYZ(r io.Reader) (ret Molecule) {
 		}
 	}
 	// Find all C2 axes and mirror planes
+	var axes AxByMass
 	for _, a := range []Axis{X, Y, Z} {
 		if IsRotAxis(ret.Atoms, 180.0, a) {
-			ret.Axes = append(ret.Axes, a)
+			axes = append(axes, abm{a, sums})
 		}
 	}
 	var planes ByMass
@@ -210,6 +211,8 @@ func ReadXYZ(r io.Reader) (ret Molecule) {
 		}
 	}
 	// Sort the axes and mirror planes by mass involved
+	sort.Sort(sort.Reverse(axes))
+	ret.Axes = axes.Axes()
 	sort.Sort(sort.Reverse(planes))
 	ret.Planes = planes.Planes()
 	ret.Group = PointGroup(ret)

@@ -1,38 +1,5 @@
 package symm
 
-type Axis int
-
-// Cartesian axes
-const (
-	X Axis = iota
-	Y
-	Z
-)
-
-// Cylindrical axes
-const (
-	R Axis = iota
-	T
-)
-
-// return the Plane perpendicular to the Axis
-func (a Axis) Not() Plane {
-	switch a {
-	case X:
-		return Plane{Y, Z}
-	case Y:
-		return Plane{X, Z}
-	case Z:
-		return Plane{X, Y}
-	default:
-		panic("Axis.not: invalid Axis")
-	}
-}
-
-func (a Axis) String() string {
-	return []string{"X", "Y", "Z"}[a]
-}
-
 type Molecule struct {
 	Atoms  []Atom
 	Axes   []Axis
