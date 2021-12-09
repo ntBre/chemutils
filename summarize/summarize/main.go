@@ -12,6 +12,8 @@ import (
 
 	"regexp"
 
+	"encoding/json"
+
 	"github.com/ntBre/chemutils/summarize"
 )
 
@@ -413,6 +415,14 @@ func main() {
 	}
 	if *spectro {
 		res := summarize.SpectroFile(filenames[0])
+		if *js {
+			data, err := json.Marshal(*res)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(string(data))
+			os.Exit(0)
+		}
 		printAll(os.Stdout, res)
 	} else if *intder {
 		id := summarize.ReadIntder(filenames[0])

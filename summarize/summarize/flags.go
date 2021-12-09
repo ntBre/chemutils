@@ -29,6 +29,7 @@ var (
 	plain   = flag.Bool("plain", false, "disable Unicode characters in txt output")
 	nohead  = flag.Bool("nohead", false, "disable printing of header info for TeX output")
 	cm      = flag.Bool("cm", false, "print principal rotational constants in cm-1")
+	js      = flag.Bool("json", false, "output summary in JSON format")
 )
 
 func parseFlags() []string {
