@@ -1,0 +1,129 @@
+.TH summarize 1 2021-12-09
+
+.SH NAME
+summarize \- summarize the output of INTDER and SPECTRO
+
+.SH SYNOPSIS
+.SY summarize
+.OP OPTION ...
+.I input_file
+.YS
+
+.SH DESCRIPTION
+.
+This document describes the
+.B summarize
+program, a utility for parsing the output of the INTDER and SPECTRO
+programs into a more usable form. For INTDER frequency files, it
+extracts
+.IP 1.
+the Cartesian geometry,
+.IP 2.
+the corresponding simple-internal coordinates,
+.IP 3.
+the symmetry-internal coordinates composed of the simple-internal
+coordinates,
+.IP 4.
+and the vibrational assignments in terms of these symmetry-internal
+coordinates.
+.P
+If the simple-internal coordinates and symmetry-internal coordinates
+are the same (e.g. for a Cs molecule) only the simple-internal
+coordinates will be printed.
+
+.P
+For a SPECTRO output file,
+.IP 1.
+the harmonic (HARM), fundamental (FUND), and resonance-corrected
+(CORR) vibrational frequencies;
+.IP 2.
+equilibrium ([ABC]_e), vibrationally averaged ([ABC]_0), and
+singly-vibrationally excited ([ABC]_n) principal rotational constants;
+.IP 3.
+quartic and sextic distortion coefficients;
+.IP 4.
+equilibrium (R(EQUIL)) and vibrationally averaged (R(ALPHA))
+geometrical parameters in terms of the curvilinear coordinates;
+.IP 5.
+and the Fermi resonances
+.P
+are printed.
+
+.SH OPTIONS
+.
+The command line is parsed according to the rules of the Go
+.B flag
+package. This means that options cannot be grouped behind a single '-'
+(minus character). Either whitespace or an '=' (equals sign) can
+appear between a command option and its argument.
+.P
+By default,
+.B summarize
+tries to determine the filetype from the filename. Files containing
+"intder" are processed as INTDER output files, while those containing
+"spectro" are assumed to be SPECTRO output files. If you use
+non-standard output filenames, use the
+.B \-i
+and
+.B \-s
+flags to force interpretation of INTDER and SPECTRO output,
+respectively.
+
+Other options:
+.TP
+.B \-v
+Only print the vibrational frequencies
+.TP
+.B \-vl
+Only print the resonance-corrected vibrational frequencies
+.TP
+.B \-r
+Only print the principal rotational constants
+.TP
+.BI \-cm
+Print principal rotational constants in cm-1 instead of MHz
+.TP
+.BI \-s
+Force the input to be interpreted as a SPECTRO input file
+.TP
+.BI \-i
+Force the input to be interpreted as an INTDER input file
+.TP
+.BI \-tex
+Output the results in the format of LaTeX tables
+.TP
+.BI \-nohead
+Disable printing of document header and footer in LaTeX output
+.TP
+.BI \-plain
+Output the results with Unicode characters disabled
+
+.SH EXAMPLES
+.
+.SS Basic example
+The following is a basic example of running
+.B summarize
+on a SPECTRO output file called
+.I spectro.out.
+.
+.IP
+.EX
+summarize spectro.out
+.EE
+.
+.P
+For the non-standard INTDER output file called
+.I use_this_one.out
+, use the
+.B \-i
+flag:
+.
+.IP
+.EX
+summarize -i use_this_one.out
+.EE
+.
+
+.SH SEE ALSO
+.I
+pbqff(1)
