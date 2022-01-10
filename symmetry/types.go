@@ -7,6 +7,14 @@ type Molecule struct {
 	Group  Group
 }
 
+func (m Molecule) IsCs() bool {
+	return m.Group == Cs
+}
+
+func (m Molecule) IsC2v() bool {
+	return m.Group == C2v
+}
+
 type Group int
 
 func (g Group) String() string {
