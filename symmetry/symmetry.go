@@ -4,6 +4,8 @@ package symm
 import (
 	"fmt"
 	"math"
+
+	"gonum.org/v1/gonum/mat"
 )
 
 // Float comparison threshold
@@ -28,15 +30,34 @@ func Rotate(atoms []Atom, deg float64, axis Axis) []Atom {
 }
 
 // Reflect returns a copy of atoms, with its coordinates mirrored
-// across plane
+// across plane. See
+// https://en.wikipedia.org/wiki/Transformation_matrix#Reflection_2
+// for details
 func Reflect(atoms []Atom, plane Plane) []Atom {
-	ax := plane.Not()
+	// this is slower than just negating plane.Not, but eventually
+	// I could encode planes as triples of a, b, c and this would
+	// apply to planes not along the Cartesian axes
+	var a, b, c float64
+	switch plane {
+	case XY:
+		a, b, c = 0, 0, 1
+	case XZ:
+		a, b, c = 0, 1, 0
+	case YZ:
+		a, b, c = 1, 0, 0
+	}
+	A := mat.NewDense(3, 3, []float64{
+		1 - 2*a*a, -2 * a * b, -2 * a * c,
+		-2 * a * b, 1 - 2*b*b, -2 * b * c,
+		-2 * a * c, -2 * b * c, 1 - 2*c*c,
+	})
 	new := make([]Atom, len(atoms))
 	for i, atom := range atoms {
-		new[i] = atom
-		new[i].Coord = make([]float64, len(atom.Coord))
-		copy(new[i].Coord, atom.Coord)
-		new[i].Coord[ax] = -new[i].Coord[ax]
+		v := mat.NewDense(len(atom.Coord), 1, atom.Coord)
+		var nc mat.Dense
+		nc.Mul(A, v)
+		newcoords := nc.RawMatrix().Data
+		new[i] = Atom{atom.Label, newcoords}
 	}
 	return new
 }

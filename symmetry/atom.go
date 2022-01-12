@@ -19,8 +19,16 @@ type Atom struct {
 }
 
 func (a Atom) String() string {
-	return fmt.Sprintf("%-2s%10.6f%10.6f%10.6f\n",
+	return fmt.Sprintf("%-2s%15.10f%15.10f%15.10f\n",
 		a.Label, a.Coord[0], a.Coord[1], a.Coord[2])
+}
+
+func Labels(atoms []Atom) []string {
+	ret := make([]string, len(atoms))
+	for i, atom := range atoms {
+		ret[i] = atom.Label
+	}
+	return ret
 }
 
 func Coords(atoms []Atom) (ret []float64) {
@@ -156,16 +164,11 @@ func PointGroup(mol Molecule) (ret Group) {
 	}
 	return
 }
-
-// ReadXYZ reads an .xyz geometry from r and returns a slice of Atoms.
-// If the first line looks like the number of atoms skip it and the
-// comment line. Otherwise start reading coordinates directly.
-func ReadXYZ(r io.Reader) (ret Molecule) {
+func ReadAtoms(r io.Reader) (ret []Atom, sums [3]float64) {
 	scanner := bufio.NewScanner(r)
 	var (
 		line string
 		skip int
-		sums [3]float64
 	)
 	for i := 1; scanner.Scan(); i++ {
 		line = scanner.Text()
@@ -194,9 +197,18 @@ func ReadXYZ(r io.Reader) (ret Molecule) {
 				f *= ptable[atom.Label]
 				sums[i] += math.Abs(f)
 			}
-			ret.Atoms = append(ret.Atoms, *atom)
+			ret = append(ret, *atom)
 		}
 	}
+	return
+}
+
+// ReadXYZ reads an .xyz geometry from r and returns a Molecule. If
+// the first line looks like the number of atoms skip it and the
+// comment line. Otherwise start reading coordinates directly.
+func ReadXYZ(r io.Reader) (ret Molecule) {
+	var sums [3]float64
+	ret.Atoms, sums = ReadAtoms(r)
 	// Find all C2 axes and mirror planes
 	var axes AxByMass
 	for _, a := range []Axis{X, Y, Z} {
