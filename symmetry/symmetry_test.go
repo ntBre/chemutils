@@ -113,7 +113,7 @@ func TestToCylinder(t *testing.T) {
 func TestToCartesian(t *testing.T) {
 	got := ToCartesian([]float64{0.7574590974, math.Pi / 2, 0.5217905143}, Z)
 	want := []float64{0.0000000000, 0.7574590974, 0.5217905143}
-	if !approxEqual(got, want) {
+	if !ApproxEqual(got, want) {
 		t.Errorf("got %v, wanted %v\n", got, want)
 	}
 }
@@ -158,7 +158,7 @@ func TestRotate(t *testing.T) {
 		got := Rotate(mole.Atoms, test.deg, test.axis)
 		for j := range got {
 			if got[j].Label != test.want[j].Label ||
-				!approxEqual(got[j].Coord, test.want[j].Coord) {
+				!ApproxEqual(got[j].Coord, test.want[j].Coord) {
 				t.Errorf("Rotate(%f, %s): got %v, wanted %v\n",
 					test.deg, test.axis, got, test.want)
 			}
@@ -207,7 +207,7 @@ H 0.0000000000 -0.7574590974 0.5217905143
 		got := Reflect(atoms.Atoms, tests[i].plane)
 		for j := range got {
 			if got[j].Label != tests[i].want[j].Label ||
-				!approxEqual(got[j].Coord, tests[i].want[j].Coord) {
+				!ApproxEqual(got[j].Coord, tests[i].want[j].Coord) {
 				t.Errorf("Reflect(%s): got\n%v, wanted\n%v\n",
 					tests[i].plane, got, tests[i].want)
 				break
@@ -242,7 +242,7 @@ func TestRotaryReflect(t *testing.T) {
 			found = false
 			for _, want := range wants.Atoms {
 				if got.Label == want.Label &&
-					approxEqual(got.Coord, want.Coord) {
+					ApproxEqual(got.Coord, want.Coord) {
 					found = true
 					break
 				}
@@ -279,7 +279,7 @@ func TestInvert(t *testing.T) {
 			found = false
 			for _, want := range wants.Atoms {
 				if got.Label == want.Label &&
-					approxEqual(got.Coord, want.Coord) {
+					ApproxEqual(got.Coord, want.Coord) {
 					found = true
 					break
 				}

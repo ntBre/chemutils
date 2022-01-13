@@ -43,7 +43,7 @@ func IsSame(atoms, btoms []Atom) bool {
 	for _, atom := range atoms {
 		found := false
 		for b, btom := range btoms {
-			if approxEqual(atom.Coord, btom.Coord) &&
+			if ApproxEqual(atom.Coord, btom.Coord) &&
 				atom.Label == btom.Label {
 				found = true
 				// pop btoms[b] out of btoms

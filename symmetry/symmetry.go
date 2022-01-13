@@ -106,8 +106,8 @@ func ToCylinder(coords []float64, axis Axis) []float64 {
 	return []float64{r, t, z}
 }
 
-// approxEqual checks approximate equality between float slices
-func approxEqual(x, y []float64) bool {
+// ApproxEqual checks approximate equality between float slices
+func ApproxEqual(x, y []float64) bool {
 	if len(x) != len(y) {
 		panic("approxEqual: dimension mismatch")
 	}
