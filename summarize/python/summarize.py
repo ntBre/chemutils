@@ -40,7 +40,8 @@ class Spectro:
                 "corrs": pd.Series(js["Corr"]),
             }
         )
-        self.Rots = js["Rots"]
+        rots = [sorted(x, reverse=True) for x in js["Rots"]]
+        self.rots = pd.DataFrame(rots, columns=["A", "B", "C"])
         self.Deltas = js["Deltas"]
         self.Phis = js["Phis"]
         self.Rhead = js["Rhead"]
@@ -52,7 +53,7 @@ class Spectro:
         self.Imag = js["Imag"]
         self.LX = js["LX"]
         if deg_modes is not None:
-            self.freqs = self.degenerate(deg_modes)
+            self.degenerate(deg_modes)
 
     def __repr__(self):
         return f"""{{
@@ -81,11 +82,27 @@ class Spectro:
             for modes in deg_modes:
                 tmp.append(
                     np.average(
-                        self.freqs[_type][list(modes)],
+                        self.freqs[_type][modes],
                     )
                 )
             new_freqs.insert(len(new_freqs.columns), _type, tmp)
-        return new_freqs
+        self.freqs = new_freqs
+
+        new_rots = pd.DataFrame()
+        for _type in ["A", "B", "C"]:
+            tmp = []
+            rot_modes = deg_modes.copy()
+            # always keep the 0th element since A_0 is a real thing,
+            # unlike v_0
+            rot_modes.insert(0, [-1])
+            for modes in rot_modes:
+                tmp.append(
+                    np.average(
+                        self.rots[_type][[x+1 for x in modes]],
+                    )
+                )
+            new_rots.insert(len(new_rots.columns), _type, tmp)
+        self.rots = new_rots
 
     def freq_table(self):
         """output the harmonic and resonance-corrected frequencies as
