@@ -59,7 +59,7 @@ class Spectro:
         return f"""{{
   "ZPT": {self.ZPT},
   "freqs": {self.freqs},
-  "Rots": {self.Rots},
+  "rots": {self.rots},
   "Deltas": {self.Deltas},
   "Phis": {self.Phis},
   "Rhead": {self.Rhead},
@@ -98,7 +98,7 @@ class Spectro:
             for modes in rot_modes:
                 tmp.append(
                     np.average(
-                        self.rots[_type][[x+1 for x in modes]],
+                        self.rots[_type][[x + 1 for x in modes]],
                     )
                 )
             new_rots.insert(len(new_rots.columns), _type, tmp)
