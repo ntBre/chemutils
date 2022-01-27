@@ -2,13 +2,14 @@ import json
 import warnings
 import numpy as np
 import re
-import collections
+from collections import OrderedDict
 
 # ignore warning on pandas to_latex()
 warnings.simplefilter(action="ignore", category=FutureWarning)
 import pandas as pd
 
 DEBUG = False
+TO_MHZ = 29979.2458
 
 
 class Spectro:
@@ -55,8 +56,22 @@ class Spectro:
         )
         rots = [sorted(x, reverse=True) for x in js["Rots"]]
         self.rots = pd.DataFrame(rots, columns=["A", "B", "C"])
-        self.Deltas = js["Deltas"]
-        self.Phis = js["Phis"]
+        delta_headers = [
+            "$\\Delta_{J}$", "$\\Delta_{K}$", "$\\Delta_{JK}$",
+            "$\\delta_{J}$", "$\\delta_{K}$",
+        ]
+        self.deltas = pd.DataFrame()
+        self.deltas["Const."] = delta_headers
+        self.deltas["Value"] = js["Deltas"]
+        self.deltas["Units"] = ["MHz"] * len(delta_headers)
+        phi_headers = [
+            "$\\Phi_{J}$", "$\\Phi_{K}$", "$\\Phi_{JK}$", "$\\Phi_{KJ}$",
+            "$\\phi_{j}$", "$\\phi_{jk}$", "$\\phi_{k}$",
+        ]
+        self.phis = pd.DataFrame()
+        self.phis["Const."] = phi_headers
+        self.phis["Value"] = js["Phis"]
+        self.phis["Units"] = ["Hz"] * len(phi_headers)
         self.Rhead = js["Rhead"]
         self.Ralpha = js["Ralpha"]
         self.Requil = js["Requil"]
@@ -73,8 +88,8 @@ class Spectro:
   "ZPT": {self.ZPT},
   "freqs": {self.freqs},
   "rots": {self.rots},
-  "Deltas": {self.Deltas},
-  "Phis": {self.Phis},
+  "Deltas": {self.deltas},
+  "Phis": {self.phis},
   "Rhead": {self.Rhead},
   "Ralpha": {self.Ralpha},
   "Requil": {self.Requil},
@@ -151,7 +166,8 @@ class Spectro:
                                     f"match {rx[0]} in {s}, "
                                     + "replacing with {match.group(1) + rx[1]}"
                                 )
-                            tmp.append(re.sub(rx[0], match.group(1) + rx[1], s))
+                            tmp.append(re.sub(rx[0], match.group(1) +
+                                              rx[1], s))
                             matched = True
                             break
                     # if part of it wasn't matched, the pair is nonsense, so
@@ -164,10 +180,10 @@ class Spectro:
                     row.append(j)
             new_fermi.append("=".join(row))
         # second pass to deduplicate within groups
-        new_new = collections.OrderedDict()
+        new_new = OrderedDict()
         for fermi in new_fermi:
             sp = fermi.split("=")
-            od = collections.OrderedDict()
+            od = OrderedDict()
             for s in sp:
                 od[s] = True
             if len(od) > 1:
@@ -204,7 +220,9 @@ def freq_table(spec: Spectro, symms=None, descs=None, ints=None) -> str:
     """
     tab = pd.DataFrame()
     labels = [f"$\\omega_{{{i+1}}}$" for i in range(len(spec.freqs["harms"]))]
-    labels.extend([f"$\\nu_{{{i+1}}}$" for i in range(len(spec.freqs["corrs"]))])
+    labels.extend(
+        [f"$\\nu_{{{i+1}}}$" for i in range(len(spec.freqs["corrs"]))]
+    )
     mode, freq, symm, desc, _int = "Mode", "Freq.", "Symm.", "Desc.", "Int."
     tab[mode] = labels
     tab[freq] = list(spec.harms()) + list(spec.corrs())
@@ -224,5 +242,28 @@ def freq_table(spec: Spectro, symms=None, descs=None, ints=None) -> str:
     tab = tab.reindex(columns=col_names)
     rx = re.compile(r"^(\\).*rule$", re.MULTILINE)
     return re.sub(
-        rx, r"\\hline", tab.to_latex(escape=False, float_format="%.1f", index=False)
+        rx, r"\\hline", tab.to_latex(escape=False, float_format="%.1f",
+                                     index=False)
     )
+
+
+# TODO determine the correct units for Delta and Phi
+def rot_table(spec: Spectro) -> str:
+    ret = pd.DataFrame()
+    _rots = spec.rots.copy()
+    _rots.loc["e"] = spec.Be
+    _rots = _rots.reindex([_rots.index[-1]] + list(_rots.index[:-1]))
+    labels = []
+    units = []
+    vals = []
+    for r in _rots.index:
+        for c in _rots.columns:
+            labels.append(f"{c}_{r}")
+            units.append("MHz")
+            vals.append("%.1f" % (_rots[c][r]*TO_MHZ))
+    ret["Const."] = labels
+    ret["Units"] = units
+    ret["Value"] = vals
+    res = pd.concat([ret, spec.deltas, spec.phis])
+    print(res)
+    return ""
