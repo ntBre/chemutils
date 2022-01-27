@@ -1,8 +1,12 @@
 import json
-import pandas as pd
+import warnings
 import numpy as np
 import re
 import collections
+
+# ignore warning on pandas to_latex()
+warnings.simplefilter(action="ignore", category=FutureWarning)
+import pandas as pd
 
 DEBUG = False
 
@@ -32,6 +36,11 @@ class Spectro:
         on. Mode indices 3, 7, and 10 are omitted from the new
         representation. The resulting modes are averages of the
         composing modes.
+
+        These degeneracies are applied to all three frequency types
+        contained in the DataFrame freqs field, the DataFrame of rots
+        in that field, and to the list of string Fermi resonance
+        relationships in the fermi field.
 
         """
         with open(filename) as f:
@@ -75,6 +84,12 @@ class Spectro:
   "Imag": {self.Imag},
   "LX": {self.LX},
 }}"""
+
+    def harms(self):
+        return self.freqs["harms"]
+
+    def corrs(self):
+        return self.freqs["corrs"]
 
     def degenerate(self, deg_modes):
         """average all applicable spectroscopic constants across
@@ -159,16 +174,57 @@ class Spectro:
                 new_new["=".join(od.keys())] = True
         self.fermi = list(new_new.keys())
 
-    def freq_table(self):
-        """output the harmonic and resonance-corrected frequencies as
-        a LaTeX table"""
-        print("\\begin{tabular}{ll}")
-        print("%11s & %7s \\\\" % ("Mode", "Freq"))
-        print("\\hline")
-        # TODO different case when symmetries and/or descriptions are
-        # available
-        for i, v in enumerate(self.freqs["harms"]):
-            print("\\omega_{%2d} & %7.1f \\\\" % (i + 1, v))
-        for i, v in enumerate(self.freqs["funds"]):
-            print("   \\nu_{%2d} & %7.1f \\\\" % (i + 1, v))
-        print("\\end{tabular}")
+
+def freq_table(spec: Spectro, symms=None, descs=None, ints=None):
+    """output the harmonic and resonance-corrected frequencies of spec
+    as a LaTeX table. symms are symmetry labels for the modes. It
+    should be the same length as the number of vibrational
+    modes. Similarly, descs is a textual description of the modes and
+    should have the same length as well.
+
+    The harmonic frequencies are numbered from 1 and prefaced with
+    \\omega, while the fundamental frequencies are prefaced with \\nu
+
+    The default output is a table like
+
+    Mode & Freq \\
+    \\hline
+
+    but a full output looks like
+
+    Mode & Symm. & Desc. & Freq. \\
+    \\hline
+
+    ints is a list of intensities. If the length is equal to one set
+    of frequencies, they are assumed to be harmonic intensities and
+    are placed in parens after the corresponding harmonic
+    frequency. If the length is twice the frequencies, the first half
+    is assumed to be harmonic and the second half anharmonic.
+
+    """
+    tab = pd.DataFrame()
+    labels = [f"$\\omega_{{{i+1}}}$" for i in range(len(spec.freqs["harms"]))]
+    labels.extend([f"$\\nu_{{{i+1}}}$" for i in range(len(spec.freqs["corrs"]))])
+    mode, freq, symm, desc, _int = "Mode", "Freq.", "Symm.", "Desc.", "Int."
+    tab[mode] = labels
+    tab[freq] = list(spec.harms()) + list(spec.corrs())
+    col_names = [mode, freq]
+    if descs is not None:
+        tab[desc] = 2 * descs
+        col_names.insert(1, desc)
+    if symms is not None:
+        tab[symm] = 2 * symms
+        col_names.insert(1, symm)
+    if ints is not None:
+        tmp = ["%.0f" % x for x in ints]
+        if len(tmp) == len(tab[freq])//2:
+            tmp.extend([""] * len(tmp))
+        tab[_int] = tmp
+        col_names.append(_int)
+    tab = tab.reindex(columns=col_names)
+    rx = re.compile(r"^(\\).*rule$", re.MULTILINE)
+    print(
+        re.sub(
+            rx, r"\\hline", tab.to_latex(escape=False, float_format="%.1f", index=False)
+        )
+    )
