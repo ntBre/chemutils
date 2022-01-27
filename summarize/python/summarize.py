@@ -1,6 +1,10 @@
 import json
 import pandas as pd
 import numpy as np
+import re
+import collections
+
+DEBUG = False
 
 
 class Spectro:
@@ -47,7 +51,7 @@ class Spectro:
         self.Rhead = js["Rhead"]
         self.Ralpha = js["Ralpha"]
         self.Requil = js["Requil"]
-        self.Fermi = js["Fermi"]
+        self.fermi = js["Fermi"]
         self.Be = js["Be"]
         self.Lin = js["Lin"]
         self.Imag = js["Imag"]
@@ -65,7 +69,7 @@ class Spectro:
   "Rhead": {self.Rhead},
   "Ralpha": {self.Ralpha},
   "Requil": {self.Requil},
-  "Fermi": {self.Fermi},
+  "fermi": {self.fermi},
   "Be": {self.Be},
   "Lin": {self.Lin},
   "Imag": {self.Imag},
@@ -103,6 +107,57 @@ class Spectro:
                 )
             new_rots.insert(len(new_rots.columns), _type, tmp)
         self.rots = new_rots
+
+        # build fermi resonance patterns
+        res = []
+        for i, d in enumerate(deg_modes):
+            for v in d:
+                res.append([f"(.*)v_{v+1}$", f"v_{i+1}"])
+
+        # loop over fermi resonance strings, first pass to update
+        # values
+        new_fermi = []
+        for fs in self.fermi:
+            # break apart equivalences
+            fs = fs.split("=")
+            row = []
+            for f in fs:
+                # break apart type 2 resonances to prevent double
+                # substitution
+                tmp = []
+                sp = f.split("+")
+                for s in sp:
+                    matched = False
+                    for rx in res:
+                        match = re.match(rx[0], s)
+                        if match:
+                            if DEBUG:
+                                print(
+                                    f"match {rx[0]} in {s}, "
+                                    + "replacing with {match.group(1) + rx[1]}"
+                                )
+                            tmp.append(re.sub(rx[0], match.group(1) + rx[1], s))
+                            matched = True
+                            break
+                    # if part of it wasn't matched, the pair is nonsense, so
+                    # remove it if it was pushed partially and break
+                    if not matched and len(tmp) > 0:
+                        tmp.pop()
+                        break
+                j = "+".join(tmp)
+                if j != "":
+                    row.append(j)
+            new_fermi.append("=".join(row))
+        # second pass to deduplicate within groups
+        new_new = collections.OrderedDict()
+        for fermi in new_fermi:
+            sp = fermi.split("=")
+            od = collections.OrderedDict()
+            for s in sp:
+                od[s] = True
+            if len(od) > 1:
+                new_new["=".join(od.keys())] = True
+        self.fermi = list(new_new.keys())
 
     def freq_table(self):
         """output the harmonic and resonance-corrected frequencies as
