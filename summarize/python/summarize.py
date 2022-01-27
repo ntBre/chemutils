@@ -175,7 +175,7 @@ class Spectro:
         self.fermi = list(new_new.keys())
 
 
-def freq_table(spec: Spectro, symms=None, descs=None, ints=None):
+def freq_table(spec: Spectro, symms=None, descs=None, ints=None) -> str:
     """output the harmonic and resonance-corrected frequencies of spec
     as a LaTeX table. symms are symmetry labels for the modes. It
     should be the same length as the number of vibrational
@@ -217,14 +217,12 @@ def freq_table(spec: Spectro, symms=None, descs=None, ints=None):
         col_names.insert(1, symm)
     if ints is not None:
         tmp = ["%.0f" % x for x in ints]
-        if len(tmp) == len(tab[freq])//2:
+        if len(tmp) == len(tab[freq]) // 2:
             tmp.extend([""] * len(tmp))
         tab[_int] = tmp
         col_names.append(_int)
     tab = tab.reindex(columns=col_names)
     rx = re.compile(r"^(\\).*rule$", re.MULTILINE)
-    print(
-        re.sub(
-            rx, r"\\hline", tab.to_latex(escape=False, float_format="%.1f", index=False)
-        )
+    return re.sub(
+        rx, r"\\hline", tab.to_latex(escape=False, float_format="%.1f", index=False)
     )
