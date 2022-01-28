@@ -14,7 +14,7 @@ import (
 )
 
 type Result struct {
-	ZPT    float64
+	LX     []float64
 	Harm   []float64
 	Fund   []float64
 	Corr   []float64
@@ -26,9 +26,9 @@ type Result struct {
 	Requil []float64
 	Fermi  []string
 	Be     []float64
+	ZPT    float64
 	Lin    bool
 	Imag   bool
-	LX     []float64 // frequencies from the LX matrix
 }
 
 // SpectroFile is a wrapper for calling Spectro on a filename
