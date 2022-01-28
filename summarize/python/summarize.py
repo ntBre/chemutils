@@ -247,7 +247,75 @@ def freq_table(spec: Spectro, symms=None, descs=None, ints=None) -> str:
     )
 
 
-# TODO determine the correct units for Delta and Phi
+def try_unit(d, try_units):
+    for unit in try_units:
+        _try = d*unit[1]
+        s = "%.3f" % _try
+        ls = len(s)
+        if _try < 0 and abs(_try) > 1 and 6 <= ls <= 8:
+            return unit[0], s
+        elif _try > 0 and _try > 1 and 5 <= ls <= 7:
+            return unit[0], s
+
+
+def mk_delta(deltas: pd.DataFrame) -> pd.DataFrame:
+    """format deltas for printing with 5 sig figs and 3 decimal
+    places. If this is not possible, give 6 sig figs with 3 before and
+    3 after the decimal
+
+    """
+    ret = pd.DataFrame()
+    ret["Const."] = deltas["Const."]
+    try_units = [
+                ("GHz", 1e-3),
+                ("MHz", 1.0),
+                ("kHz", 1e3),
+                ("Hz", 1e6),
+                ("mHz", 1e9),
+        ]
+    units = []
+    vals = []
+    for delta in deltas.index:
+        d = deltas.at[delta, "Value"]
+        r = try_unit(d, try_units)
+        if r is not None:
+            u, v = r
+            units.append(u)
+            vals.append(v)
+    ret["Units"] = units
+    ret["Value"] = vals
+    return ret
+
+
+def mk_phi(phis: pd.DataFrame) -> pd.DataFrame():
+    """format phis for printing with 5 sig figs and 3 decimal
+    places. If this is not possible, give 6 sig figs with 3 before and
+    3 after the decimal
+
+    """
+    ret = pd.DataFrame()
+    ret["Const."] = phis["Const."]
+    try_units = [
+                ("kHz", 1e-3),
+                ("Hz", 1.0),
+                ("mHz", 1e3),
+                ("$\\mu$Hz", 1e6),
+                ("nHz", 1e9),
+        ]
+    units = []
+    vals = []
+    for phi in phis.index:
+        p = phis.at[phi, "Value"]
+        r = try_unit(p, try_units)
+        if r is not None:
+            u, v = r
+            units.append(u)
+            vals.append(v)
+    ret["Units"] = units
+    ret["Value"] = vals
+    return ret
+
+
 def rot_table(spec: Spectro) -> str:
     ret = pd.DataFrame()
     _rots = spec.rots.copy()
@@ -258,12 +326,16 @@ def rot_table(spec: Spectro) -> str:
     vals = []
     for r in _rots.index:
         for c in _rots.columns:
-            labels.append(f"{c}_{r}")
+            labels.append(f"${c}_{r}$")
             units.append("MHz")
             vals.append("%.1f" % (_rots[c][r]*TO_MHZ))
     ret["Const."] = labels
     ret["Units"] = units
     ret["Value"] = vals
-    res = pd.concat([ret, spec.deltas, spec.phis])
-    print(res)
-    return ""
+    res = pd.concat([ret, mk_delta(spec.deltas), mk_phi(spec.phis)])
+    rx = re.compile(r"^(\\).*rule$", re.MULTILINE)
+    tmp = re.sub(
+        rx, r"\\hline", res.to_latex(escape=False, float_format="%.1f",
+                                     index=False, column_format="llr")
+    )
+    return re.sub("-", "$-$", tmp)
