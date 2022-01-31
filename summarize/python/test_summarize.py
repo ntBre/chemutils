@@ -114,38 +114,27 @@ class TestInit(unittest.TestCase):
             self.aslist(self.want.phis, "Units"),
         )
 
-    #   "Rhead": [
-    #     "r(H1-O2)",
-    #     "r(O2-H3)",
-    #     "<(O2-H1-H3)"
-    #   ],
-    #   "Ralpha": [
-    #     0.9733425,
-    #     0.9733425,
-    #     104.2809485
-    #   ],
-    #   "Requil": [
-    #     0.9586139,
-    #     0.9586139,
-    #     104.401023
-    #   ],
-    #   "Fermi": null,
-    #   "Be": [
-    #     27.28099,
-    #     14.57684,
-    #     9.50051
-    #   ],
-    #   "Lin": false,
-    #   "Imag": false,
-    #   "LX": [
-    #     3943.69,
-    #     3833.7,
-    #     1650.93,
-    #     30.35,
-    #     29.74,
-    #     0.09,
-    #     0.17,
-    #     0.32,
-    #     29.61
-    #   ]
-    # }
+    def test_rest(self):
+        self.assertEqual(
+            self.got.Rhead,
+            ["r(H1-O2)", "r(O2-H3)", "<(O2-H1-H3)"],
+        )
+        self.assertEqual(
+            self.got.Ralpha,
+            [0.9733425, 0.9733425, 104.2809485],
+        )
+        self.assertEqual(
+            self.got.Requil,
+            [0.9586139, 0.9586139, 104.401023],
+        )
+        self.assertEqual(self.got.fermi, None)
+        self.assertEqual(
+            self.got.Be,
+            [27.28099, 14.57684, 9.50051],
+        )
+        self.assertEqual(self.got.Lin, False)
+        self.assertEqual(self.got.Imag, False)
+        self.assertEqual(
+            self.got.LX,
+            [3943.69, 3833.7, 1650.93, 30.35, 29.74, 0.09, 0.17, 0.32, 29.61],
+        )

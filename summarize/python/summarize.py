@@ -58,17 +58,17 @@ class Spectro:
         self.rots = pd.DataFrame(rots, columns=["A", "B", "C"])
         self.deltas = pd.DataFrame({
             "Const.": [
-            "$\\Delta_{J}$", "$\\Delta_{K}$", "$\\Delta_{JK}$",
-            "$\\delta_{J}$", "$\\delta_{K}$",
+                "$\\Delta_{J}$", "$\\Delta_{K}$", "$\\Delta_{JK}$",
+                "$\\delta_{J}$", "$\\delta_{K}$",
             ],
             "Value": js["Deltas"],
             "Units": ["MHz"] * 5,
         })
         self.phis = pd.DataFrame({
-        "Const.": [
-            "$\\Phi_{J}$", "$\\Phi_{K}$", "$\\Phi_{JK}$", "$\\Phi_{KJ}$",
-            "$\\phi_{j}$", "$\\phi_{jk}$", "$\\phi_{k}$",
-        ],
+            "Const.": [
+                "$\\Phi_{J}$", "$\\Phi_{K}$", "$\\Phi_{JK}$", "$\\Phi_{KJ}$",
+                "$\\phi_{j}$", "$\\phi_{jk}$", "$\\phi_{k}$",
+            ],
             "Value": js["Phis"],
             "Units": ["Hz"] * 7,
         })
