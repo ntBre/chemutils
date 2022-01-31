@@ -1,2 +1,2 @@
 test:
-	python -m unittest test_summarize
+	python -m unittest -v test_summarize
