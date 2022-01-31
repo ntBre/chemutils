@@ -12,6 +12,57 @@ DEBUG = False
 TO_MHZ = 29979.2458
 
 
+def new_spectro(zpt, harms, funds, corrs, rots, deltas, phis, rhead,
+                ralpha, requil, fermi, be, lin, imag, lx):
+    ret = Spectro
+    ret.ZPT = zpt
+    ret.freqs = pd.DataFrame(
+        {
+            "harms": pd.Series(harms),
+            "funds": pd.Series(funds),
+            "corrs": pd.Series(corrs),
+        }
+    )
+    ret.rots = pd.DataFrame(rots, columns=["A", "B", "C"])
+    ret.deltas = pd.DataFrame(
+        {
+            "Const.": [
+                "$\\Delta_{J}$",
+                "$\\Delta_{K}$",
+                "$\\Delta_{JK}$",
+                "$\\delta_{J}$",
+                "$\\delta_{K}$",
+            ],
+            "Value": deltas,
+            "Units": ["MHz"] * 5,
+        }
+    )
+    ret.phis = pd.DataFrame(
+        {
+            "Const.": [
+                "$\\Phi_{J}$",
+                "$\\Phi_{K}$",
+                "$\\Phi_{JK}$",
+                "$\\Phi_{KJ}$",
+                "$\\phi_{j}$",
+                "$\\phi_{jk}$",
+                "$\\phi_{k}$",
+            ],
+            "Value": phis,
+            "Units": ["Hz"] * 7,
+        }
+    )
+    ret.Rhead = rhead
+    ret.Ralpha = ralpha
+    ret.Requil = requil
+    ret.fermi = fermi
+    ret.Be = be
+    ret.Lin = lin
+    ret.Imag = imag
+    ret.LX = lx
+    return ret
+
+
 class Spectro:
     def __init__(self, filename, deg_modes=None):
         """load a Spectro from a JSON file. deg_modes is a list of
