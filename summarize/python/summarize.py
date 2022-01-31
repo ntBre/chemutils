@@ -56,14 +56,14 @@ class Spectro:
         )
         rots = [sorted(x, reverse=True) for x in js["Rots"]]
         self.rots = pd.DataFrame(rots, columns=["A", "B", "C"])
-        delta_headers = [
+        self.deltas = pd.DataFrame({
+            "Const.": [
             "$\\Delta_{J}$", "$\\Delta_{K}$", "$\\Delta_{JK}$",
             "$\\delta_{J}$", "$\\delta_{K}$",
-        ]
-        self.deltas = pd.DataFrame()
-        self.deltas["Const."] = delta_headers
-        self.deltas["Value"] = js["Deltas"]
-        self.deltas["Units"] = ["MHz"] * len(delta_headers)
+            ],
+            "Value": js["Deltas"],
+            "Units": ["MHz"] * 5,
+        })
         phi_headers = [
             "$\\Phi_{J}$", "$\\Phi_{K}$", "$\\Phi_{JK}$", "$\\Phi_{KJ}$",
             "$\\phi_{j}$", "$\\phi_{jk}$", "$\\phi_{k}$",
