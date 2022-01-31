@@ -64,14 +64,14 @@ class Spectro:
             "Value": js["Deltas"],
             "Units": ["MHz"] * 5,
         })
-        phi_headers = [
+        self.phis = pd.DataFrame({
+        "Const.": [
             "$\\Phi_{J}$", "$\\Phi_{K}$", "$\\Phi_{JK}$", "$\\Phi_{KJ}$",
             "$\\phi_{j}$", "$\\phi_{jk}$", "$\\phi_{k}$",
-        ]
-        self.phis = pd.DataFrame()
-        self.phis["Const."] = phi_headers
-        self.phis["Value"] = js["Phis"]
-        self.phis["Units"] = ["Hz"] * len(phi_headers)
+        ],
+            "Value": js["Phis"],
+            "Units": ["Hz"] * 7,
+        })
         self.Rhead = js["Rhead"]
         self.Ralpha = js["Ralpha"]
         self.Requil = js["Requil"]
