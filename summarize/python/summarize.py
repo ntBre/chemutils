@@ -326,7 +326,7 @@ def rot_table(spec: Spectro) -> str:
     vals = []
     for r in _rots.index:
         for c in _rots.columns:
-            labels.append(f"${c}_{r}$")
+            labels.append(f"${c}_{{{r}}}$")
             units.append("MHz")
             vals.append("%.1f" % (_rots[c][r]*TO_MHZ))
     ret["Const."] = labels
