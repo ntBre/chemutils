@@ -1,6 +1,7 @@
 package spectro
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -13,23 +14,18 @@ import (
 )
 
 var (
-	names  = []string{"Al", "O", "O", "Al"}
-	coords = `0.000000000        2.391678166        0.000000000
-     -2.274263181        0.000000000        0.000000000
-      2.274263181        0.000000000        0.000000000
-      0.000000000       -2.391678166        0.000000000
-`
+	names = []string{"Al", "O", "O", "Al"}
 )
 
 func TestLoad(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
 		got, _ := Load("testfiles/spectro.in")
 		got.FormatGeom([]string{"N", "C", "O", "H"},
-			`0.0000000000       -0.0115666469        2.4598228639
-      0.0000000000      -0.0139207809       0.2726915161
-      0.0000000000       0.1184234620      -2.1785371074
-      0.0000000000      -1.5591967852      -2.8818447886
-`)
+			[]float64{0.0000000000, -0.0115666469, 2.4598228639,
+				0.0000000000, -0.0139207809, 0.2726915161,
+				0.0000000000, 0.1184234620, -2.1785371074,
+				0.0000000000, -1.5591967852, -2.8818447886,
+			}, false)
 		want := &Spectro{
 			Head: `# SPECTRO ##########################################
     1    1    3    2    0    0    1    4    0    1    0    0    0    0    0
@@ -58,17 +54,20 @@ func TestLoad(t *testing.T) {
 `,
 		}
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("got\n%#v\nwanted\n%#v\n", got, want)
+			want.WriteInput("/tmp/want.in")
+			got.WriteInput("/tmp/got.in")
+			t.Errorf("(diff %q %q)\n", "/tmp/got.in", "/tmp/want.in")
 		}
 	})
 	t.Run("dummy atoms", func(t *testing.T) {
 		got, _ := Load("testfiles/dummy.in")
 		got.FormatGeom([]string{"He", "H", "H", "He"},
-			`0.0000000000      0.0000000000     -3.3444358116
-      0.0000000000      0.0000000000     -1.0031937592
-      0.0000000000      0.0000000000      1.0031937592
-      0.0000000000      0.0000000000      3.3444358116
-`)
+			[]float64{
+				0.0000000000, 0.0000000000, -3.3444358116,
+				0.0000000000, 0.0000000000, -1.0031937592,
+				0.0000000000, 0.0000000000, 1.0031937592,
+				0.0000000000, 0.0000000000, 3.3444358116,
+			}, false)
 		want := &Spectro{
 			Head: `# SPECTRO ##########################################
     1   -1    3    0    2    0    0    4    0    1    0    0    0    0    0
@@ -110,7 +109,6 @@ func TestLoad(t *testing.T) {
 `,
 		}
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("got\n%#+v, wanted\n%#+v\n", got, want)
 			want.WriteInput("/tmp/want.in")
 			got.WriteInput("/tmp/got.in")
 			t.Errorf("(diff %q %q)\n", "/tmp/got.in", "/tmp/want.in")
@@ -122,20 +120,25 @@ func TestWriteSpectroInput(t *testing.T) {
 	tests := []struct {
 		load   string
 		names  []string
-		coords string
+		coords []float64
 		write  string
 		right  string
 	}{
 		{
-			load:   "testfiles/spectro.in",
-			names:  names,
-			coords: coords,
-			right:  "testfiles/right.in",
+			load:  "testfiles/spectro.in",
+			names: names,
+			coords: []float64{
+				0.000000000, 2.391678166, 0.000000000,
+				-2.274263181, 0.000000000, 0.000000000,
+				2.274263181, 0.000000000, 0.000000000,
+				0.000000000, -2.391678166, 0.000000000,
+			},
+			right: "testfiles/right.in",
 		},
 	}
 	for _, test := range tests {
 		spec, _ := Load(test.load)
-		spec.FormatGeom(test.names, test.coords)
+		spec.FormatGeom(test.names, test.coords, false)
 		temp := t.TempDir()
 		write := filepath.Join(temp, "spectro.in")
 		spec.WriteInput(write)
@@ -503,9 +506,17 @@ func TestDoSpectro(t *testing.T) {
 			dst, _ := os.Create(filepath.Join(tmp, dests[i]))
 			io.Copy(dst, src)
 		}
-		spec.WriteInput(filepath.Join(tmp, "spectro.in"))
-		spec.DoSpectro(tmp)
-		res := summarize.Spectro(filepath.Join(tmp, "spectro2.out"))
+		fmt.Println(tmp)
+		err := spec.WriteInput(filepath.Join(tmp, "spectro.in"))
+		if err != nil {
+			panic(err)
+		}
+		Command = "/home/brent/Projects/pbqff/bin/spectro"
+		err = spec.DoSpectro(tmp)
+		if err != nil {
+			panic(err)
+		}
+		res := summarize.SpectroFile(filepath.Join(tmp, "spectro2.out"))
 		if res.ZPT != test.zpt {
 			t.Errorf("got %v, wanted %v\n", res.ZPT, test.zpt)
 		}

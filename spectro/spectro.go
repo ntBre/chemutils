@@ -97,38 +97,48 @@ func Load(filename string) (*Spectro, error) {
 
 // FormatGeom formats a slice of atom names and their corresponding
 // coordinates for use in spectro
-func (s *Spectro) FormatGeom(names []string, coords string) {
+func (s *Spectro) FormatGeom(names []string, coords []float64, convert bool) {
+	if convert {
+		const ANGBOHR = 0.529177249 // angstrom per bohr
+		for i, _ := range coords {
+			coords[i] /= ANGBOHR
+		}
+	}
 	// atomic numbers are 5.2f, 18.9f on coords
-	var buf bytes.Buffer
-	lines := strings.Split(coords, "\n")
+	var buf strings.Builder
 	fmt.Fprintf(&buf, "%4d%4d\n", len(names), 1)
 	for n := range names {
-		fields := strings.Fields(lines[n])
-		fmt.Fprintf(&buf, "%5.2f%18s%18s%18s\n",
+		fields := coords[3*n : 3*n+3]
+		fmt.Fprintf(&buf, "%5.2f%18.10f%18.10f%18.10f\n",
 			atmNum[strings.ToUpper(names[n])],
 			fields[0], fields[1], fields[2])
 	}
 	if len(s.Dummies) > 0 {
-		fcord := strings.Fields(coords)
-		fgeom := make([]string, 0)
-		fdumm := make([]string, 0)
+		fgeom := make([]float64, 0)
+		fdumm := make([]float64, 0)
 		// skip natoms with 1: and trailing newline with trimspace
 		glines := strings.Split(strings.TrimSpace(s.Geometry), "\n")[1:]
 		dlines := strings.Split(strings.TrimSpace(s.Dummies), "\n")
 		for g := range glines {
-			fgeom = append(fgeom, strings.Fields(glines[g])[1:]...)
-			fdumm = append(fdumm, strings.Fields(dlines[g])[1:]...)
+			for _, f := range strings.Fields(glines[g])[1:] {
+				v, _ := strconv.ParseFloat(f, 64)
+				fgeom = append(fgeom, v)
+			}
+			for _, f := range strings.Fields(dlines[g])[1:] {
+				v, _ := strconv.ParseFloat(f, 64)
+				fdumm = append(fdumm, v)
+			}
 		}
 		for i := range fgeom {
 			for j := range fdumm {
 				if fdumm[j] == fgeom[i] {
-					fdumm[j] = fcord[i]
+					fdumm[j] = coords[i]
 				}
 			}
 		}
 		var str strings.Builder
 		for i := 0; i < len(fdumm); i += 3 {
-			fmt.Fprintf(&str, "%5.2f%18s%18s%18s\n",
+			fmt.Fprintf(&str, "%5.2f%18.10f%18.10f%18.10f\n",
 				0.00, fdumm[i], fdumm[i+1], fdumm[i+2])
 		}
 		s.Dummies = str.String()
