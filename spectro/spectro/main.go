@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"path/filepath"
 
 	"github.com/ntBre/chemutils/spectro"
 )
@@ -25,11 +26,12 @@ func main() {
 	if len(args) < 1 {
 		log.Fatal("spectro: not enough input arguments\n")
 	}
+	dir := filepath.Dir(args[0])
 	spec, err := spectro.Load(args[0])
 	if err != nil {
 		log.Fatalf("spectro: %v\n", err)
 	}
-	err = spec.DoSpectro(".")
+	err = spec.DoSpectro(dir)
 	if err != nil {
 		log.Fatalf("spectro: %v\n", err)
 	}
