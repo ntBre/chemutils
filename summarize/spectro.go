@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"regexp"
 	"sort"
@@ -187,7 +186,7 @@ func Spectro(r io.Reader) *Result {
 			for f := range fields {
 				v, err := strconv.ParseFloat(fields[f], 64)
 				if err != nil {
-					v = math.NaN()
+					v = -1
 				}
 				tmp = append(tmp, v)
 			}
