@@ -285,6 +285,22 @@ func printSiic(id *summarize.Intder, siic []int) string {
 			geom[siic[2]].Sym, siic[2]+1,
 			geom[siic[3]].Sym, siic[3]+1,
 		)
+	case summarize.LINX:
+		geom := append(id.Geom, id.Dumm...)
+		fmt.Fprintf(&str, "LINX(%s_%d - %s_%d - %s_%d - %s_%d)",
+			geom[siic[0]].Sym, siic[0]+1,
+			geom[siic[1]].Sym, siic[1]+1,
+			geom[siic[2]].Sym, siic[2]+1,
+			geom[siic[3]].Sym, siic[3]+1,
+		)
+	case summarize.LINY:
+		geom := append(id.Geom, id.Dumm...)
+		fmt.Fprintf(&str, "LINY(%s_%d - %s_%d - %s_%d - %s_%d)",
+			geom[siic[0]].Sym, siic[0]+1,
+			geom[siic[1]].Sym, siic[1]+1,
+			geom[siic[2]].Sym, siic[2]+1,
+			geom[siic[3]].Sym, siic[3]+1,
+		)
 	case summarize.OUT:
 		fmt.Fprintf(&str, "OUT(%s_%d - %s_%d - %s_%d - %s_%d)",
 			id.Geom[siic[0]].Sym, siic[0]+1,
