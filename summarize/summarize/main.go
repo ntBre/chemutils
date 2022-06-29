@@ -365,6 +365,9 @@ func Eqnify(str string, end bool) string {
 	case 2:
 		return fmt.Sprintf(`S_{%s} &= &\frac{1}{\sqrt{2}}[%s]%s`,
 			split[0], split[1], term)
+	case 4:
+		return fmt.Sprintf(`S_{%s} &= &\frac{1}{2}[%s]%s`,
+			split[0], split[1], term)
 	default:
 		fmt.Printf("%q -> %v\n", str, cords)
 		panic("unrecognized number of SICs")

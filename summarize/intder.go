@@ -93,6 +93,9 @@ func ReadIntder(filename string) *Intder {
 	contrib := regexp.MustCompile(`(-?)([0-9]+) \([ -]*([0-9]{1,3}\.[0-9])\)`)
 	sint := regexp.MustCompile(`(L|S)\( ?([0-9]{1,2})\)=?`)
 	syicpat := regexp.MustCompile(`^ SYMMETRY INTERNAL COORDINATES$`)
+	// the length of the last SIC; if 4 components, intder prints a blank
+	// line that will otherwise terminate the SIC section
+	var lsic_last int
 	for scanner.Scan() {
 		line = scanner.Text()
 		fields = strings.Fields(line)
@@ -130,6 +133,12 @@ func ReadIntder(filename string) *Intder {
 			syic = true
 			skip += 1
 		case syic && len(fields) == 0:
+			if lsic_last != 4 {
+				syic = false
+			}
+		case strings.Contains(line,
+			"VALUES OF SIMPLE INTERNAL COORDINATES (ANG. OR DEG.)",
+		):
 			syic = false
 		case geom:
 			coords := make([]float64, 3)
@@ -202,8 +211,11 @@ func ReadIntder(filename string) *Intder {
 			}
 			id.SiIC = append(id.SiIC, ids)
 		case syic:
+			lsic_last = 0
 			ids := make([]int, 0)
-			fields = strings.Fields(sint.ReplaceAllString(line, "${2}"))
+			fields = strings.Fields(
+				sint.ReplaceAllString(line, "${2}"),
+			)
 			var fac int = 1
 			for i, f := range fields[1:] {
 				if i%2 == 0 {
@@ -214,6 +226,7 @@ func ReadIntder(filename string) *Intder {
 						fac = 1
 					}
 				} else {
+					lsic_last++
 					d, _ := strconv.Atoi(f)
 					ids = append(ids, fac*(d-1))
 				}
